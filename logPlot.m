@@ -13,7 +13,7 @@ clear all;
 
 d2r = pi/180;
 r2d = 180/pi;
-idx = 1;
+idx = 2;
 % Initialization
 % File parameters
 % gdLogFile = '/home/jaehan/Desktop/test flight/0603FT/gdLog_200603_134152'; % 6-2 // 용대리 - TE quality 확인용 데이터
@@ -21,17 +21,15 @@ idx = 1;
 
 
 
-% logList = ["200611_111447","200611_113320","200611_125154","200611_131752"...
-%     ,"200611_135228","200611_140139","200611_143043"];
-% directory = '/home/jaehan/Desktop/test flight/';
-% 
-% gdLogFile = directory+logList(idx)+'/gdLog_'+logList(idx);
-% gdLogFile = convertStringsToChars(gdLogFile);
+logList = ["200611_111447","200611_113320","200611_125154","200611_131752"...
+    ,"200611_135228","200611_140139","200611_143043"];
+directory = '/home/jaehan/Desktop/test flight/';
 
-gdLogFile = "/home/jaehan/Desktop/MATLAB devel/gdLog_200630_134612";
+gdLogFile = directory+logList(idx)+'/gdLog_'+logList(idx);
+gdLogFile = convertStringsToChars(gdLogFile);
 
-logList = ["152807","153315","153830","154615"];
-gdLogFile = '/home/jaehan/log/200703_' + logList(idx) + '/gdLogCsv/gdLog_200703_' + logList(idx);
+% logList = ["152807","153315","153830","154615"];
+% gdLogFile = '/home/jaehan/log/200703_' + logList(idx) + '/gdLogCsv/gdLog_200703_' + logList(idx);
 
 gdLogFileName = gdLogFile + ".csv";
 gdLogFIleMat = gdLogFile + ".mat";

@@ -65,6 +65,8 @@ temp = sqrt(temp);
 temp = sqrt(temp.^2+eh.^2);
 histogram(temp,'normalization','probability')
 
+temp = 
+
 %% Image quality function (Film angle)
 temp2 = etheta + ee./(7+en); %angle
 temp3 = temp2 .* (7+en); %distance

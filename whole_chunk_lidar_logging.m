@@ -1,4 +1,4 @@
-clear all
+% clear all
 
 %% Variable setting
 
@@ -11,11 +11,11 @@ S1 = S1 * 1000;
 coc = abs(S2-S1)./S2.*f^2./(N.*(S1-f));
 
 %% Data loading
-logPlot
-flag = find(fix(data.jobSeq/max(data.jobSeq)),1);
-flage = flag + 1000;
+% logPlot
+% flag = find(fix(data.jobSeq/max(data.jobSeq)),1);
+% flage = flag + 1000;
 
-data = data(flag-100:flage,:); time = time(flag-100:flage);
+% data = data(flag-100:flage,:); time = time(flag-100:flage);
 yaw = data.rpy_2*pi/180;
 lidar = [data.LidarRaw_0,data.LidarRaw_1,data.LidarRaw_2,data.LidarRaw_3,data.LidarRaw_4,data.LidarRaw_5,data.LidarRaw_6,data.LidarRaw_7];
 

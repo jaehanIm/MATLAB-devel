@@ -1,7 +1,7 @@
 clear all
 % close all
 
-directory = "/home/jaehan/Downloads/white_creek/";
+directory = "/home/jaehan/Desktop/white_creek_additional/";
 % directory = "/home/jaehan/Desktop/white_creek_sample/";
 list = dir(directory);
 d2r = pi/180; r2d = 180/pi;

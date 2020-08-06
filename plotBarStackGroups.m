@@ -16,8 +16,8 @@ NumStacksPerGroup = size(stackData, 2);
 groupBins = 1:NumGroupsPerAxis;
 MaxGroupWidth = 0.65; % Fraction of 1. If 1, then we have all bars in groups touching
 groupOffset = MaxGroupWidth/NumStacksPerGroup;
-figure
-    hold on; 
+figure(1)
+    hold on;
 for i=1:NumStacksPerGroup
 
     Y = squeeze(stackData(:,i,:));
@@ -32,6 +32,7 @@ for i=1:NumStacksPerGroup
     h(i,:) = bar(Y, 'stacked');
     set(h(i,:),'BarWidth',groupOffset);
     set(h(i,:),'XData',groupDrawPos);
+    set(h(i,:),{'FaceColor'},{[0 0.4470 0.7410];[0.6350 0.0780 0.1840];[0.8500 0.3250 0.0980]});
 end
 hold off;
 set(gca,'XTickMode','manual');

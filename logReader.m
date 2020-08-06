@@ -1,4 +1,4 @@
-function [time,out,acc,gimbal] = logReader(gdLogFileName)
+function [time,out,acc,gimbal,data] = logReader(gdLogFileName)
 d2r = pi/180;
 
 useMinuteFormat = true;
