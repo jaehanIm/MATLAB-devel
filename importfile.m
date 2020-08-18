@@ -1,57 +1,57 @@
 function gdLog = importfile(filename, startRow, endRow)
-%IMPORTFILE1 ï¿½Ø½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½Ä·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½É´Ï´ï¿½.
-%   GDLOG181031195314 = IMPORTFILE1(FILENAME) ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½×¸ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ FILENAMEï¿½ï¿½ï¿½ï¿½
-%   ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½Ð½ï¿½ï¿½Ï´ï¿½.
+%IMPORTFILE1 ÅØ½ºÆ® ÆÄÀÏÀÇ ¼ýÀÚÇü µ¥ÀÌÅÍ¸¦ Çà·Ä·Î °¡Á®¿É´Ï´Ù.
+%   GDLOG181031195314 = IMPORTFILE1(FILENAME) µðÆúÆ® ¼±ÅÃ Ç×¸ñÀÇ ÅØ½ºÆ® ÆÄÀÏ FILENAME¿¡¼­
+%   µ¥ÀÌÅÍ¸¦ ÀÐ½À´Ï´Ù.
 %
-%   GDLOG181031195314 = IMPORTFILE1(FILENAME, STARTROW, ENDROW) ï¿½Ø½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
-%   FILENAMEï¿½ï¿½ STARTROW ï¿½à¿¡ï¿½ï¿½ ENDROW ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½Ð½ï¿½ï¿½Ï´ï¿½.
+%   GDLOG181031195314 = IMPORTFILE1(FILENAME, STARTROW, ENDROW) ÅØ½ºÆ® ÆÄÀÏ
+%   FILENAMEÀÇ STARTROW Çà¿¡¼­ ENDROW Çà±îÁö µ¥ÀÌÅÍ¸¦ ÀÐ½À´Ï´Ù.
 %
 % Example:
 %   gdLog181031195314 = importfile1('gdLog_181031_195314.csv', 2, 8899);
 %
-%    TEXTSCANï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï½Ê½Ã¿ï¿½.
+%    TEXTSCANµµ ÂüÁ¶ÇÏ½Ê½Ã¿À.
 
-% MATLABï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Â¥ï¿½ï¿½ ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: 2018/10/31 20:50:05
+% MATLAB¿¡¼­ ´ÙÀ½ ³¯Â¥¿¡ ÀÚµ¿ »ý¼ºµÊ: 2018/10/31 20:50:05
 
-%% ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­ï¿½Õ´Ï´ï¿½.
+%% º¯¼ö¸¦ ÃÊ±âÈ­ÇÕ´Ï´Ù.
 delimiter = ',';
 if nargin<=2
     startRow = 2;
     endRow = inf;
 end
 
-%% ï¿½ï¿½ ï¿½Ø½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½:
-%   ï¿½ï¿½1: double (%f)
-%	ï¿½ï¿½2: double (%f)
-%   ï¿½ï¿½3: double (%f)
-%	ï¿½ï¿½4: double (%f)
-%   ï¿½ï¿½5: double (%f)
-%	ï¿½ï¿½6: double (%f)
-%   ï¿½ï¿½7: double (%f)
-%	ï¿½ï¿½8: double (%f)
-%   ï¿½ï¿½9: double (%f)
-%	ï¿½ï¿½10: double (%f)
-%   ï¿½ï¿½11: double (%f)
-%	ï¿½ï¿½12: double (%f)
-%   ï¿½ï¿½13: double (%f)
-%	ï¿½ï¿½14: double (%f)
-%   ï¿½ï¿½15: double (%f)
-%	ï¿½ï¿½16: double (%f)
-%   ï¿½ï¿½17: double (%f)
-%	ï¿½ï¿½18: double (%f)
-%   ï¿½ï¿½19: double (%f)
-%	ï¿½ï¿½20: double (%f)
-%   ï¿½ï¿½21: double (%f)
-%	ï¿½ï¿½22: double (%f)
-%   ï¿½ï¿½23: double (%f)
-%	ï¿½ï¿½24: double (%f)
-%   ï¿½ï¿½25: double (%f)
-%	ï¿½ï¿½26: double (%f)
-% ï¿½Ú¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ TEXTSCANï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï½Ê½Ã¿ï¿½.
+%% °¢ ÅØ½ºÆ® ¶óÀÎÀÇ Çü½Ä:
+%   ¿­1: double (%f)
+%	¿­2: double (%f)
+%   ¿­3: double (%f)
+%	¿­4: double (%f)
+%   ¿­5: double (%f)
+%	¿­6: double (%f)
+%   ¿­7: double (%f)
+%	¿­8: double (%f)
+%   ¿­9: double (%f)
+%	¿­10: double (%f)
+%   ¿­11: double (%f)
+%	¿­12: double (%f)
+%   ¿­13: double (%f)
+%	¿­14: double (%f)
+%   ¿­15: double (%f)
+%	¿­16: double (%f)
+%   ¿­17: double (%f)
+%	¿­18: double (%f)
+%   ¿­19: double (%f)
+%	¿­20: double (%f)
+%   ¿­21: double (%f)
+%	¿­22: double (%f)
+%   ¿­23: double (%f)
+%	¿­24: double (%f)
+%   ¿­25: double (%f)
+%	¿­26: double (%f)
+% ÀÚ¼¼ÇÑ ³»¿ëÀº µµ¿ò¸» ¹®¼­¿¡¼­ TEXTSCANÀ» ÂüÁ¶ÇÏ½Ê½Ã¿À.
 
-formatSpec = '%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f %[^\n\r]'; % total 128 variables
+formatSpec = '%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f %[^\n\r]'; % total 140 variables
 
-%% ï¿½Ø½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï´ï¿½.
+%% ÅØ½ºÆ® ÆÄÀÏÀ» ¿±´Ï´Ù.
 fid = fopen(filename, 'r+');
 fseek(fid, -1, 'eof');
 fe = fread(fid, 1);
@@ -63,9 +63,9 @@ fclose(fid);
 
 fileID = fopen(filename,'r');
 
-%% ï¿½ï¿½ï¿½Ä¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ð½ï¿½ï¿½Ï´ï¿½.
-% ï¿½ï¿½ È£ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Úµå¸¦ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Õ´Ï´ï¿½. ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß»ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-% ï¿½Úµå¸¦ ï¿½Ù½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï½Ê½Ã¿ï¿½.
+%% Çü½Ä¿¡ µû¶ó µ¥ÀÌÅÍ ¿­À» ÀÐ½À´Ï´Ù.
+% ÀÌ È£ÃâÀº ÀÌ ÄÚµå¸¦ »ý¼ºÇÏ´Â µ¥ »ç¿ëµÇ´Â ÆÄÀÏÀÇ ±¸Á¶Ã¼¸¦ ±â¹ÝÀ¸·Î ÇÕ´Ï´Ù. ´Ù¸¥ ÆÄÀÏ¿¡ ´ëÇÑ ¿À·ù°¡ ¹ß»ýÇÏ´Â °æ¿ì °¡Á®¿À±â Åø¿¡¼­
+% ÄÚµå¸¦ ´Ù½Ã »ý¼ºÇÏ½Ê½Ã¿À.
 dataArray = textscan(fileID, formatSpec, endRow(1)-startRow(1)+1, 'Delimiter', delimiter, 'TextType', 'string', 'EmptyValue', NaN, 'HeaderLines', startRow(1)-1, 'ReturnOnError', false, 'EndOfLine', '\r\n');
 for block=2:length(startRow)
     frewind(fileID);
@@ -75,14 +75,14 @@ for block=2:length(startRow)
     end
 end
 
-%% ï¿½Ø½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ý½ï¿½ï¿½Ï´ï¿½.
+%% ÅØ½ºÆ® ÆÄÀÏÀ» ´Ý½À´Ï´Ù.
 fclose(fileID);
 
-%% ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ ï¿½ï¿½ï¿½Ô´Ï´ï¿½.
-% ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½ï¿½Ä¢ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ ï¿½Úµå°¡ ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½ ï¿½Ê¾Ò½ï¿½ï¿½Ï´ï¿½. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-% ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Úµå¸¦ ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½Å©ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Ù½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï½Ê½Ã¿ï¿½.
+%% °¡Á®¿Ã ¼ö ¾ø´Â µ¥ÀÌÅÍ¿¡ ´ëÇÑ »çÈÄ Ã³¸® ÁßÀÔ´Ï´Ù.
+% °¡Á®¿À±â °úÁ¤¿¡¼­ °¡Á®¿Ã ¼ö ¾ø´Â µ¥ÀÌÅÍ¿¡ ±ÔÄ¢ÀÌ Àû¿ëµÇÁö ¾Ê¾ÒÀ¸¹Ç·Î »çÈÄ Ã³¸® ÄÚµå°¡ Æ÷ÇÔµÇÁö ¾Ê¾Ò½À´Ï´Ù. °¡Á®¿Ã ¼ö ¾ø´Â
+% µ¥ÀÌÅÍ¿¡ »ç¿ëÇÒ ÄÚµå¸¦ »ý¼ºÇÏ·Á¸é ÆÄÀÏ¿¡¼­ °¡Á®¿Ã ¼ö ¾ø´Â ¼¿À» ¼±ÅÃÇÏ°í ½ºÅ©¸³Æ®¸¦ ´Ù½Ã »ý¼ºÇÏ½Ê½Ã¿À.
 
-%% ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
+%% Ãâ·Â º¯¼ö ¸¸µé±â
 gdLog = table(dataArray{1:end-1}, 'VariableNames', {
     'rosTime','flightMode','ctrlDeviceStatus', ...
     'fcMcMode','nSat','gpsFix', 'jobSeq', ...
@@ -106,21 +106,25 @@ gdLog = table(dataArray{1:end-1}, 'VariableNames', {
     'AcXRel', 'AcYRel', 'AcZRel', ...
     'AcHorWarnRange', 'AcHorWarnAngle', 'AcVerWarnRange', 'AcVerWarnAngle', ...
     'LidarDist', 'LidarAngle', ... // 20+15+24+15
+    'LidarRaw_0', 'LidarRaw_1', 'LidarRaw_2', 'LidarRaw_3', ...
+    'LidarRaw_4', 'LidarRaw_5', 'LidarRaw_6', 'LidarRaw_7', ...
     'LongVelCmd', 'LatVelCmd', 'HeaveVelCmd', ...
     'velCtrlI_u', 'velCtrlI_v', 'velCtrlI_d', ...
     'posCtrlI_N', 'posCtrlI_E', 'posCtrlI_D', ...
-    'gimbalRPY_0', 'gimbalRPY_1', 'gimbalRPY_2', ... // 20+15+24+15+12
+    'gimbalRPY_0', 'gimbalRPY_1', 'gimbalRPY_2', ... // 20+15+24+15+20
     'windStatus', 'windSpeed', 'windAngle', 'windQueryTime', 'windResponseTime', ...
     'acousticTemp', 'tempQueryTime', 'tempResponseTime', ...
-    'accBody_0', 'accBody_1', 'accBody_2', ... // 20+15+24+15+12+11
+    'accBody_0', 'accBody_1', 'accBody_2', ... // 20+15+24+15+20+11
     'trajUnitVectorT_0', 'trajUnitVectorT_1', 'trajUnitVectorT_2', ...
     'trajUnitVectorN_0', 'trajUnitVectorN_1', 'trajUnitVectorN_2', ...
     'trajUnitVectorB_0', 'trajUnitVectorB_1', 'trajUnitVectorB_2', ...
     'trajCtrlI_T', 'trajCtrlI_N', 'trajCtrlI_B', ...
     'StdJobLongPidErr', 'StdJobLongPidRate', 'StdJobLongPidIgain', ...
-    'GuideModeLongPidErr', 'GuideModeLongPidRate', 'GuideModeLongPidIgain', ... % 20+15+24+15+12+11+18
+    'GuideModeLongPidErr', 'GuideModeLongPidRate', 'GuideModeLongPidIgain', ... % 20+15+24+15+20+11+18
     'pqr_0', 'pqr_1', 'pqr_2', ... 
     'rpdCmd_0', 'rpdCmd_1', 'rpdCmd_2', ... 
     'velCmdNav_0', 'velCmdNav_1', 'velCmdNav_2', ...
     'posCmdNed_0', 'posCmdNed_1', 'posCmdNed_2', ...
-    'missionType'}); % 20+15+24+15+12+11+18+13 = 128
+    'missionType', 'jobType', ...
+    'bladeTravelDistance', 'trajTimeCur', 'trajTimeMax'}); % 20+15+24+15+20+11+18+17 = 140
+
