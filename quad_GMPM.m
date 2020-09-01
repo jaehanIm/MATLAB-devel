@@ -10,6 +10,9 @@ w = 0.01:0.01:6.28*100; % test 대역 (0~10hz)
 wn = sqrt(94.77);
 k = 82.85/wn^2;
 zeta = 9.124/2/wn; 
+% wn = sqrt(636.6);
+% k = 626/wn^2;
+% zeta = 321.5/2/wn; 
 
 gain = wn^2./sqrt((wn^2-w.^2).^2+4.*zeta^2.*wn^2.*w.^2)*k;  % pitch angle response gain
 f = w/2/pi;                                                 % rad/s to hz
@@ -82,7 +85,7 @@ k_a = k;
 zeta_a = zeta; 
 
 f_pa = 1.7364 * 2 * pi;
-f_pp = 0.01 * 2 * pi;
+f_pp = 0.2 * 2 * pi;
 % Angle response at 1.682hz (피치각 반응의 peak freq.임)
 gain_a_pa = wn_a^2./sqrt((wn_a^2-f_pa^2)^2+4*zeta_a^2*wn_a^2*f_pa^2)*k_a;
 % Angle response at 1.151hz (위치 반응의 peak freq.임)

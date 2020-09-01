@@ -1,4 +1,4 @@
-addpath '/home/jaehan/Desktop/MATLAB devel'
+addpath 'C:\Users\dlawo\Desktop\matlab devel'
 
 % gdLogFile = "/home/jaehan/Desktop/test flight/ref_sig_sim/gdLog_200813_121452.csv"; % 배속 시뮬레이션 데이터
 gdLogFile = "/home/jaehan/Desktop/test flight/ref_sig_sim/gdLog_200812_152705.csv"; % A3 데이터
