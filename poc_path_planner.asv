@@ -5,7 +5,7 @@ px = 6; % fov x length
 py = 4;
 ov_x = 0.2; % overlap length
 ov_y = 0.1;
-voxel_width = 0.03; % voxel distance
+voxel_width = 0.1; % voxel distance
 inpection_dist = 1; % Inspection distance
 
 eff_x = px - ov_x; % Effective fov size
@@ -32,9 +32,10 @@ gridEdgeY = [gridPosY(:,1)'-eff_y/2,gridPosY(end)+eff_y/2];
 %% Curvature generation (Voxel Data Loading)
 voxelData = peaks(length(area))*0.3;
 voxelData = voxelData(1:size(area,1),1:size(area,2));
+% voxelData(200:300,300:430) = nan; % Simulating voxel fault
 voxelFilterData = area.*voxelData;
 
-gridValue = griddata(voxelPosX(:),voxelPosY(:),voxelData(:),gridPosX,gridPosY); %interpolation -> 위험함.
+gridValue = griddata(voxelPosX(:),voxelPosY(:),voxelData(:),gridPosX,gridPosY);
 
 voxelFilterData(area==0) = nan; % neglect unselected area
 
@@ -47,13 +48,12 @@ for i = 1:size(gridPosX,2)
         vg(i,j).y = voxelPosY(voxelPosX > gridEdgeX(i) & voxelPosX < gridEdgeX(i+1) & voxelPosY > gridEdgeY(j) & voxelPosY < gridEdgeY(j+1) & ~isnan(voxelData));
         vg(i,j).data = voxelData(voxelPosX > gridEdgeX(i) & voxelPosX < gridEdgeX(i+1) & voxelPosY > gridEdgeY(j) & voxelPosY < gridEdgeY(j+1) & ~isnan(voxelData));
         vg(i,j).filterData = voxelData(voxelPosX > gridEdgeX(i) & voxelPosX < gridEdgeX(i+1) & voxelPosY > gridEdgeY(j) & voxelPosY < gridEdgeY(j+1) & ~isnan(voxelFilterData));
-        vg(i,j).filterX = voxelPosX(voxelPosX > gridEdgeX(i) & voxelPosX < gridEdgeX(i+1) & voxelPosY > gridEdgeY(j) & voxelPosY < gridEdgeY(j+1) & ~isnan(voxelData));
-        vg(i,j).filterY = voxelPosY(voxelPosX > gridEdgeX(i) & voxelPosX < gridEdgeX(i+1) & voxelPosY > gridEdgeY(j) & voxelPosY < gridEdgeY(j+1) & ~isnan(voxelData));
-        
+        vg(i,j).filterX = voxelPosX(voxelPosX > gridEdgeX(i) & voxelPosX < gridEdgeX(i+1) & voxelPosY > gridEdgeY(j) & voxelPosY < gridEdgeY(j+1) & ~isnan(voxelFilterData));
+        vg(i,j).filterY = voxelPosY(voxelPosX > gridEdgeX(i) & voxelPosX < gridEdgeX(i+1) & voxelPosY > gridEdgeY(j) & voxelPosY < gridEdgeY(j+1) & ~isnan(voxelFilterData));
         vg(i,j).null = 0;
 %         vg(i,j).xlen = length(find(voxelPosX(1,:) > gridEdgeX(i) & voxelPosX(1,:) < gridEdgeX(i+1)));
 %         vg(i,j).ylen = length(vg(i,j).data)/vg(i,j).xlen;
-        if isnan(vg(i,j).data)
+        if is(vg(i,j).filterData)
            vg(i,j).null = 1;
         end
         % Mesh type
@@ -81,6 +81,9 @@ for i = 1:size(vg,1)
             temp_x = gridPosX(1,i);
             temp_y = gridPosY(j,1);
             gridNormVector{j,i} = slopeQuadResponseSurf(coeff,temp_x,temp_y);
+        else
+            gridNormVector{j,i} = nan;
+            gridNormVector_lin{j,i} = nan;
         end
     end
 end
@@ -130,7 +133,7 @@ mesh(voxelPosX,voxelPosY,voxelFilterData);
 plot3(gridPosX(:),gridPosY(:),gridValue(:)+1,'ko')
 plot3(airPosX(:),airPosY(:),airPosZ(:),'kx')
 plot3(airPosX_lin(:),airPosY_lin(:),airPosZ_lin(:),'mo')
-plot3(vg(2,4).filterX,vg(2,4).filterYy,vg(2,4).filterData,'.','MarkerSize',0.1) % Inspection area(voxel)
+plot3(vg(1,4).filterX,vg(1,4).filterY,vg(1,4).filterData,'.','MarkerSize',0.1) % Inspection area(voxel)
 % view(-45,45)
 line([],[],'Color','k')
 xlim([gridEdgeX(1) gridEdgeX(end)])
