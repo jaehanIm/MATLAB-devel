@@ -1,12 +1,12 @@
 clear all
-
+tic
 %% Parameter setting
 px = 6; % fov x length
 py = 4;
 ov_x = 0.2; % overlap length
 ov_y = 0.1;
-voxel_width = 0.1; % voxel distance
-inpection_dist = 1; % Inspection distance
+voxel_width = 0.05; % voxel distance
+inpection_dist = 7; % Inspection distance
 
 eff_x = px - ov_x; % Effective fov size
 eff_y = py - ov_y;
@@ -72,12 +72,12 @@ for i = 1:size(vg,1)
         if vg(i,j).null == 0
             % Linear approximation
             coeff = linResponseSurface(vg(i,j).x, vg(i,j).y, vg(i,j).data);
-%             plane = drawLinResponseSurf(coeff,vg(i,j).x,vg(i,j).y);
+            planel = drawLinResponseSurf(coeff,vg(i,j).x,vg(i,j).y);
             gridNormVector_lin{j,i} = [coeff(1),coeff(2),-1];
 
             % Quadratic approximation
             coeff = quadResponseSurface(vg(i,j).x, vg(i,j).y, vg(i,j).data);
-%             plane = drawQuadResponseSurf(coeff,vg(i,j).x,vg(i,j).y);
+            plane = drawQuadResponseSurf(coeff,vg(i,j).x,vg(i,j).y);
             temp_x = gridPosX(1,i);
             temp_y = gridPosY(j,1);
             gridNormVector{j,i} = slopeQuadResponseSurf(coeff,temp_x,temp_y);
@@ -101,7 +101,7 @@ for i = 1:size(gridNormVector,1)
         airPosZ_lin(i,j) = gridValue(i,j) - inpection_dist * gridNormVector_lin{i,j}(3);
     end
 end
-
+toc
 %% Plot
 figure(1)
 clf
@@ -130,14 +130,18 @@ clf
 hold on
 grid on
 mesh(voxelPosX,voxelPosY,voxelFilterData);
-plot3(gridPosX(:),gridPosY(:),gridValue(:)+1,'ko')
+contour3(voxelPosX,voxelPosY,voxelFilterData);
+plot3(gridPosX(:),gridPosY(:),gridValue(:),'ko')
 plot3(airPosX(:),airPosY(:),airPosZ(:),'kx')
 plot3(airPosX_lin(:),airPosY_lin(:),airPosZ_lin(:),'mo')
-plot3(vg(1,4).filterX,vg(1,4).filterY,vg(1,4).filterData,'.','MarkerSize',0.1) % Inspection area(voxel)
+plot3(vg(3,7).filterX,vg(3,7).filterY,vg(3,7).filterData,'.','MarkerSize',0.1) % Inspection area(voxel)
+
 % view(-45,45)
 line([],[],'Color','k')
 xlim([gridEdgeX(1) gridEdgeX(end)])
 ylim([gridEdgeY(1) gridEdgeY(end)])
+zlim([-7 11])
+
 
 for i = 1:size(gridPosX,1)
     for j= 1:size(gridPosX,2)
