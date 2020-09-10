@@ -30,7 +30,7 @@ gridEdgeX = [gridPosX(1,:)-eff_x/2,gridPosX(end)+eff_x/2];
 gridEdgeY = [gridPosY(:,1)'-eff_y/2,gridPosY(end)+eff_y/2];
 
 %% Curvature generation (Voxel Data Loading)
-voxelData = peaks(length(area))*0.3;
+voxelData = peaks(length(area))*0.1;
 voxelData = voxelData(1:size(area,1),1:size(area,2));
 % voxelData(200:300,300:430) = nan; % Simulating voxel fault
 voxelFilterData = area.*voxelData;
@@ -107,8 +107,8 @@ end
 init_direction = -1; % 1 is up, 0 is down
 sweep_dir = ones(short_l,1);
 sweep_dir(1) = init_direction;
-% short_axis = 1;
-% short_l = 7;
+short_axis = 1;
+short_l = 7;
 for i = 2:short_l
     sweep_dir(i) = -sweep_dir(i-1);
 end
@@ -206,10 +206,3 @@ title('Path result','fontsize',14)
 xlabel('X position [m]','fontsize',14)
 xlabel('X position [m]')
 ylabel('Y position [m]')
-
-for i = 1:size(gridPosX,1)
-    for j= 1:size(gridPosX,2)
-       plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],'r--')
-       plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')
-    end
-end

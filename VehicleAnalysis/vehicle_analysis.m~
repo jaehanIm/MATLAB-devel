@@ -1,9 +1,15 @@
+gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_141145/gdLog_200904_141145.csv";
+[data, data_time] = loader(gdLogFile);
+data_time = seconds(data_time);
 d2r = pi/180;
-addpath 'C:\Users\dlawo\Desktop\matlab devel'
 
-gdLogFile = "/home/jaehan/Desktop/test flight/ref_sig_sim/gdLog_200909_180524.csv";
+% Sweep signal param.
+c1 = 4; c2 = 0.01866;
+wmin = 0.4*2*pi;
+wmax = 10*2*pi;
+T = 20;
 
-[data, time] = loader(gdLogFile);
+%% Coordination adjustment
 posNed = [data.posNed_0,data.posNed_1,data.posNed_2];
 posNedCmd = [data.posCmdNed_0,data.posCmdNed_1,data.posCmdNed_2];
 velNed = [data.velNed_0,data.velNed_1,data.velNed_2];
@@ -15,11 +21,9 @@ posXyzCmd = zeros(size(posNed));
 velUvw = zeros(size(posNed));
 % velUvwCmd = zeros(size(posNed));
 velUvwCmd = velNedCmd;
-posXyzCmd = posNedCmd;
-posXyz = posNed;
 for i = 1:size(posNed,1)
-%     posXyz(i,:) = dcmI2bridge(:,:,i) * posNed(i,:)';
-%     posXyzCmd(i,:) = dcmI2bridge(:,:,i) * posNedCmd(i,:)';
+    posXyz(i,:) = dcmI2bridge(:,:,i) * posNed(i,:)';
+    posXyzCmd(i,:) = dcmI2bridge(:,:,i) * posNedCmd(i,:)';
     velUvw(i,:) = dcmI2bridge(:,:,i) * velNed(i,:)';
 %     velUvwCmd(i,:) = dcmI2bridge(:,:,i) * velNedCmd(i,:)';
 end
@@ -37,23 +41,55 @@ velUvwCmd_0 = velUvwCmd(:,1);
 velUvwCmd_1 = velUvwCmd(:,2);
 velUvwCmd_2 = velUvwCmd(:,3);
 
-% total
-angletest = 1 : length(time);
-veltest = 1 : length(time);
-postest = 1 : length(time);
+%% Data parsing 
+testStartFlag = [];
+testFinishFlag = [];
+missionStartFlag = [];
+missionFinishFlag = [];
+fcMode = data.fcMcMode;
+missionType = data.missionType;
 
-% 배속 시뮬레이션
-% angletest = 259 : 910;
-% veltest = 1415 : 2067;
-% postest = 2571 : 3200;
+ns = 1; nf = 1; nsm = 1; nfm = 1;
+for i = 2:length(fcMode)
+    if fcMode(i) ~= fcMode(i-1) && fcMode(i) == 2
+        testStartFlag(ns) = i; ns = ns+1;
+    elseif fcMode(i) ~= fcMode(i-1) && fcMode(i-1) == 2
+        testFinishFlag(nf) = i; nf = nf+1;
+    end
+    if fcMode(i-1) == 0 && fcMode(i) == 1
+        missionStartFlag(nsm) = i; nsm = nsm + 1;
+    elseif fcMode(i-1) == 1 && fcMode(i) == 0
+        missionFinishFlag(nfm) = i; nfm = nfm + 1;
+    end
+end
 
-% A3 시뮬레이션
-% angletest = 2553 : 3204;
-% veltest = 3456 : 4108;
-% postest = 4446 : 5097;
+%% Data Selection
+% Mission Type
+% 4-1: 2 / 4-2: 3 / 4-3: 4 / 5-1: 0 / 5-2: 1 / 6-1: 8 / 6-2: ?
+
+n = 3;
+
+Cmd = data.rpdCmd_0(testStartFlag(n):testFinishFlag(n));
+SigStartFlag = find(Cmd);
+SigFinishFlag = SigStartFlag(end)+testStartFlag(n)-2;
+SigStartFlag = SigStartFlag(1)+testStartFlag(n);
+
+% Response = data.rpy_0(SigStartFlag:SigFinishFlag);
+% Cmd = data.rpdCmd_0(SigStartFlag:SigFinishFlag);
+Response = posXyz_1(SigStartFlag:SigFinishFlag);
+Cmd = posXyzCmd_1(SigStartFlag:SigFinishFlag);
+time = data_time(SigStartFlag:SigFinishFlag);
+
+res = c2*(wmax-wmin)*T/c1;
+omega = wmin + (exp((time-time(1))/T*c1)-1)*c2*(wmax-wmin);
+freq = omega/2/pi;
+% theta = wmin*t + c2*(wmax-wmin)*(T/c1*exp(c1/T*t)-t) - res;
 
 
-range = angletest;
+%% Plotting
+
+range = 1:length(time)
+
 figure(1)
 clf
 hold on
@@ -116,18 +152,3 @@ hold on
 grid on
 title('response time plot')
 plot(time,data.fcMcMode)
-
-%% Reference sweep signal
-
-% figure(5)
-% clf
-% c1 = 4; c2 = 0.01866;
-% wmin = 0.4*2*pi;
-% wmax = 10*2*pi;
-% t = 0:0.02:13;
-% T = 13;
-% res = c2*(wmax-wmin)*T/c1;
-% omega = wmin + (exp(t/T*c1)-1)*c2*(wmax-wmin);
-% theta = wmin*t + c2*(wmax-wmin)*(T/c1*exp(c1/T*t)-t) - res;
-% plot(t,sin(theta))
-% plot(t,omega/2/pi)
