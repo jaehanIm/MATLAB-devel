@@ -1,5 +1,5 @@
 clear all
-tic
+% tic
 %% Parameter setting
 px = 6; % fov x length
 py = 4;
@@ -103,6 +103,8 @@ for i = 1:size(gridNormVector,1)
 end
 
 %% Path Planner (Sweep Algorithm)
+% Sweeping algorithm
+tic
 [short_l,short_axis]= min(size(airPosX));
 init_direction = -1; % 1 is up, 0 is down
 sweep_dir = ones(short_l,1);
@@ -132,13 +134,53 @@ elseif short_axis == 2
         end
     end
 end
-
+toc
+% waypoint alignment
 sectorX = sectorX(:);
 sectorY = sectorY(:);
 sectorX = sectorX(~isnan(sectorX));
 sectorY = sectorY(~isnan(sectorY));
-toc
 
+net = [sectorX,sectorY];
+
+cost_Sweep = 0;
+for i = 2:length(net)
+    cost_Sweep = cost_Sweep + euclideanDist(net(i,:),net(i-1,:));
+end
+
+% Cost Matrix gen.
+dim = size(net,1);
+costMatrix = zeros(dim,dim);
+for i = 1:dim
+    for j = 1:dim
+        costMatrix(i,j) = euclideanDist(net(i,:),net(j,:)); % by distance
+    end
+end
+
+% Nearest Neighborhood Method
+tic
+costMatrix(costMatrix == 0) = nan;
+
+record = zeros(size(net));
+record(1,:) = net(1,:);
+record(end,:) = net(end,:); %restricted
+cost_NNM = 0;
+curridx = 1;
+costMatrix_temp = costMatrix(:,1:end-1);
+costMatrix_temp(:,1) = nan;
+for i = 1:length(net)-2
+[~,j]=min(costMatrix_temp(curridx,:));
+record(i+1,:) = net(j,:);
+cost_NNM = cost_NNM + costMatrix_temp(curridx,j);
+curridx = j;
+costMatrix_temp(:,j) = nan;
+end
+cost_NNM = cost_NNM + costMatrix(curridx,end); %restricted
+record = vertcat(record,net(end,:)); %restricted
+toc
+% toc
+figure(4)
+plot(record(:,1),record(:,2))
 
 %% Plot
 figure(1)
@@ -188,7 +230,10 @@ for i = 1:size(gridPosX,1)
     end
 end
 
-figure(3)
+addpath('C:\Users\dlawo\Downloads\ACO_Code');
+bestset = load('ACO_restricted');
+bestset = bestset.bestset;
+figure(3) 
 clf
 hold on
 grid on
@@ -199,7 +244,9 @@ plot(airPosX(:),airPosY(:),'kx')
 plot(airPosX_lin(:),airPosY_lin(:),'mo')
 xlim([gridEdgeX(1) gridEdgeX(end)])
 ylim([gridEdgeY(1) gridEdgeY(end)])
-plot(sectorX,sectorY,'k')
+% plot(sectorX,sectorY,'k')
+% plot(record(:,1),record(:,2),'k')
+plot(bestset(:,1),bestset(:,2),'k')
 mesh(voxelPosX,voxelPosY,voxelFilterData-10,'EdgeAlpha',0.1)
 contour(voxelPosX,voxelPosY,voxelFilterData-10)
 title('Path result','fontsize',14)
@@ -212,4 +259,8 @@ for i = 1:size(gridPosX,1)
        plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],'r--')
        plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')
     end
+end
+
+function out = euclideanDist(pos1,pos2)
+out = sqrt((pos2(2)-pos1(2))^2+(pos2(1)-pos1(1))^2);
 end
