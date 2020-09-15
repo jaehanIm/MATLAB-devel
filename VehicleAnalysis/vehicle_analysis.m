@@ -11,6 +11,8 @@ wmin = 0.4*2*pi;
 wmax = 10*2*pi;
 T = 20;
 
+doplot = 0;
+
 %% Coordination adjustment
 posNed = [data.posNed_0,data.posNed_1,data.posNed_2];
 posNedCmd = [data.posCmdNed_0,data.posCmdNed_1,data.posCmdNed_2];
@@ -22,8 +24,8 @@ posXyz = zeros(size(posNed));
 posXyzCmd = zeros(size(posNed));
 velUvw = zeros(size(posNed));
 velUvwCmd = velNedCmd;
-% posXyzCmd = posNedCmd;
-% posXyz = posNed;
+posXyzCmd = posNedCmd;
+posXyz = posNed;
 for i = 1:size(posNed,1)
     posXyz(i,:) = dcmI2bridge(:,:,i) * posNed(i,:)';
     posXyzCmd(i,:) = dcmI2bridge(:,:,i) * posNedCmd(i,:)';
@@ -66,32 +68,54 @@ for i = 2:length(fcMode)
     end
 end
 
-%% Data Selection
+responseSet = [data.rpy_0,velUvw_1,posXyz_1,data.rpy_1,velUvw_0,posXyz_0,data.rpy_2,velUvw_2,posXyz_2];
+cmdSet = [data.rpdCmd_0,velUvwCmd_1,posXyzCmd_1,data.rpdCmd_1,velUvwCmd_0,posXyzCmd_0,data.ySp,velUvwCmd_2,posXyzCmd_2];
+
+gimbaldev = sqrt(data.gimbalRPY_0.^2 + data.gimbalRPY_1.^2 + data.gimbalRPY_2.^2);
+
+%% Data Selection & TF estimation
 % Mission Type
 % 4-1: 2 / 4-2: 3 / 4-3: 4 / 5-1: 0 / 5-2: 1 / 6-1: 8 / 6-2: ?
 
-n = 16;
+% 1개씩 테스트할 때 쓰기.
+% doplot = 1;
+% n = 3;
+% i = n;
+% Cmd = data.rpy_0(testStartFlag(n):testFinishFlag(n));
+% SigStartFlag = find(Cmd);
+% SigFinishFlag = SigStartFlag(end)+testStartFlag(n)-2;
+% SigStartFlag = SigStartFlag(1)+testStartFlag(n);
+% time = data_time(SigStartFlag:SigFinishFlag);
+% Cmd = cmdSet(SigStartFlag:SigFinishFlag,3);
+% response = responseSet(SigStartFlag:SigFinishFlag,3);
 
-% Cmd = data.rpdCmd_0(testStartFlag(n):testFinishFlag(n));
-Cmd = data.ySp(testStartFlag(n):testFinishFlag(n));
-SigStartFlag = find(Cmd);
-SigFinishFlag = SigStartFlag(end)+testStartFlag(n)-2;
-SigStartFlag = SigStartFlag(1)+testStartFlag(n);
+% tfResult = {};
+% for i = 1:9
+%     [Num,Den]=extract_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+%     tfResult{i}.Num = Num;
+%     tfResult{i}.Den = Den;
+%     A = [num2str(i),'th transfer function estimation complete'];
+%     disp(A)
+% end
 
-Response = data.rpy_0(SigStartFlag:SigFinishFlag);
-Cmd = data.rpdCmd_0(SigStartFlag:SigFinishFlag);
-% Response = posXyz_1(SigStartFlag:SigFinishFlag);
-% Cmd = posXyzCmd_1(SigStartFlag:SigFinishFlag);
-time = data_time(SigStartFlag:SigFinishFlag);
+tfResult = {};
+for i = 1:3
+    [Num,Den]=extract_tf(3,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+    tfResult{i}.Num = Num;
+    tfResult{i}.Den = Den;
+    A = [num2str(i),'th transfer function estimation complete'];
+    disp(A)
+end
 
+%% Sweep signal
 res = c2*(wmax-wmin)*T/c1;
-% omega = wmin + (exp((time-time(1))/T*c1)-1)*c2*(wmax-wmin);
+omega = wmin + (exp((time-time(1))/T*c1)-1)*c2*(wmax-wmin);
 freq = omega/2/pi;
 % theta = wmin*t + c2*(wmax-wmin)*(T/c1*exp(c1/T*t)-t) - res;
 
-
 %% Plotting
 
+if doplot == 1
 range = SigStartFlag:SigFinishFlag;
 
 figure(1)
@@ -105,7 +129,6 @@ plot(time,data.rpdCmd_0(range),'k:')
 plot(time,data.rpdCmd_1(range),'b:')
 plot(time,data.ySp(range),'r:')
 title('angle')
-size(find(islocalmax(data.rpy_0(range))),1)
 legend('r','p','y')
 
 figure(2)
@@ -114,12 +137,11 @@ hold on
 grid on
 plot(time,velUvw_0(range),'k')
 plot(time,velUvw_1(range),'b')
-plot(time,velUvw_2(range),'r')
+plot(time,-velUvw_2(range),'r')
 plot(time,velUvwCmd_0(range),'k:')
 plot(time,velUvwCmd_1(range),'b:')
-plot(time,velUvwCmd_2(range),'r:')
+plot(time,-velUvwCmd_2(range),'r:')
 title('vel')
-size(find(islocalmax(data.velNed_1(range))),1)
 legend('u','v','w')
 
 figure(3)
@@ -128,21 +150,48 @@ hold on
 grid on
 plot(time,posXyz_0(range),'k')
 plot(time,posXyz_1(range),'b')
-plot(time,posXyz_2(range),'r')
+plot(time,-posXyz_2(range),'r')
 plot(time,posXyzCmd_0(range),'k:')
 plot(time,posXyzCmd_1(range),'b:')
-plot(time,posXyzCmd_2(range),'r:')
-% plot(time,islocalmax(data.posNed_1(range))/5+mean(data.posNed_1(range)))
-% plot(time,-islocalmin(data.posNed_1(range))/5+mean(data.posNed_1(range)))
-% plot(time,data.rpy_0(range)/10+mean(data.posNed_1(range)))
-% plot(time,data.velNed_1(range)+mean(data.posNed_1(range)))
+plot(time,-posXyzCmd_2(range),'r:')
 title('pos')
-size(find(islocalmax(data.posNed_1(range))),1)
 legend('x','y','z')
 
-% figure(4)
-% clf
-% hold on
-% grid on
-% title('response time plot')
-% plot(time,data.fcMcMode(range))
+figure(4)
+clf
+hold on
+grid on
+title('Gimbal Response (POS)')
+plot(time,gimbaldev(range),'m.-')
+plot(time,data.gimbalRPY_0(range),'.:')
+plot(time,data.gimbalRPY_1(range),'.:')
+plot(time,data.gimbalRPY_2(range),'.:')
+legend('tot','r','p','y')
+end
+
+%% function
+function [Num, Den] = extract_tf(n,mix,responseSet,cmdSet,testStartFlag,testFinishFlag)
+m = n;
+if n>9
+    m = n-9;
+end
+if mix>9
+    mix = mix-9;
+end
+Cmd = responseSet(testStartFlag(n):testFinishFlag(n),1);
+SigStartFlag = find(Cmd);
+SigFinishFlag = SigStartFlag(end)+testStartFlag(n)-2;
+SigStartFlag = SigStartFlag(1)+testStartFlag(n);
+Response = responseSet(SigStartFlag:SigFinishFlag,m);
+if mix ~= m
+    Response = responseSet(SigStartFlag:SigFinishFlag,mix);
+end
+Cmd = cmdSet(SigStartFlag:SigFinishFlag,m);
+Cmd = detrend(Cmd,0);
+Response = detrend(Response,0);
+
+timeseriesSet = iddata(Response,Cmd,0.02);
+sys = tfest(timeseriesSet,2,1);
+Num = sys.Numerator;
+Den = sys.Denominator;
+end

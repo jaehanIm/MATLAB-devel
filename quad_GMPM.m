@@ -107,7 +107,7 @@ gain_pp = (gain_pos.*gain_vel.*gain_a_pp.*(gain_int.^2)*g)./(1+gain_vel.*gain_a_
 cutoff_hz = 0.1:0.01:4;
 result = zeros(length(cutoff_hz),3);
 n = 1;
-for cutoff_hz = 0.1:0.01:4
+for cutoff_hz = 0.1:0.01:5
     wc = cutoff_hz*2*pi;
     filter_low = 1./sqrt(1+(f_pp/wc).^2); % 1st order filter gain @ f_pp
     filter_high = 1./sqrt(1+(f_pa/wc).^2); % 1st order filter gain @ f_pa
@@ -137,9 +137,10 @@ figure(7)
 hold on
 plot(result(:,1),result(:,2),'b')
 plot(result(:,1),result(:,3),'r')
-plot([0.5 0.5],[0.4 1.1],'k')
-plot([0.7 0.7],[0.4 1.1],'k')
-legend('P->P response','P->A response')
+plot([0.3 0.3],[0 1.2],'k')
+plot([0.5 0.5],[0 1.2],'k')
+plot([0.7 0.7],[0 1.2],'k')
+legend('P->P response @0.2hz','P->A response @0.73hz')
 grid on
 title('Most sensitive frequency response','fontsize',14)
 xlabel('Cutoff frequency')
