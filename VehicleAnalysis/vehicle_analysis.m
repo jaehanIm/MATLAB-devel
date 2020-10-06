@@ -1,8 +1,20 @@
-gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_141145/gdLog_200904_141145.csv";
+loadSkip = 0;
+% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_141145/gdLog_200904_141145.csv";
+% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_142605/gdLog_200904_142605.csv";
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/200904_144201/gdLog_200904_144201.csv";
 
-[data, data_time] = loader(gdLogFile);
-data_time = seconds(data_time);
+% 0918 flight test
+% gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_143045/gdLog_200918_143045.csv"; % 1st
+gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_144556/gdLog_200918_144556.csv"; % 2nd
+% gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_150250/gdLog_200918_150250.csv"; % 3rd
+
+if loadSkip == 0
+    [data, data_time] = loader(gdLogFile);
+    data_time = seconds(data_time);
+else
+    
+end
+
 d2r = pi/180;
 
 % Sweep signal param.
@@ -78,34 +90,39 @@ gimbaldev = sqrt(data.gimbalRPY_0.^2 + data.gimbalRPY_1.^2 + data.gimbalRPY_2.^2
 % 4-1: 2 / 4-2: 3 / 4-3: 4 / 5-1: 0 / 5-2: 1 / 6-1: 8 / 6-2: ?
 
 % 1개씩 테스트할 때 쓰기.
-% doplot = 1;
-% n = 3;
-% i = n;
-% Cmd = data.rpy_0(testStartFlag(n):testFinishFlag(n));
-% SigStartFlag = find(Cmd);
-% SigFinishFlag = SigStartFlag(end)+testStartFlag(n)-2;
-% SigStartFlag = SigStartFlag(1)+testStartFlag(n);
-% time = data_time(SigStartFlag:SigFinishFlag);
-% Cmd = cmdSet(SigStartFlag:SigFinishFlag,3);
-% response = responseSet(SigStartFlag:SigFinishFlag,3);
+doplot = 1;
+n = 5;
+i = n;
+Cmd = data.rpy_0(testStartFlag(n):testFinishFlag(n));
+SigStartFlag = find(Cmd);
+SigFinishFlag = SigStartFlag(end)+testStartFlag(n)-2;
+SigStartFlag = SigStartFlag(1)+testStartFlag(n);
+time = data_time(SigStartFlag:SigFinishFlag);
+if n > 9
+    n = n-9;
+end
+Cmd = cmdSet(SigStartFlag:SigFinishFlag,n);
+response = responseSet(SigStartFlag:SigFinishFlag,n);
 
+% Basic TF
 % tfResult = {};
 % for i = 1:9
-%     [Num,Den]=extract_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+%     [Num,Den]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
 %     tfResult{i}.Num = Num;
 %     tfResult{i}.Den = Den;
 %     A = [num2str(i),'th transfer function estimation complete'];
 %     disp(A)
 % end
 
-tfResult = {};
-for i = 1:3
-    [Num,Den]=extract_tf(3,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
-    tfResult{i}.Num = Num;
-    tfResult{i}.Den = Den;
-    A = [num2str(i),'th transfer function estimation complete'];
-    disp(A)
-end
+% Mix TF
+% tfResult = {};
+% for i = 1:3
+%     [Num,Den]=estimate_tf(3,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+%     tfResult{i}.Num = Num;
+%     tfResult{i}.Den = Den;
+%     A = [num2str(i),'th transfer function estimation complete'];
+%     disp(A)
+% end
 
 %% Sweep signal
 res = c2*(wmax-wmin)*T/c1;
@@ -118,7 +135,7 @@ freq = omega/2/pi;
 if doplot == 1
 range = SigStartFlag:SigFinishFlag;
 
-figure(1)
+figure(10)
 clf
 hold on
 grid on
@@ -131,7 +148,7 @@ plot(time,data.ySp(range),'r:')
 title('angle')
 legend('r','p','y')
 
-figure(2)
+figure(11)
 clf
 hold on
 grid on
@@ -144,7 +161,7 @@ plot(time,-velUvwCmd_2(range),'r:')
 title('vel')
 legend('u','v','w')
 
-figure(3)
+figure(12)
 clf
 hold on
 grid on
@@ -157,7 +174,7 @@ plot(time,-posXyzCmd_2(range),'r:')
 title('pos')
 legend('x','y','z')
 
-figure(4)
+figure(13)
 clf
 hold on
 grid on
@@ -169,8 +186,15 @@ plot(time,data.gimbalRPY_2(range),'.:')
 legend('tot','r','p','y')
 end
 
+figure(14)
+clf
+hold on
+grid on
+title('Yaw angle history')
+plot(time,data.rpy_2(range))
+
 %% function
-function [Num, Den] = extract_tf(n,mix,responseSet,cmdSet,testStartFlag,testFinishFlag)
+function [Num, Den] = estimate_tf(n,mix,responseSet,cmdSet,testStartFlag,testFinishFlag)
 m = n;
 if n>9
     m = n-9;

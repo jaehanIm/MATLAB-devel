@@ -18,15 +18,13 @@ for i = 1:9
     grid on
     y1 = step(tf(KH{i}.Num,KH{i}.Den));
     y2 = step(tf(SB{i}.Num,SB{i}.Den));
-    step(tf(KH{i}.Num,KH{i}.Den));
-    step(tf(SB{i}.Num,SB{i}.Den));
     title("Step "+Flag(i))
     BW_KH(i) = bandwidth(tf(KH{i}.Num,KH{i}.Den));
     BW_SB(i) = bandwidth(tf(SB{i}.Num,SB{i}.Den));
     stepResult{1,i} = stepinfo(tf(KH{i}.Num,KH{i}.Den));
     stepResult{2,i} = stepinfo(tf(SB{i}.Num,SB{i}.Den));
-    stepSse(1,i) = 1 - y1(end);
-    stepSse(2,i) = 1 - y2(end);
+    stepSse(1,i) = 
+    stepSse(2,i)
 end
 disp('c1')
 
@@ -98,7 +96,7 @@ end
 
 figure(9)
 clf
-subplot(6,1,1)
+subplot(5,1,1)
 bar([[BW_KH,BW_KH_mix]'/pi/2,[BW_SB,BW_SB_mix]'/pi/2])
 xticklabels([Flag,FlagMix])
 grid on
@@ -106,37 +104,30 @@ title('BandWidth')
 ylabel('hz')
 legend('KH','SB')
 
-subplot(6,1,2)
+subplot(5,1,2)
 bar([[GMPM_KH(:,1);GMPM_KH_mix(:,1)],[GMPM_SB(:,1);GMPM_SB_mix(:,1)]])
 xticklabels([Flag,FlagMix])
 grid on
 title('Gain Margin')
 ylabel('db')
 
-subplot(6,1,3)
+subplot(5,1,3)
 bar([[GMPM_KH(:,2);GMPM_KH_mix(:,2)],[GMPM_SB(:,2);GMPM_SB_mix(:,2)]])
 xticklabels([Flag,FlagMix])
 grid on
 title('Phase Margin')
 ylabel('deg')
 
-subplot(6,1,4)
+subplot(5,1,4)
 bar([stepRise(1,:)',stepRise(2,:)'])
 xticklabels([Flag,FlagMix])
 grid on
 title('Rise Time')
 ylabel('deg')
 
-subplot(6,1,5)
+subplot(5,1,5)
 bar([stepSettle(1,:)',stepSettle(2,:)'])
 xticklabels([Flag,FlagMix])
 grid on
 title('Settling Time')
-ylabel('deg')
-
-subplot(6,1,6)
-bar([abs(stepSse(1,:)'),abs(stepSse(2,:)')])
-xticklabels([Flag,FlagMix])
-grid on
-title('SSE')
 ylabel('deg')

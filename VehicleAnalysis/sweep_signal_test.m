@@ -1,7 +1,8 @@
 d2r = pi/180;
 addpath 'C:\Users\dlawo\Desktop\matlab devel'
 
-gdLogFile = "/home/jaehan/Desktop/test flight/ref_sig_sim/gdLog_200909_180524.csv";
+% gdLogFile = "/home/jaehan/Desktop/test flight/ref_sig_sim/gdLog_200917_135329.csv";
+gdLogFile = "/home/jaehan/Desktop/test flight/ref_sig_sim/gdLog_200917_150053.csv";
 
 [data, time] = loader(gdLogFile);
 posNed = [data.posNed_0,data.posNed_1,data.posNed_2];
@@ -18,8 +19,8 @@ velUvwCmd = velNedCmd;
 posXyzCmd = posNedCmd;
 posXyz = posNed;
 for i = 1:size(posNed,1)
-%     posXyz(i,:) = dcmI2bridge(:,:,i) * posNed(i,:)';
-%     posXyzCmd(i,:) = dcmI2bridge(:,:,i) * posNedCmd(i,:)';
+    posXyz(i,:) = dcmI2bridge(:,:,i) * posNed(i,:)';
+    posXyzCmd(i,:) = dcmI2bridge(:,:,i) * posNedCmd(i,:)';
     velUvw(i,:) = dcmI2bridge(:,:,i) * velNed(i,:)';
 %     velUvwCmd(i,:) = dcmI2bridge(:,:,i) * velNedCmd(i,:)';
 end
