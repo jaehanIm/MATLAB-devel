@@ -1,7 +1,11 @@
-KH = load('KH'); KH = KH.tfResult;
-SB = load('SB'); SB = SB.tfResult;
+KH = load('KH'); KH = KH.tfResult; % 대조군
+SB = load('KH_0918'); SB = SB.tfResult; % 실험군
+% SB = load('SB'); SB = SB.tfResult; % 실험군
+% SB = load('KH_discrete'); SB = SB.tfResult; % 실험군
+% SB = load('KH_sweep'); SB = SB.tfResult; % 실험군
+
 KH_mix = load('KH_mix'); KH_mix = KH_mix.tfResult;
-SB_mix = load('SB_mix'); SB_mix = SB_mix.tfResult;
+SB_mix = load('KH_mix_0918'); SB_mix = SB_mix.tfResult;
 Flag = ["Roll","v","Y","Pitch","u","X","Yaw","w","Alt"];
 FlagMix = ["P->A","P->V","P->P"];
 
@@ -85,7 +89,6 @@ disp('c4')
 stepRise = zeros(2,12);
 stepSettle = zeros(2,12);
 stepOver = zeros(2,12);
-stepSse = zeros(2,12);
 for i = 1:12
     stepRise(1,i) = stepResult{1,i}.RiseTime;
     stepRise(2,i) = stepResult{2,i}.RiseTime;

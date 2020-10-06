@@ -4,15 +4,17 @@ loadSkip = 0;
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/200904_144201/gdLog_200904_144201.csv";
 
 % 0918 flight test
-% gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_143045/gdLog_200918_143045.csv"; % 1st
-gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_144556/gdLog_200918_144556.csv"; % 2nd
+gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_143045/gdLog_200918_143045.csv"; loadSkip = 1; % 1st
+% gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_144556/gdLog_200918_144556.csv"; loadSkip = 1;% 2nd
 % gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_150250/gdLog_200918_150250.csv"; % 3rd
 
 if loadSkip == 0
     [data, data_time] = loader(gdLogFile);
     data_time = seconds(data_time);
 else
-    
+    temp = load('gdLog_KH_0918.mat');
+    data = temp.data;
+    data_time = temp.data_time;
 end
 
 d2r = pi/180;
@@ -91,7 +93,7 @@ gimbaldev = sqrt(data.gimbalRPY_0.^2 + data.gimbalRPY_1.^2 + data.gimbalRPY_2.^2
 
 % 1개씩 테스트할 때 쓰기.
 doplot = 1;
-n = 5;
+n = 4;
 i = n;
 Cmd = data.rpy_0(testStartFlag(n):testFinishFlag(n));
 SigStartFlag = find(Cmd);
@@ -117,7 +119,7 @@ response = responseSet(SigStartFlag:SigFinishFlag,n);
 % Mix TF
 % tfResult = {};
 % for i = 1:3
-%     [Num,Den]=estimate_tf(3,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+%     [Num,Den]=estimate_tf(12,i+9,responseSet,cmdSet,testStartFlag,testFinishFlag);
 %     tfResult{i}.Num = Num;
 %     tfResult{i}.Den = Den;
 %     A = [num2str(i),'th transfer function estimation complete'];
@@ -125,9 +127,9 @@ response = responseSet(SigStartFlag:SigFinishFlag,n);
 % end
 
 %% Sweep signal
-res = c2*(wmax-wmin)*T/c1;
-omega = wmin + (exp((time-time(1))/T*c1)-1)*c2*(wmax-wmin);
-freq = omega/2/pi;
+% res = c2*(wmax-wmin)*T/c1;
+% omega = wmin + (exp((time-time(1))/T*c1)-1)*c2*(wmax-wmin);
+% freq = omega/2/pi;
 % theta = wmin*t + c2*(wmax-wmin)*(T/c1*exp(c1/T*t)-t) - res;
 
 %% Plotting
@@ -184,7 +186,6 @@ plot(time,data.gimbalRPY_0(range),'.:')
 plot(time,data.gimbalRPY_1(range),'.:')
 plot(time,data.gimbalRPY_2(range),'.:')
 legend('tot','r','p','y')
-end
 
 figure(14)
 clf
@@ -192,6 +193,8 @@ hold on
 grid on
 title('Yaw angle history')
 plot(time,data.rpy_2(range))
+
+end
 
 %% function
 function [Num, Den] = estimate_tf(n,mix,responseSet,cmdSet,testStartFlag,testFinishFlag)
