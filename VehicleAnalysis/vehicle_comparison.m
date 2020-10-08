@@ -5,10 +5,10 @@ KH = load('KH'); KH = KH.tfResult; % 대조군
 % SB = load('KH_discrete'); SB = SB.tfResult; % 실험군
 % SB = load('KH_sweep'); SB = SB.tfResult; % 실험군
 
-SB = load('KH_mod'); SB = SB.tfResult;
+SB = load('GAIN_ref'); SB = SB.tfResult;
 
 KH_mix = load('KH_mix'); KH_mix = KH_mix.tfResult;
-SB_mix = load('KH_mod_mix'); SB_mix = SB_mix.tfResult;
+SB_mix = load('GAIN_ref_mix'); SB_mix = SB_mix.tfResult;
 Flag = ["Roll","v","Y","Pitch","u","X","Yaw","w","Alt"];
 FlagMix = ["P->A","P->V","P->P"];
 

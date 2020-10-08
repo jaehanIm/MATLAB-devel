@@ -1,5 +1,5 @@
 loadSkip = 0;
-gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_141145/gdLog_200904_141145.csv";
+% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_141145/gdLog_200904_141145.csv";
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_142605/gdLog_200904_142605.csv";
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/200904_144201/gdLog_200904_144201.csv";
 
@@ -12,7 +12,7 @@ gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_141145/
 % gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_092545.csv"; % ref
 % gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_095248.csv"; % prop gain
 % gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_100107.csv"; % att gain
-% gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_101037.csv"; % perf gain
+gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_101037.csv"; % perf gain
 
 if loadSkip == 0
     [data, data_time] = loader(gdLogFile);
