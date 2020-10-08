@@ -1,14 +1,14 @@
 tic
-KH = load('KH'); KH = KH.tfResult; % 대조군
+KH = load('GAIN_ref'); KH = KH.tfResult; % 대조군
 % SB = load('KH_0918'); SB = SB.tfResult; % 실험군
 % SB = load('SB'); SB = SB.tfResult; % 실험군
 % SB = load('KH_discrete'); SB = SB.tfResult; % 실험군
 % SB = load('KH_sweep'); SB = SB.tfResult; % 실험군
 
-SB = load('GAIN_ref'); SB = SB.tfResult;
+SB = load('GAIN_perf'); SB = SB.tfResult;
 
-KH_mix = load('KH_mix'); KH_mix = KH_mix.tfResult;
-SB_mix = load('GAIN_ref_mix'); SB_mix = SB_mix.tfResult;
+KH_mix = load('GAIN_ref_mix'); KH_mix = KH_mix.tfResult;
+SB_mix = load('GAIN_perf_mix'); SB_mix = SB_mix.tfResult;
 Flag = ["Roll","v","Y","Pitch","u","X","Yaw","w","Alt"];
 FlagMix = ["P->A","P->V","P->P"];
 
