@@ -1,11 +1,14 @@
+tic
 KH = load('KH'); KH = KH.tfResult; % 대조군
-SB = load('KH_0918'); SB = SB.tfResult; % 실험군
+% SB = load('KH_0918'); SB = SB.tfResult; % 실험군
 % SB = load('SB'); SB = SB.tfResult; % 실험군
 % SB = load('KH_discrete'); SB = SB.tfResult; % 실험군
 % SB = load('KH_sweep'); SB = SB.tfResult; % 실험군
 
+SB = load('KH_mod'); SB = SB.tfResult;
+
 KH_mix = load('KH_mix'); KH_mix = KH_mix.tfResult;
-SB_mix = load('KH_mix_0918'); SB_mix = SB_mix.tfResult;
+SB_mix = load('KH_mod_mix'); SB_mix = SB_mix.tfResult;
 Flag = ["Roll","v","Y","Pitch","u","X","Yaw","w","Alt"];
 FlagMix = ["P->A","P->V","P->P"];
 
@@ -31,6 +34,7 @@ for i = 1:9
     stepResult{2,i} = stepinfo(tf(SB{i}.Num,SB{i}.Den));
     stepSse(1,i) = 1 - y1(end);
     stepSse(2,i) = 1 - y2(end);
+    grid on
 end
 disp('c1')
 
@@ -43,12 +47,13 @@ for i = 1:9
     hold on
     [Gm,Pm,Wcg,Wcp] = margin(tf(KH{i}.Num,KH{i}.Den));
     margin(tf(KH{i}.Num,KH{i}.Den));
-    GMPM_KH(i,:) = [Gm,Pm,Wcg,Wcp];
+    GMPM_KH(i,:) = [mag2db(Gm),Pm,Wcg,Wcp];
     [Gm,Pm,Wcg,Wcp] = margin(tf(SB{i}.Num,SB{i}.Den));
     margin(tf(SB{i}.Num,SB{i}.Den));
-    GMPM_SB(i,:) = [Gm,Pm,Wcg,Wcp];
+    GMPM_SB(i,:) = [mag2db(Gm),Pm,Wcg,Wcp];
     grid on
     title("Bode "+Flag(i))
+    grid on
 end
 disp('c2')
 %%mix code
@@ -65,6 +70,7 @@ for i = 1:3
     BW_SB_mix(i) = bandwidth(tf(SB_mix{i}.Num,SB_mix{i}.Den));
     stepResult{1,i+9} = stepinfo(tf(KH_mix{i}.Num,KH_mix{i}.Den));
     stepResult{2,i+9} = stepinfo(tf(SB_mix{i}.Num,SB_mix{i}.Den));
+    grid on
 end
 disp('c3')
 figure(8)
@@ -76,10 +82,10 @@ for i = 1:3
     hold on
     grid on
     [Gm,Pm,Wcg,Wcp]=margin(tf(KH_mix{i}.Num,KH_mix{i}.Den));
-    GMPM_KH_mix(i,:) = [Gm,Pm,Wcg,Wcp];
+    GMPM_KH_mix(i,:) = [mag2db(Gm),Pm,Wcg,Wcp];
     margin(tf(KH_mix{i}.Num,KH_mix{i}.Den));
     [Gm,Pm,Wcg,Wcp]=margin(tf(SB_mix{i}.Num,SB_mix{i}.Den));
-    GMPM_SB_mix(i,:) = [Gm,Pm,Wcg,Wcp];
+    GMPM_SB_mix(i,:) = [mag2db(Gm),Pm,Wcg,Wcp];
     margin(tf(SB_mix{i}.Num,SB_mix{i}.Den));
     title("Bode "+FlagMix(i))
     grid on
@@ -128,18 +134,19 @@ bar([stepRise(1,:)',stepRise(2,:)'])
 xticklabels([Flag,FlagMix])
 grid on
 title('Rise Time')
-ylabel('deg')
+ylabel('s')
 
 subplot(6,1,5)
 bar([stepSettle(1,:)',stepSettle(2,:)'])
 xticklabels([Flag,FlagMix])
 grid on
 title('Settling Time')
-ylabel('deg')
+ylabel('s')
 
 subplot(6,1,6)
 bar([abs(stepSse(1,:)'),abs(stepSse(2,:)')])
 xticklabels([Flag,FlagMix])
 grid on
 title('SSE')
-ylabel('deg')
+ylabel(' ')
+toc

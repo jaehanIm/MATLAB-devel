@@ -1,12 +1,18 @@
 loadSkip = 0;
-% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_141145/gdLog_200904_141145.csv";
+gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_141145/gdLog_200904_141145.csv";
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_142605/gdLog_200904_142605.csv";
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/200904_144201/gdLog_200904_144201.csv";
 
 % 0918 flight test
-gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_143045/gdLog_200918_143045.csv"; loadSkip = 1; % 1st
+% gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_143045/gdLog_200918_143045.csv"; loadSkip = 1; % 1st
 % gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_144556/gdLog_200918_144556.csv"; loadSkip = 1;% 2nd
 % gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_150250/gdLog_200918_150250.csv"; % 3rd
+
+% refsig gain simulation
+% gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_092545.csv"; % ref
+% gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_095248.csv"; % prop gain
+% gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_100107.csv"; % att gain
+% gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_101037.csv"; % perf gain
 
 if loadSkip == 0
     [data, data_time] = loader(gdLogFile);
@@ -92,21 +98,28 @@ gimbaldev = sqrt(data.gimbalRPY_0.^2 + data.gimbalRPY_1.^2 + data.gimbalRPY_2.^2
 % 4-1: 2 / 4-2: 3 / 4-3: 4 / 5-1: 0 / 5-2: 1 / 6-1: 8 / 6-2: ?
 
 % 1개씩 테스트할 때 쓰기.
-doplot = 1;
-n = 4;
-i = n;
-Cmd = data.rpy_0(testStartFlag(n):testFinishFlag(n));
-SigStartFlag = find(Cmd);
-SigFinishFlag = SigStartFlag(end)+testStartFlag(n)-2;
-SigStartFlag = SigStartFlag(1)+testStartFlag(n);
-time = data_time(SigStartFlag:SigFinishFlag);
-if n > 9
-    n = n-9;
-end
-Cmd = cmdSet(SigStartFlag:SigFinishFlag,n);
-response = responseSet(SigStartFlag:SigFinishFlag,n);
+% doplot = 1;
+% n = 1;
+% m = n;
+% if m > 9
+%     m = m-9;
+% end
+% Cmd = data.rpy_0(testStartFlag(n):testFinishFlag(n));
+% Cmd = cmdSet(testStartFlag(n):testFinishFlag(n),m);
+% time = data_time(testStartFlag(n):testFinishFlag(n));
+% response = responseSet(testStartFlag(n):testFinishFlag(n),m);
 
-% Basic TF
+% Basic TF - All
+% tfResult = {};
+% for i = 1:18
+%     [Num,Den]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+%     tfResult{i}.Num = Num;
+%     tfResult{i}.Den = Den;
+%     A = [num2str(i),'th transfer function estimation complete'];
+%     disp(A)
+% end
+
+% Basic TF - Step only
 % tfResult = {};
 % for i = 1:9
 %     [Num,Den]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
@@ -117,14 +130,14 @@ response = responseSet(SigStartFlag:SigFinishFlag,n);
 % end
 
 % Mix TF
-% tfResult = {};
-% for i = 1:3
-%     [Num,Den]=estimate_tf(12,i+9,responseSet,cmdSet,testStartFlag,testFinishFlag);
-%     tfResult{i}.Num = Num;
-%     tfResult{i}.Den = Den;
-%     A = [num2str(i),'th transfer function estimation complete'];
-%     disp(A)
-% end
+tfResult = {};
+for i = 1:3
+    [Num,Den]=estimate_tf(3,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+    tfResult{i}.Num = Num;
+    tfResult{i}.Den = Den;
+    A = [num2str(i),'th transfer function estimation complete'];
+    disp(A)
+end
 
 %% Sweep signal
 % res = c2*(wmax-wmin)*T/c1;
@@ -135,7 +148,7 @@ response = responseSet(SigStartFlag:SigFinishFlag,n);
 %% Plotting
 
 if doplot == 1
-range = SigStartFlag:SigFinishFlag;
+range = testStartFlag(n):testFinishFlag(n);
 
 figure(10)
 clf
@@ -205,15 +218,11 @@ end
 if mix>9
     mix = mix-9;
 end
-Cmd = responseSet(testStartFlag(n):testFinishFlag(n),1);
-SigStartFlag = find(Cmd);
-SigFinishFlag = SigStartFlag(end)+testStartFlag(n)-2;
-SigStartFlag = SigStartFlag(1)+testStartFlag(n);
-Response = responseSet(SigStartFlag:SigFinishFlag,m);
+Cmd = cmdSet(testStartFlag(n):testFinishFlag(n),m);
+Response = responseSet(testStartFlag(n):testFinishFlag(n),m);
 if mix ~= m
-    Response = responseSet(SigStartFlag:SigFinishFlag,mix);
+    Response = responseSet(testStartFlag(n):testFinishFlag(n),mix);
 end
-Cmd = cmdSet(SigStartFlag:SigFinishFlag,m);
 Cmd = detrend(Cmd,0);
 Response = detrend(Response,0);
 
