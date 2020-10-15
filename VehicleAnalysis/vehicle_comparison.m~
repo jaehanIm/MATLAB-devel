@@ -1,16 +1,16 @@
 tic
 addpath('./1013FT')
 
-KH = load('./1013FT/KH.mat'); KH = KH.tfResult; % 대조군
+KH = load('SB_default.mat'); KH = KH.tfResult; % 대조군
 % SB = load('KH_0918'); SB = SB.tfResult; % 실험군
 % SB = load('SB'); SB = SB.tfResult; % 실험군
 % SB = load('KH_discrete'); SB = SB.tfResult; % 실험군
 % SB = load('KH_sweep'); SB = SB.tfResult; % 실험군
 
-SB = load('SB_default'); SB = SB.tfResult;
+SB = load('SB_advanced'); SB = SB.tfResult;
 
-KH_mix = load('./1013FT/KH_mix'); KH_mix = KH_mix.tfResult_mix;
-SB_mix = load('SB_default_mix'); SB_mix = SB_mix.tfResult_mix;
+KH_mix = load('SB_default_mix'); KH_mix = KH_mix.tfResult_mix;
+SB_mix = load('SB_advanced_mix'); SB_mix = SB_mix.tfResult_mix;
 Flag = ["Roll","v","Y","Pitch","u","X","Yaw","w","Alt"];
 FlagMix = ["P->A","P->V","P->P"];
 
@@ -37,10 +37,8 @@ for i = 1:9
     stepResult{2,i} = stepinfo(tf(SB{i}.Num,SB{i}.Den));
     stepSse(1,i) = 1 - y1(end);
     stepSse(2,i) = 1 - y2(end);
-    [~,temp] = damp(tf(KH{i}.Num,KH{i}.Den));
-    stepDamp(1,i) = temp(1);
-    [~,temp] = damp(tf(SB{i}.Num,SB{i}.Den));
-    stepDamp(1,i) = temp(1);
+    [~,stepDamp(1,i)] = mean(damp(tf(KH{i}.Num,KH{i}.Den)));
+    stepDamp(2,i) = 
     grid on
 end
 disp('c1')
@@ -152,8 +150,8 @@ title('Settling Time')
 ylabel('s')
 
 subplot(6,1,6)
-bar([abs(stepSse(1,:)'),abs(stepSse(2,:)')])
-% bar([abs(stepOver(1,:)'),abs(stepOver(2,:)')])
+% bar([abs(stepSse(1,:)'),abs(stepSse(2,:)')])
+bar([abs(stepOver(1,:)'),abs(stepOver(2,:)')])
 xticklabels([Flag,FlagMix])
 grid on
 title('Overshoot')

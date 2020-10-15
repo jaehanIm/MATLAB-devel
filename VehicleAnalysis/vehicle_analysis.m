@@ -1,24 +1,33 @@
 loadSkip = 0;
+% 0904 flight test
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_141145/gdLog_200904_141145.csv";
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_142605/gdLog_200904_142605.csv";
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/200904_144201/gdLog_200904_144201.csv";
 
 % 0918 flight test
-% gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_143045/gdLog_200918_143045.csv"; loadSkip = 1; % 1st
-% gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_144556/gdLog_200918_144556.csv"; loadSkip = 1;% 2nd
+% gdLogFile = "gdLog_KH_0918.mat"; loadSkip = 1; % 1st
 % gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_150250/gdLog_200918_150250.csv"; % 3rd
 
 % refsig gain simulation
 % gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_092545.csv"; % ref
 % gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_095248.csv"; % prop gain
 % gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_100107.csv"; % att gain
-gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_101037.csv"; % perf gain
+% gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_101037.csv"; % perf gain
+% gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201012_105630.csv"; % prop max
+
+% 1013 flight test
+gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/201013_104036/gdLog_201013_104036.csv"; % KH Step
+% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/201013_105028/gdLog_201013_105028.csv"; % KH Sweep
+% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/Default_Gain/gdLog_201013_114813.csv"; 
+% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/Prop_Gain_def_trimmed"; loadSkip = 1;
+% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/Advanced_Gain_90_100/gdLog_201013_120027.csv";
+% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/CPP_100_130/gdLog_201013_121302.csv";
 
 if loadSkip == 0
     [data, data_time] = loader(gdLogFile);
     data_time = seconds(data_time);
 else
-    temp = load('gdLog_KH_0918.mat');
+    temp = load(gdLogFile);
     data = temp.data;
     data_time = temp.data_time;
 end
@@ -47,9 +56,9 @@ velUvwCmd = velNedCmd;
 posXyzCmd = posNedCmd;
 posXyz = posNed;
 for i = 1:size(posNed,1)
-    posXyz(i,:) = dcmI2bridge(:,:,i) * posNed(i,:)';
-    posXyzCmd(i,:) = dcmI2bridge(:,:,i) * posNedCmd(i,:)';
-    velUvw(i,:) = dcmI2bridge(:,:,i) * velNed(i,:)';
+    posXyz(i,:) = dcmI2bridge(:,:,1) * posNed(i,:)';
+    posXyzCmd(i,:) = dcmI2bridge(:,:,1) * posNedCmd(i,:)';
+    velUvw(i,:) = dcmI2bridge(:,:,1) * velNed(i,:)';
 %     velUvwCmd(i,:) = dcmI2bridge(:,:,i) * velNedCmd(i,:)';
 end
 
@@ -99,15 +108,14 @@ gimbaldev = sqrt(data.gimbalRPY_0.^2 + data.gimbalRPY_1.^2 + data.gimbalRPY_2.^2
 
 % 1개씩 테스트할 때 쓰기.
 % doplot = 1;
-% n = 1;
+% n = 3;
 % m = n;
 % if m > 9
 %     m = m-9;
 % end
-% Cmd = data.rpy_0(testStartFlag(n):testFinishFlag(n));
-% Cmd = cmdSet(testStartFlag(n):testFinishFlag(n),m);
-% time = data_time(testStartFlag(n):testFinishFlag(n));
-% response = responseSet(testStartFlag(n):testFinishFlag(n),m);
+% Cmd = cmdSet(testStartFlag(n):testFinishFlag(n)-1,m);
+% time = data_time(testStartFlag(n):testFinishFlag(n)-1);
+% response = responseSet(testStartFlag(n):testFinishFlag(n)-1,m);
 
 % Basic TF - All
 % tfResult = {};
@@ -120,21 +128,21 @@ gimbaldev = sqrt(data.gimbalRPY_0.^2 + data.gimbalRPY_1.^2 + data.gimbalRPY_2.^2
 % end
 
 % Basic TF - Step only
-% tfResult = {};
-% for i = 1:9
-%     [Num,Den]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
-%     tfResult{i}.Num = Num;
-%     tfResult{i}.Den = Den;
-%     A = [num2str(i),'th transfer function estimation complete'];
-%     disp(A)
-% end
-
-% Mix TF
 tfResult = {};
-for i = 1:3
-    [Num,Den]=estimate_tf(3,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+for i = 1:9
+    [Num,Den]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
     tfResult{i}.Num = Num;
     tfResult{i}.Den = Den;
+    A = [num2str(i),'th transfer function estimation complete'];
+    disp(A)
+end
+
+% Mix TF
+tfResult_mix = {};
+for i = 1:3
+    [Num,Den]=estimate_tf(3,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+    tfResult_mix{i}.Num = Num;
+    tfResult_mix{i}.Den = Den;
     A = [num2str(i),'th transfer function estimation complete'];
     disp(A)
 end
@@ -148,7 +156,7 @@ end
 %% Plotting
 
 if doplot == 1
-range = testStartFlag(n):testFinishFlag(n);
+range = testStartFlag(n):testFinishFlag(n)-1;
 
 figure(10)
 clf
@@ -218,16 +226,16 @@ end
 if mix>9
     mix = mix-9;
 end
-Cmd = cmdSet(testStartFlag(n):testFinishFlag(n),m);
-Response = responseSet(testStartFlag(n):testFinishFlag(n),m);
+Cmd = cmdSet(testStartFlag(n):testFinishFlag(n)-1,m);
+Response = responseSet(testStartFlag(n):testFinishFlag(n)-1,m);
 if mix ~= m
-    Response = responseSet(testStartFlag(n):testFinishFlag(n),mix);
+    Response = responseSet(testStartFlag(n):testFinishFlag(n)-1,mix);
 end
 Cmd = detrend(Cmd,0);
 Response = detrend(Response,0);
 
 timeseriesSet = iddata(Response,Cmd,0.02);
-sys = tfest(timeseriesSet,2,1);
+sys = tfest(timeseriesSet,2,2);
 Num = sys.Numerator;
 Den = sys.Denominator;
 end
