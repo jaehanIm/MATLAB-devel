@@ -76,8 +76,10 @@ axis equal
 figure(4)
 hold on
 clf
-x_data = detrend(data.rpy_0(range),0);
-y_data = detrend(data.rpy_1(range),0);
+% x_data = detrend(data.rpy_0(range),0);
+% y_data = detrend(data.rpy_1(range),0);
+x_data = data.rpy_0(range);
+y_data = data.rpy_1(range);
 mu_x = mean(x_data);
 mu_y = mean(y_data);
 std_x = std(x_data);

@@ -96,7 +96,7 @@ pos(:,3) = -pos(:,3);
 %     addpoints(an,d_x(i,7),d_y(i,7));
 %     addpoints(an,d_x(i,8),d_y(i,8));
 %     addpoints(pn,dp_x(i),dp_y(i));
-%     line = plot_arrow([pos(i,1),pos(i,2),0],[pos(i,1)+10*cos(yaw(i)),pos(i,2)+10*sin(yaw(i)),0]);
+    line = plot_arrow([pos(i,1),pos(i,2),0],[pos(i,1)+10*cos(yaw(i)),pos(i,2)+10*sin(yaw(i)),0]);
 %     [~,~,line_2] = draw_circle([pos(i,1),pos(i,2)],7,'k:');
 %     line_3 = plot([pos(i,1) dp_x(i)],[pos(i,2) dp_y(i)],'r:');
 %     txt1 = text(0,15,["time: " num2str(seconds(time(i)))]);

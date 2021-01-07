@@ -3,84 +3,81 @@
 % GD Log Data Analysis
 %
 % Lee, Byung-Yoon, NearthLab, 181022
-% Last modified date: 200226
+% Last modified date: 200803
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clear all;
-% close all; 
-% clc;
+close all; 
+clc;
 
 d2r = pi/180;
 r2d = 180/pi;
-idx = 2;
+
 % Initialization
 % File parameters
-% gdLogFile = '/home/jaehan/Desktop/test flight/0603FT/gdLog_200603_134152'; % 6-2 // 용대리 - TE quality 확인용 데이터
-% gdLogFile = '/home/jaehan/Desktop/test flight/0603FT/gdLog_200603_135902'; % 4-1 4-2
-
-
-
-logList = ["200611_111447","200611_113320","200611_125154","200611_131752"...
-    ,"200611_135228","200611_140139","200611_143043"];
-directory = '/home/jaehan/Desktop/test flight/';
-
-gdLogFile = directory+logList(idx)+'/gdLog_'+logList(idx);
-gdLogFile = convertStringsToChars(gdLogFile);
-
-% logList = ["152807","153315","153830","154615"];
-% gdLogFile = '/home/jaehan/log/200703_' + logList(idx) + '/gdLogCsv/gdLog_200703_' + logList(idx);
-
-gdLogFileName = gdLogFile + ".csv";
+gdLogFile = '/home/jaehan/log/201105_111716/gdLogCsv/gdLog_201105_111716.csv'; 
+% gdLogFile = '/home/jaehan/Desktop/test flight/gdLog_200702_133252.csv'; % 5-1
+% gdLogFile = '/home/jaehan/Desktop/test flight/gdLog_200702_123742.csv'; % 4-1
+gdLogImageFolder = '/home/jaehan/log/201105_111716/images';
+gdLogFileName = gdLogFile;
 gdLogFIleMat = gdLogFile + ".mat";
 
 % Time parameters
 % dt = 0.02;
-useMinuteFormat = true;
-useHourFormat = false;
-Logging_Type = 2;
+timeFormat = 1; % Time format (1: seconds, 2: minute, 3: date)
 
 % Select figures to show
 timeStepVer_show = false;
-attitudeResp_show = false;
-velocityRespWithEulerAngle_show = false;
-velocityRespWithGpsVel_show = false;
-positionResp_show = false;
+attitudeResp_show = true;
+velocityRespWithEulerAngle_show = true;
+velocityRespWithGpsVel_show = true;
+positionResp_show = true;
 errLat_show = false;
 bdLidar_show = false;
 acLidarH_show = false;
 acLidarV_show = false;
 windSensor_show = false;
+plot3dEstimatedBlade_show = false;
 plot3d_show = false;
-remoteController_show = false;
-missionTime_show = true;
+plot3dPosCmd_show = false;
+situationAnalysis3d_show = false;
+remoteController_show = true;
+gimbalAngle_show = false;
+bladeTravelDistance_show = false;
+missionTime_show = false;
 analEachJob_show = false;
+
 
 %%
 % Load Log Data
-if Logging_Type == 1
-    gdLog = importfile(gdLogFileName);
-elseif Logging_Type == 2
-    gdLog = importfile2(gdLogFileName);
-end
+gdLog = importfile(gdLogFileName);
 data = gdLog;
 timeValidIdx = max(find(gdLog.rosTime < 1514764800)); % 2018/01/01 == 1514764800
 data((1:timeValidIdx),:) = [];
 dataSize = size(data.rosTime);
-time = data.rosTime;
-time = time(:,1) - time(1,1);
-time = seconds(time);
-dateStart = datetime(data.rosTime(2),'ConvertFrom','posixtime','TimeZone','Asia/Tokyo');
-if(useMinuteFormat)
-    strTimeXtickFormat = 'mm:ss.SSS';
-else
-    strTimeXtickFormat = 'ss.SSS';
+
+fTimeGlobal = data.rosTime;
+fTimeGlobal_Date = datetime(data.rosTime,'ConvertFrom','posixtime','TimeZone','Asia/Tokyo');
+fTimeLocal = fTimeGlobal(:,1) - fTimeGlobal(1,1);
+fTimeLocal_Sec = seconds(fTimeLocal);
+
+time = fTimeLocal_Sec;
+timeSec = fTimeLocal_Sec;
+hourTime = fTimeGlobal_Date;
+dateStart = fTimeGlobal_Date(1);
+
+switch timeFormat % (1: seconds, 2: minute, 3: date)
+    case 1
+        strTimeXtickFormat = 's';
+    case 2
+        strTimeXtickFormat = 'mm:ss.SSS';
+    case 3
+        time = time + dateStart;
+        strTimeXtickFormat = 'HH:mm:ss';
+    otherwise
 end
 
-if(useHourFormat)
-    time = time + dateStart;
-    strTimeXtickFormat = 'HH:mm:ss';
-end
 flightMode = data.flightMode;
 ctrlDeviceStatus = data.ctrlDeviceStatus;
 fcMcMode = data.fcMcMode;
@@ -110,6 +107,10 @@ end
 velNavGps = zeros(size(velNedGps,1),3);
 for i=1:size(velNedGps,1)
     velNavGps(i,:)=dcmI2N(:,:,i)*velNedGps(i,:)';
+end
+posNav = zeros(size(posNed,1),3);
+for i = 1:size(posNed,1)
+    posNav(i,:) = dcmI2N(:,:,i)*posNed(i,:)';
 end
 ctrlStruct = data.ctrlStruct;
 ctrlSetpointType = data.ctrlSetpointType;
@@ -176,6 +177,18 @@ tempResponseTime = data.tempResponseTime;
 accBody(:,1) = data.accBody_0;
 accBody(:,2) = data.accBody_1;
 accBody(:,3) = data.accBody_2;
+trajUnitVectorT(:,1) = data.trajUnitVectorT_0;
+trajUnitVectorT(:,2) = data.trajUnitVectorT_1;
+trajUnitVectorT(:,3) = data.trajUnitVectorT_2;
+trajUnitVectorN(:,1) = data.trajUnitVectorN_0;
+trajUnitVectorN(:,2) = data.trajUnitVectorN_1;
+trajUnitVectorN(:,3) = data.trajUnitVectorN_2;
+trajUnitVectorB(:,1) = data.trajUnitVectorB_0;
+trajUnitVectorB(:,2) = data.trajUnitVectorB_1;
+trajUnitVectorB(:,3) = data.trajUnitVectorB_2;
+trajCmdTnb(:,1) = data.trajCtrlI_T;
+trajCmdTnb(:,2) = data.trajCtrlI_N;
+trajCmdTnb(:,3) = data.trajCtrlI_B;
 StdJobLongPidErr = data.StdJobLongPidErr;
 StdJobLongPidRate = data.StdJobLongPidRate;
 StdJobLongPidIgain = data.StdJobLongPidIgain;
@@ -194,6 +207,9 @@ velCmdNav(:,3) = data.velCmdNav_2;
 posCmdNed(:,1) = data.posCmdNed_0;
 posCmdNed(:,2) = data.posCmdNed_1;
 posCmdNed(:,3) = data.posCmdNed_2;
+trajTimeCur = data.trajTimeCur;
+trajTimeMax = data.trajTimeMax;
+bladeTravelDistance = data.bladeTravelDistance;
 
 sTime = min(time);
 eTime = max(time);
@@ -210,7 +226,7 @@ if timeStepVer_show
     timeStepMin = min(timeStep);
 
     figure(1);
-    set(gcf, 'Position', [100, -50, 800, 800]);
+    set(gcf, 'Position', [100, -20, 800, 800]);
     subFigTime(1) = subplot(2,1,1);
     hEdges = 0:0.001:0.14;
     histogram(timeStep, hEdges, 'Normalization', 'probability'); 
@@ -226,16 +242,16 @@ if timeStepVer_show
     
     subFigTime(2) = subplot(2,1,2);
     plot(time(1:end-1,1), seconds(diff(time))); ylim([0 0.1]);
+    xtickformat(strTimeXtickFormat);
     legend("dt");
     grid on;
-    xtickformat(strTimeXtickFormat);
 end
 
 %%
 % Attitude Responses
 if attitudeResp_show
     figure(2); 
-    set(gcf, 'Position', [100, -50, 800, 800]);
+    set(gcf, 'Position', [100, -20, 800, 800]);
     suptitle("Attitude Responses");
     
     subFigAtt(1) = subplot(4,1,1);
@@ -259,7 +275,7 @@ if attitudeResp_show
 
     subFigAtt(3) = subplot(4,1,3);
     plot(time, rpdCmd(:,2), ':r', 'LineWidth', 1.5); hold on;
-    plot(time, rpy(:,2), '-k', 'LineWidth', 1.2); 
+    plot(time, rpy(:,2), '-k', 'LineWidth', 1.2);
     xtickformat(strTimeXtickFormat);
     ylim([-20 20]);
     legend("Pitch Cmd","Pitch Angle");
@@ -284,7 +300,7 @@ end
 % Velocity Command Responses with Euler Angle (Navigation frame)
 if velocityRespWithEulerAngle_show
     figure(3);
-    set(gcf, 'Position', [100, -50, 800, 800]);
+    set(gcf, 'Position', [100, -20, 800, 800]);
     suptitle("Velocity Command Responses with Euler Angle Command");
     
     subFigVelCmd(1) = subplot(3,1,1);
@@ -327,7 +343,7 @@ end
 % Velocity Command Responses with GPS Velocity (Navigation frame)
 if velocityRespWithGpsVel_show
     figure(4);
-    set(gcf, 'Position', [100, -50, 800, 800]);
+    set(gcf, 'Position', [100, -20, 800, 800]);
     suptitle("Velocity Command Responses with GPS Velocity");
 
     subFigVel(1) = subplot(4,1,1);
@@ -378,18 +394,20 @@ end
 % Position Responses
 if positionResp_show
     figure(5);
-    set(gcf, 'Position', [100, -50, 800, 800]);
+    set(gcf, 'Position', [100, -20, 800, 800]);
     suptitle("Position Responses");
     
     subFigPos(1) = subplot(4,1,1);
     plot(time, jobSeq, '-k', 'LineWidth', 1.5); hold on; 
     plot(time, fcMcMode, '--b', 'LineWidth', 1.5); hold on;
     plot(time, ctrlSetpointType, '-.r', 'LineWidth', 1.5); hold on;
-    plot(time, ctrlUser, '-.g', 'LineWidth', 1.2);
-    plot(time, flightMode, ':m', 'LineWidth', 1.5);
+%     plot(time, ctrlUser, '-.g', 'LineWidth', 1.2);
+%     plot(time, flightMode, ':m', 'LineWidth', 1.5);
+    plot(time, nSat, '-.g', 'LineWidth', 1.2);
+    plot(time, gpsFix, ':m', 'LineWidth', 1.5);
     xtickformat(strTimeXtickFormat);
     ylim([0 22]);
-    legend("jobSeq","fcMcMode","ctrlSetpointType", "ctrlUser", "flightMode");
+    legend("jobSeq","fcMcMode","ctrlSetpointType", "nSat", "gpsFix");
     ylabel("Index");
     grid on;
 
@@ -431,7 +449,7 @@ end
 % errLat Responses
 if errLat_show
     figure(6);
-    set(gcf, 'Position', [100, -50, 800, 800]);
+    set(gcf, 'Position', [100, -20, 800, 800]);
     suptitle("errLat Responses");
     
     subFigErrLat(1) = subplot(3,1,1);
@@ -450,7 +468,7 @@ if errLat_show
     plot(time, errLatLid, '--b', 'LineWidth', 1.5); hold on;
     plot(time, errLatMix, '-k', 'LineWidth', 1.2); 
     xtickformat(strTimeXtickFormat);
-    ylim([-inf inf]);
+    ylim([-1.5 1.5]);
     legend("errLatVis", "errLatLid", "errLatMix");
     ylabel("errLat");
     grid on;
@@ -459,7 +477,7 @@ if errLat_show
     plot(time, cmdLatVelIgain, '--r', 'LineWidth', 1.5); hold on;
     plot(time, cmdLatVelMix, '--b', 'LineWidth', 1.5); hold on;
     xtickformat(strTimeXtickFormat);
-    ylim([-inf inf]);
+    ylim([-1.5 1.5]);
     legend("cmdLatVelIgain", "cmdLatVelMix");
     ylabel("cmdLatVel");
     grid on;
@@ -471,7 +489,7 @@ end
 % BD Lidar
 if bdLidar_show
     figure(7);
-    set(gcf, 'Position', [100, -50, 800, 800]);
+    set(gcf, 'Position', [100, -20, 800, 800]);
     suptitle("BD Lidar Information");
 
     subFigLid(1) = subplot(2,1,1);
@@ -495,7 +513,7 @@ end
 % AC Hor Lidar
 if acLidarH_show
     figure(8);
-    set(gcf, 'Position', [100, -50, 800, 800]);
+    set(gcf, 'Position', [100, -20, 800, 800]);
     suptitle("AC Hor Lidar Information");
 
     subFigAcHorLid(1) = subplot(2,1,1);
@@ -522,7 +540,7 @@ end
 % AC Ver Lidar
 if acLidarV_show
     figure(9);
-    set(gcf, 'Position', [100, -50, 800, 800]);
+    set(gcf, 'Position', [100, -20, 800, 800]);
     suptitle("AC Ver Lidar Information");
 
     subFigAcVerLid(1) = subplot(2,1,1);
@@ -571,7 +589,7 @@ if windSensor_show
     plot(time, windAngle);
     xtickformat(strTimeXtickFormat);
     xlabel("time (sec)");
-    ylabel("Wind Angle (¢®¨¡)");
+    ylabel("Wind Angle (��)");
     grid on;   
     
     subFigTemp = subplot(4,1,3);
@@ -579,7 +597,7 @@ if windSensor_show
     plot(time, acousticTemp);
     xtickformat(strTimeXtickFormat);
     xlabel("time (sec)");
-    ylabel("Wind Temperature (¢®¨¡C)");
+    ylabel("Wind Temperature (��C)");
     grid on;
 
     subFigTime = subplot(4,1,4);
@@ -634,13 +652,6 @@ if windSensor_show
     
     windVelTrue = windVelFrame - droneBodyVel_ProjSensorPlane + armLength .* pqr;
     windSpeedTrue = sqrt(windVelTrue(:,1).^2 + windVelTrue(:,2).^2 + windVelTrue(:,3).^2);
-    
-    for i = 1: arraySize
-        unsignedWindAngle(i) = acos(dot(windSensorNorth(i,:), windVelTrue(i,:)/norm(windVelTrue(i,:))));
-        sgn(i,:) = sign(cross(windSensorNorth(i,:), windVelTrue(i,:)));
-        windAngleTrue(i) = mod(unsignedWindAngle(i) * (-1)^(sgn(i,3)<0), 2*pi);
-    end
-    
     minWind = min(windSpeedTrue)
     maxWind = max(windSpeedTrue)
     meanWind = mean(windSpeedTrue)
@@ -665,7 +676,7 @@ if windSensor_show
     xtickformat(strTimeXtickFormat);
     legend("Wind Angle True", "Wind Angle Sensor");
     xlabel("time (sec)");
-    ylabel("Wind Angle True(¢®¨¡)");
+    ylabel("Wind Angle True(��)");
     grid on;  
     
     subFigVelUVW = subplot(4,1,3);
@@ -683,7 +694,7 @@ if windSensor_show
     xtickformat(strTimeXtickFormat);
     legend("P", "Q", "R")
     xlabel("time (sec)");
-    ylabel("PQR(¢®¨¡/s)");
+    ylabel("PQR(��/s)");
     grid on; 
     
     linkaxes([subFigTrueSpeedADS, subFigTrueAngleADS, subFigVelUVW, subFigPQR], 'x');
@@ -691,15 +702,23 @@ end
 
 %% 
 % 3d plot with estimated blade
-if plot3d_show
+if plot3dEstimatedBlade_show
     figure(13);
-    set(gcf, 'Position', [100, -50, 800, 800]);
+    set(gcf, 'Position', [100, -20, 800, 800]);
     suptitle("3d Plot with Estimated Blade");
 
+    % for all time
 %     sTimeIdx = 1;
 %     eTimeIdx = size(time,1);
+
+    % for mission time
     sTimeIdx = min(find(jobSeq==1));
     eTimeIdx = min(find( (jobSeq==max(jobSeq)) & (fcMcMode==0) ));
+
+    % for specific job
+%     sTimeIdx = min(find(jobSeq==2));
+%     eTimeIdx = max(find(jobSeq==2));
+    
     durTimeIdx = [sTimeIdx:eTimeIdx];
 
     estimatedBladePosNed = zeros(size(posNed,1), 3);
@@ -716,20 +735,20 @@ if plot3d_show
         end
     end
 
-    plot3(estimatedBladePosNed([sTimeIdx:eTimeIdx],1), estimatedBladePosNed([sTimeIdx:eTimeIdx],2), -estimatedBladePosNed([sTimeIdx:eTimeIdx],3), 'r.', 'LineWidth', 1.0); grid on; hold on;
+    plot3(estimatedBladePosNed([sTimeIdx:eTimeIdx],1), estimatedBladePosNed([sTimeIdx:eTimeIdx],2), -estimatedBladePosNed([sTimeIdx:eTimeIdx],3), 'b.', 'LineWidth', 1.0); grid on; hold on;
     plot3(posNed([sTimeIdx:eTimeIdx],1), posNed([sTimeIdx:eTimeIdx],2), -posNed([sTimeIdx:eTimeIdx],3), '-k', 'LineWidth', 1.5); grid on; hold on;
 
     % GP
 %     posGP_ned = lla2flat(posGP, [posGP(1,1), posGP(2,2)], 0, -posGP(3,3), 'WGS84');
-    % plot3(posGP_ned([sTimeIdx:eTimeIdx],1), posGP_ned([sTimeIdx:eTimeIdx],2), -posGP_ned([sTimeIdx:eTimeIdx],3), 'r-'); grid on; hold on;
+%     plot3(posGP_ned([sTimeIdx:eTimeIdx],1), posGP_ned([sTimeIdx:eTimeIdx],2), -posGP_ned([sTimeIdx:eTimeIdx],3), 'r-'); grid on; hold on;
 
     % GPS raw
 %     posGPS_ned = lla2flat(posGPS, [posGPS(1,1), posGPS(2,2)], 0, -posGPS(3,3), 'WGS84');
-    % plot3(posGPS_ned([sTimeIdx:eTimeIdx],1), posGPS_ned([sTimeIdx:eTimeIdx],2), -posGPS_ned([sTimeIdx:eTimeIdx],3), 'g-'); grid on; hold on;
+%     plot3(posGPS_ned([sTimeIdx:eTimeIdx],1), posGPS_ned([sTimeIdx:eTimeIdx],2), -posGPS_ned([sTimeIdx:eTimeIdx],3), 'g-'); grid on; hold on;
 
     % RTK raw
 %     posRTK_ned = lla2flat(posRTK, [posRTK(1,1), posRTK(2,2)], 0, -posRTK(3,3), 'WGS84');
-    % plot3(posRTK_ned([sTimeIdx:eTimeIdx],1), posRTK_ned([sTimeIdx:eTimeIdx],2), -posRTK_ned([sTimeIdx:eTimeIdx],3), 'b-'); grid on; hold on;
+%     plot3(posRTK_ned([sTimeIdx:eTimeIdx],1), posRTK_ned([sTimeIdx:eTimeIdx],2), -posRTK_ned([sTimeIdx:eTimeIdx],3), 'b-'); grid on; hold on;
     
     xlabel("Position(N)");
     ylabel("Position(E)");
@@ -739,11 +758,143 @@ if plot3d_show
     legend('estimated blade','vehicle position');
 end
 
+
+%% 
+% 3d plot with position command for trajectory following
+if plot3dPosCmd_show
+    figure(14);
+    set(gcf, 'Position', [100, -20, 800, 800]);
+    suptitle("3d Plot with Position Command");
+
+    % for all time
+%     sTimeIdx = 1;
+%     eTimeIdx = size(time,1);
+
+    % for mission time
+%     sTimeIdx = min(find(jobSeq==1));
+%     eTimeIdx = min(find( (jobSeq==max(jobSeq)) & (fcMcMode==0) ));
+
+    % for specific job
+    sTimeIdx = min(find( (jobSeq==8) & (ctrlSetpointType==10) ));
+    eTimeIdx = max(find( (jobSeq==8) & (ctrlSetpointType==10) ));
+    durTimeIdx = [sTimeIdx:eTimeIdx];
+    
+    estimatedBladePosNed = zeros(size(posNed,1), 3);
+
+    for i=1:size(bdLidarDist)
+        if(bdLidarDist(i,1) > 0)
+            bladeRelPosB = [bdLidarDist(i,1); 0; 0];
+            lidarRelDcmI2B = angle2dcm((rpy(i,3)*d2r + bdLidarAngle(i,1)*d2r), 0, 0, 'ZYX');
+            lidarRelDcmB2I = lidarRelDcmI2B';
+            bladeRelPosI = lidarRelDcmB2I*bladeRelPosB;
+            estimatedBladePosNed(i,:) = posNed(i,:)' + bladeRelPosI;
+        else
+            estimatedBladePosNed(i,:) = [0, 0, 0];
+        end
+    end
+
+%     plot3(estimatedBladePosNed(durTimeIdx,1), estimatedBladePosNed(durTimeIdx,2), -estimatedBladePosNed(durTimeIdx,3), 'b.', 'LineWidth', 1.0); grid on; hold on;
+    plot3(posCmdNed(durTimeIdx,1), posCmdNed(durTimeIdx,2), -posCmdNed(durTimeIdx,3), '-r', 'LineWidth', 1.0); grid on; hold on;
+    plot3(posNed(durTimeIdx,1), posNed(durTimeIdx,2), -posNed(durTimeIdx,3), '-k', 'LineWidth', 1.5); grid on; hold on;
+
+    xlabel("Position(N)");
+    ylabel("Position(E)");
+    zlabel("Position(Alt)");
+    axis ij;
+    axis equal;
+    legend('posCmd','vehicle position');
+    
+    % trajectory following performance analysis
+    posErrNed = posCmdNed(durTimeIdx,:) - posNed(durTimeIdx,:);
+    posDotT = dot(posErrNed, trajUnitVectorT((durTimeIdx),:),2)';
+    posDotN = dot(posErrNed, trajUnitVectorN((durTimeIdx),:),2)';
+    posDotB = dot(posErrNed, trajUnitVectorB((durTimeIdx),:),2)';
+    posDotTNB = [posDotT; posDotN; posDotB];
+    posDotTNBMean = mean(posDotTNB,2)
+    posDotTNBStdDev = std(posDotTNB,0,2)
+    posDotTNBMax = max(abs(posDotTNB(:,:)),[],2)
+    
+    figure(25);
+    plot(time, trajTimeCur); hold on; 
+    plot(time, trajTimeMax); grid on;
+    legend('trajTimeCur','trajTimeMax')
+end
+
+
+%%
+% Situation analysis in 3D
+if situationAnalysis3d_show
+    
+    % find map for flight time index to payload image index
+    plImageList = dir(gdLogImageFolder + "/*.jpg");
+    plJsonList = dir(gdLogImageFolder + "/*.json");
+    hourTimeHHmmssSS = hourTime;
+    hourTimeHHmmssSS.Format = 'HHmmssSS';
+    timeIdx2PlImageIdx = zeros(size(hourTimeHHmmssSS,1), 1);
+    hourTimeFeature = str2double(string(hourTimeHHmmssSS));
+    
+    for i=1:size(plImageList,1)
+        imageListNameStruct = split(plImageList(i).name, '.');
+        imageListName(i) = string(imageListNameStruct{1});
+        imageListNameStruct = split(imageListName(i), '_');
+        imageListFeature(i,1) = str2double(imageListNameStruct(2)+imageListNameStruct{3}(1:2));
+    end
+    
+    for i=1:size(timeIdx2PlImageIdx,1)
+        [res, idx] = min(abs(hourTimeFeature(i) - imageListFeature));
+        timeIdx2PlImageIdx(i) = idx;
+    end
+    
+    % draw base figures
+    sa3d_fig = figure(15);
+    set(sa3d_fig, 'Position', [100, 50, 1200, 700]);
+    axis3dplot = axes('Parent', sa3d_fig, 'position', [0.05, 0.2, 0.5, 0.75]);
+    hold(axis3dplot, 'on');
+    axisImage = axes('Parent', sa3d_fig, 'position', [0.6, 0.55, 0.35, 0.4]);
+
+    % allocate GUIs
+    sa3d_slider = uicontrol('Parent', sa3d_fig, 'Style', 'slider', 'Position', [80,50,1000,20], ...
+                  'value', 1, 'min', 1, 'max', size(timeSec, 1), ...
+                  'SliderStep', [1/size(timeSec,1), 10/size(timeSec,1)] );
+    sa3d_bgcolor = sa3d_fig.Color;
+    sa3d_text1 = uicontrol('Parent', sa3d_fig, 'Style', 'text', 'Position', [45,43,30,25], ...
+                    'String', string(min(timeSec)),'BackgroundColor', sa3d_bgcolor);
+    sa3d_text2 = uicontrol('Parent', sa3d_fig, 'Style', 'text', 'Position', [1080,43,70,25], ...
+                    'String', string(max(timeSec)),'BackgroundColor', sa3d_bgcolor);
+    sa3d_text3 = uicontrol('Parent', sa3d_fig, 'Style', 'text', 'Position', [550,25,100,25], ...
+                    'String', '0.000', 'BackgroundColor', sa3d_bgcolor);
+
+    % prepare data
+    sa3dAxisHandle.plot3d = axis3dplot;
+    sa3dAxisHandle.image = axisImage;
+    sa3dGuiObject.textTime = sa3d_text3;
+    sa3dData.folderName = gdLogImageFolder;
+    sa3dData.time = time;
+    sa3dData.fTimeLocal_Sec = fTimeLocal_Sec;
+    sa3dData.vPosNed = posNed;
+    sa3dData.vRpy = rpy;
+    sa3dData.bdLidarDist = bdLidarDist;
+    sa3dData.bdLidarAngle = bdLidarAngle;
+    sa3dData.gimbalRpy = gimbalRPY;
+    sa3dData.posCmdNed = posCmdNed;
+    sa3dData.timeIdx2PlImageIdx = timeIdx2PlImageIdx;
+    sa3dData.plImageList = plImageList;
+    sa3dData.trajUvT = trajUnitVectorT;
+    sa3dData.trajUvN = trajUnitVectorN;
+    sa3dData.trajUvB = trajUnitVectorB;
+    sa3dData.trajCmdTnb = trajCmdTnb;
+    sa3dData.timeFormat = timeFormat;
+    sa3dData.plJsonList = plJsonList;
+    
+    sa3d_slider.Callback = {@situationAnalysis3d, sa3dAxisHandle, sa3dGuiObject, sa3dData};
+end
+
+
 %%
 % Remote Controller Input
 if remoteController_show
-    figure(14); 
-    set(gcf, 'Position', [100, -50, 800, 800]);
+    figure(16); 
+    set(gcf, 'Position', [100, -20, 800, 800]);
     suptitle("Remote controller input");
     
     subFigRc(1) = subplot(5,1,1);
@@ -788,6 +939,67 @@ if remoteController_show
     xlim([sTime eTime]);
 end
 
+%%
+% Gimbal Angle
+if gimbalAngle_show
+    figure(17); 
+    set(gcf, 'Position', [100, -20, 800, 800]);
+    suptitle("Gimbal angle response");
+    
+    subFigGimbal(1) = subplot(4,1,1);
+    plot(time, jobSeq, '-k', 'LineWidth', 1.5); hold on; 
+    plot(time, fcMcMode, '--b', 'LineWidth', 1.5); hold on;
+    plot(time, ctrlSetpointType, '-.r', 'LineWidth', 1.5);
+    xtickformat(strTimeXtickFormat);
+    ylim([0 22]);
+    legend("jobSeq","fcMcMode","ctrlSetpointType");
+    ylabel("Index");
+    grid on;
+
+    subFigGimbal(2) = subplot(4,1,2);
+    plot(time, gimbalRPY(:,1), '-k', 'LineWidth', 1.2);
+    xtickformat(strTimeXtickFormat);
+    legend("gimbal roll");
+    ylabel("gimbal roll (deg)");
+    grid on;
+
+    subFigGimbal(3) = subplot(4,1,3);
+    plot(time, gimbalRPY(:,2), '-k', 'LineWidth', 1.2);
+    xtickformat(strTimeXtickFormat);
+    legend("gimbal pitch");
+    ylabel("gimbal pitch (deg)");
+    grid on;
+
+    subFigGimbal(4) = subplot(4,1,4);
+    plot(time, gimbalRPY(:,3), '-k', 'LineWidth', 1.2);
+    xtickformat(strTimeXtickFormat);
+    legend("gimbal yaw");
+    ylabel("gimbal yaw (deg)");
+    grid on;
+
+    linkaxes([subFigGimbal(1), subFigGimbal(2), subFigGimbal(3), subFigGimbal(4)], 'x');
+    xlim([sTime eTime]);
+end
+
+%%
+% bladeTravelDistance
+if bladeTravelDistance_show
+    figure(18); 
+    set(gcf, 'Position', [100, -20, 800, 800]);
+    suptitle("Blade Travel Distance");
+    
+    subFigGimbal(1) = subplot(1,1,1);
+    plot(time, bladeTravelDistance, '-k', 'LineWidth', 1.5); hold on; 
+%     plot(time, fcMcMode, '--b', 'LineWidth', 1.5); hold on;
+%     plot(time, ctrlSetpointType, '-.r', 'LineWidth', 1.5);
+    xtickformat(strTimeXtickFormat);
+%     ylim([0 22]);
+    legend("bladeTravelDistance");
+    ylabel("Distance");
+    grid on;
+    xlim([sTime eTime]);
+end
+
 %% Mission Time Analysis
 if missionTime_show
     
@@ -799,17 +1011,17 @@ if missionTime_show
 %     JobSeqArr = [1, 4, 6, 9, 10]; % Blade inspection job for 4-1 side mission
 %     JobSeqArr = [1, 4, 6, 9, 10]; % Blade inspection job for 4-2 side mission
 
-    TotalJob = (1:16); % Total job for 6_1 pitch mission
+%     TotalJob = (1:16); % Total job for 6_1 pitch mission
 %     TotalJob = (1:17); % Total job for 6_2 pitch, 6_1 no pitch mission
-%     TotalJob = (1:20); % Total job for 6_2 no pitch mission
+    TotalJob = (1:20); % Total job for 6_2 no pitch mission
 
 %   6_1 no pitch
-    JobSeqArr = [1, 4, 6, 9, 14, 17];  % Blade inspection job for 6_1 no pitch mission
-    CamTranSeqArr = [5, 10, 13]; % Cam Transition job for 6_1 no pitch mission
+%     JobSeqArr = [1, 4, 6, 9, 14, 17];  % Blade inspection job for 6_1 no pitch mission
+%     CamTranSeqArr = [5, 10, 13]; % Cam Transition job for 6_1 no pitch mission
 
 %   6_2 no pitch
-%     JobSeqArr = [1, 5, 10, 14, 16 ,19];  % Blade inspection job for 6_2 no pitch mission
-%     CamTranSeqArr = [6, 9, 15]; % Cam Transition job for 6_2 no pitch mission
+    JobSeqArr = [1, 5, 10, 14, 16 ,19];  % Blade inspection job for 6_2 no pitch mission
+    CamTranSeqArr = [6, 9, 15]; % Cam Transition job for 6_2 no pitch mission
 
 %   6_1 / 6_2 pitch
 %     JobSeqArr = [1, 4, 6, 10, 12, 15];  % Blade inspection job for 6_1 / 6_2 pitch mission
@@ -864,7 +1076,7 @@ if missionTime_show
     
 end
 
-%%
+%% 
 % Analysis for each blade inspection job for 5-1, 5-2 missions
 if analEachJob_show
     
@@ -892,7 +1104,7 @@ if analEachJob_show
         errVelNav = velNav(durIdx,:) - velCmdNav(durIdx,:);
         rmse_errVelNav(:,:,i) = sqrt(mean(errVelNav.^2));
 
-        figure; set(gcf, 'Position', [100, -50, 800, 800]);
+        figure; set(gcf, 'Position', [100, -20, 800, 800]);
         supTitle_array = "Velocity Responses (UVW) for Job # " + JobSeqArr(i);
         suptitle(supTitle_array);
 
@@ -933,5 +1145,4 @@ if analEachJob_show
     rmse_errVelNav
     
 end
-
 

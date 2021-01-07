@@ -1,4 +1,4 @@
-function [x,y,h] = draw_circle3(varargin)
+function [x,y,z,h] = draw_circle3(varargin)
 % function plotting a circle in your figure
 % ** the code does not contain 'hold on' script **
 % position is 2x1 vector, r is radius, var contains plot information

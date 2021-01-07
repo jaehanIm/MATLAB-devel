@@ -3,18 +3,23 @@
 % gdLog = '/home/jaehan/Desktop/test flight/gdLogCsv/gdLog_200414_113807.csv'; % 용대뤼
 % gdLog = '/home/jaehan/Desktop/test flight/gyeongju/gdLog_200121_094823.csv'; % 경주 data
 % gdLog = '/home/jaehan/Desktop/test flight/gdLog_200520_153847.csv';
-gdLog = '/home/jaehan/Desktop/test flight/200715_154607/gdLog_200715_154607.csv';
+% gdLog = '/home/jaehan/Desktop/test flight/200715_154607/gdLog_200715_154607.csv';
 % [time, out, acc, gimbal] = logReader(gdLog);
 
+% temporary files
+gdLog = '/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/201013_105028/gdLog_201013_105028.csv';
+
+[data,time] = loader(gdLog);
 
 % sample = [4600 8440]; % 1st lidar
-sample = [8440 9678]; % 1st hold
+% sample = [8440 9678]; % 1st hold
 % sample = [9678 13170]; % 2nd lidar
 % sample = [14190 19340]; % 3rd zlidar
-% sample = [10000 15200];
+sample = [19530 20610]; % temporary
+
 T = time(sample(1):sample(2));
 % X = zeromean(acc(sample(1):sample(2),2));
-X = zeromean(data.LidarDist(sample(1):sample(2)));
+X = zeromean(data.gimbalRPY_2(sample(1):sample(2)));
 % X = zeromean([0;diff(data.rpy_0(sample(1):sample(2)))]);
 % X = zeromean(rot_data(1,sample(1):sample(2)))';
 L = length(X);

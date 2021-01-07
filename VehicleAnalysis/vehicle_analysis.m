@@ -1,4 +1,6 @@
 loadSkip = 0;
+fd = 0;
+addpath('/home/jaehan/Desktop/MATLAB devel');
 % 0904 flight test
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_141145/gdLog_200904_141145.csv";
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_142605/gdLog_200904_142605.csv";
@@ -16,8 +18,8 @@ loadSkip = 0;
 % gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201012_105630.csv"; % prop max
 
 % 1013 flight test
-gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/201013_104036/gdLog_201013_104036.csv"; % KH Step
-% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/201013_105028/gdLog_201013_105028.csv"; % KH Sweep
+% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/201013_104036/gdLog_201013_104036.csv"; % KH Step
+gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/201013_105028/gdLog_201013_105028.csv"; fd = 1; % KH Sweep
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/Default_Gain/gdLog_201013_114813.csv"; 
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/Prop_Gain_def_trimmed"; loadSkip = 1;
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/Advanced_Gain_90_100/gdLog_201013_120027.csv";
@@ -107,45 +109,48 @@ gimbaldev = sqrt(data.gimbalRPY_0.^2 + data.gimbalRPY_1.^2 + data.gimbalRPY_2.^2
 % 4-1: 2 / 4-2: 3 / 4-3: 4 / 5-1: 0 / 5-2: 1 / 6-1: 8 / 6-2: ?
 
 % 1개씩 테스트할 때 쓰기.
-% doplot = 1;
-% n = 3;
-% m = n;
-% if m > 9
-%     m = m-9;
-% end
-% Cmd = cmdSet(testStartFlag(n):testFinishFlag(n)-1,m);
-% time = data_time(testStartFlag(n):testFinishFlag(n)-1);
-% response = responseSet(testStartFlag(n):testFinishFlag(n)-1,m);
+doplot = 1;
+n = 10;
+m = n;
+if m > 9
+    m = m-9;
+end
+Cmd = cmdSet(testStartFlag(n):testFinishFlag(n)-1,m);
+time = data_time(testStartFlag(n):testFinishFlag(n)-1);
+response = responseSet(testStartFlag(n):testFinishFlag(n)-1,m);
 
 % Basic TF - All
 % tfResult = {};
 % for i = 1:18
-%     [Num,Den]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+%     [Num,Den,delay]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
 %     tfResult{i}.Num = Num;
 %     tfResult{i}.Den = Den;
+%     tfResult{i}.Delay = delay;
 %     A = [num2str(i),'th transfer function estimation complete'];
 %     disp(A)
 % end
 
 % Basic TF - Step only
-tfResult = {};
-for i = 1:9
-    [Num,Den]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
-    tfResult{i}.Num = Num;
-    tfResult{i}.Den = Den;
-    A = [num2str(i),'th transfer function estimation complete'];
-    disp(A)
-end
+% tfResult = {};
+% for i = 1:9
+%     [Num,Den,delay]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+%     tfResult{i}.Num = Num;
+%     tfResult{i}.Den = Den;
+%     tfResult{i}.Delay = delay;
+%     A = [num2str(i),'th transfer function estimation complete'];
+%     disp(A)
+% end
 
 % Mix TF
-tfResult_mix = {};
-for i = 1:3
-    [Num,Den]=estimate_tf(3,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
-    tfResult_mix{i}.Num = Num;
-    tfResult_mix{i}.Den = Den;
-    A = [num2str(i),'th transfer function estimation complete'];
-    disp(A)
-end
+% tfResult_mix = {};
+% for i = 1:3
+%     [Num,Den,delay]=estimate_tf(3,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+%     tfResult_mix{i}.Num = Num;
+%     tfResult_mix{i}.Den = Den;
+%     tfResult_mix{i}.Delay = delay;
+%     A = [num2str(i),'th transfer function estimation complete'];
+%     disp(A)
+% end
 
 %% Sweep signal
 % res = c2*(wmax-wmin)*T/c1;
@@ -172,15 +177,15 @@ title('angle')
 legend('r','p','y')
 
 figure(11)
-clf
+% clf
 hold on
 grid on
-plot(time,velUvw_0(range),'k')
-plot(time,velUvw_1(range),'b')
-plot(time,-velUvw_2(range),'r')
-plot(time,velUvwCmd_0(range),'k:')
-plot(time,velUvwCmd_1(range),'b:')
-plot(time,-velUvwCmd_2(range),'r:')
+plot(time-time(1),velUvw_0(range),'k')
+plot(time-time(1),velUvw_1(range),'b')
+plot(time-time(1),-velUvw_2(range),'r')
+plot(time-time(1),velUvwCmd_0(range),'k:')
+plot(time-time(1),velUvwCmd_1(range),'b:')
+plot(time-time(1),-velUvwCmd_2(range),'r:')
 title('vel')
 legend('u','v','w')
 
@@ -218,7 +223,7 @@ plot(time,data.rpy_2(range))
 end
 
 %% function
-function [Num, Den] = estimate_tf(n,mix,responseSet,cmdSet,testStartFlag,testFinishFlag)
+function [Num, Den, delay] = estimate_tf(n,mix,responseSet,cmdSet,testStartFlag,testFinishFlag)
 m = n;
 if n>9
     m = n-9;
@@ -235,7 +240,8 @@ Cmd = detrend(Cmd,0);
 Response = detrend(Response,0);
 
 timeseriesSet = iddata(Response,Cmd,0.02);
-sys = tfest(timeseriesSet,2,2);
+sys = tfest(timeseriesSet,2,1,nan);
 Num = sys.Numerator;
 Den = sys.Denominator;
+delay = sys.IODelay;
 end
