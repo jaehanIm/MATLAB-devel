@@ -1,11 +1,14 @@
 clear all
 % close all
+d2r = pi/180;
+shootDistance = 25;
 
-path = '/home/jaehan/log/sample6_pitch90_blade0 whole_vertexaddition update/spdlog_210106_165604.txt';
-% gdpath = '/home/jaehan/log/210106_120246/gdLogCsv/gdLog_210106_120246.csv';
+
+path = '/home/jaehan/Downloads/spdlog_210209_104316.txt';
+gdpath = '/home/jaehan/Downloads/gdLog_210209_104316.csv';
 
 fileID = fopen(path);
-% [ftdata,time] = loader(gdpath);
+[ftdata,time] = loader(gdpath);
 
 n = 1;
 while ~feof(fileID)
@@ -13,8 +16,33 @@ while ~feof(fileID)
     n = n+1;
 end
 
-d2r = pi/180;
-dcmI2ShootSurface = angle2dcm(0,0,0,'zyx');
+gimbalrpy_0 = ftdata.gimbalRPYCmd_0*d2r;
+gimbalrpy_1 = ftdata.gimbalRPYCmd_1*d2r;
+gimbalrpy_2 = ftdata.gimbalRPYCmd_2*d2r;
+rpyCmd_2 = ftdata.ySp*d2r;
+posNed_0 = ftdata.posCmdNed_0;
+posNed_1 = ftdata.posCmdNed_1;
+posNed_2 = ftdata.posCmdNed_2;
+posNed = [posNed_0,posNed_1,posNed_2]';
+
+% extract interest point
+isInterest = gimbalrpy_1 == 0;
+gimbalrpy_0(isInterest) = [];
+gimbalrpy_1(isInterest) = [];
+gimbalrpy_2(isInterest) = [];
+rpyCmd_2(isInterest) = [];
+posNed_0(isInterest) = [];
+posNed_1(isInterest) = [];
+posNed_2(isInterest) = [];
+ftsize = size(posNed_0,1);
+
+posNed = [posNed_0,posNed_1,posNed_2]';
+
+dcmI2ShootSurface = angle2dcm(0,0,0,'zyx'); % #0 LE
+% dcmI2ShootSurface_2 = angle2dcm(-pi/2,-60*d2r,0,'zyx'); % #0 SS
+dcmI2ShootSurface_2 = dcmI2ShootSurface;
+dcmI2Gimbal = angle2dcm(gimbalrpy_2,gimbalrpy_0,gimbalrpy_1,'zxy');
+dcmI2Nav = angle2dcm(zeros(ftsize,1),zeros(ftsize,1),rpyCmd_2,'xyz');
 
 maxvertexN = [];
 maxvertexE = [];
@@ -26,6 +54,14 @@ gridPosImageFrame = [];
 gridPosNED = [];
 addedVertexImageFrame = [];
 rejectedGrid = [];
+
+gimbalCommandTime = [];
+gridAssignTime = [];
+shootWorthyTime = [];
+totalGridAssignTime = [];
+initShootGridExec = [];
+
+verifyGimbal = [];
 
 for i = 1:size(data,2)
     % find where it is
@@ -44,27 +80,46 @@ for i = 1:size(data,2)
     is_rejectedGrid = strfind(data{i},'[Hopping_verify] Rejected Grid');
     is_gridSize = strfind(data{i},'[Hopping_verify] Grid size');
     
+    is_gimbalCommandTime = strfind(data{i},'[Hopping_verify] Calculate gimbal commande');
+    is_gridAssignTime = strfind(data{i}, '[Hopping_verify] Single grid assignment time');
+    is_shootWorthyTime = strfind(data{i}, '[Hopping_verify] IsSHootWorthy');
+    is_totalGridAssignTime = strfind(data{i}, '[Hopping_verify] total assign time');
+    is_initShootGridExec = strfind(data{i}, '[Hopping_verify] Init Shoot Grid duration');
+
+    is_verifyGimbal = strfind(data{i},'[Hopping_verify] [');
+    
     % extract information
+    if ~isempty(is_verifyGimbal)
+        verifyGimbal = vertcat(verifyGimbal,str2num(data{i}(is_verifyGimbal + 17:end)));
+    end
+    
     if ~isempty(is_maxvertexN)
         maxvertexN = horzcat(maxvertexN,str2num(data{i}(is_maxvertexN + 31:end)));
+        maxvertexN(end-9:end)=[];
     end
     if ~isempty(is_maxvertexE)
         maxvertexE = horzcat(maxvertexE,str2num(data{i}(is_maxvertexE + 31:end)));
+        maxvertexE(end-9:end)=[];
     end
     if ~isempty(is_maxvertexD)
         maxvertexD = horzcat(maxvertexD,str2num(data{i}(is_maxvertexD + 31:end)));
+        maxvertexD(end-9:end)=[];
     end
     if ~isempty(is_minvertexN)
         minvertexN = horzcat(minvertexN,str2num(data{i}(is_minvertexN + 31:end)));
+        minvertexN(end-9:end)=[];
     end
     if ~isempty(is_minvertexE)
         minvertexE = horzcat(minvertexE,str2num(data{i}(is_minvertexE + 31:end)));
+        minvertexE(end-9:end)=[];
     end
     if ~isempty(is_minvertexD)
         minvertexD = horzcat(minvertexD,str2num(data{i}(is_minvertexD + 31:end)));
+        minvertexD(end-9:end)=[];
     end
+
     
-    if ~isempty(is_addedVertex) %% TODO
+    if ~isempty(is_addedVertex)
         addedVertexImageFrame = vertcat(addedVertexImageFrame,str2num(data{i}(is_addedVertex+29:end)));
     end
     
@@ -81,7 +136,26 @@ for i = 1:size(data,2)
     if ~isempty(is_gridSize)
         gridSize = str2num(data{i}(is_gridSize+29:end));
     end
+    
+    if ~isempty(is_gimbalCommandTime)
+        gimbalCommandTime = vertcat(gimbalCommandTime,str2num(data{i}(is_gimbalCommandTime+50:end)));
+    end
+    if ~isempty(is_gridAssignTime)
+        gridAssignTime = vertcat(gridAssignTime,str2num(data{i}(is_gridAssignTime + 47:end)));
+    end
+    if ~isempty(is_shootWorthyTime)
+        shootWorthyTime = vertcat(shootWorthyTime, str2num(data{i}(is_shootWorthyTime + 45:end)));
+    end
+    if ~isempty(is_totalGridAssignTime)
+        totalGridAssignTime = vertcat(totalGridAssignTime, str2num(data{i}(is_totalGridAssignTime + 37:end)));
+    end
+    if ~isempty(is_initShootGridExec)
+        initShootGridExec = vertcat(initShootGridExec,str2num(data{i}(is_initShootGridExec+45:end)));
+    end
 end
+
+
+%% Post processing & plotting
 
 gridPosImageFrame = gridPosImageFrame';
 gridPosNED = gridPosNED';
@@ -98,29 +172,56 @@ width = gridSize(1); height = gridSize(2);
 rectangle = [0 0 0 0 0 ; ...
     width/2 width/2 -width/2 -width/2 width/2 ; ...
     height/2 -height/2 -height/2 height/2 height/2];
-rectangle = dcmI2ShootSurface' * rectangle;
+rectangleShootSur_2 = dcmI2ShootSurface_2' * rectangle;
+rectangleShootSur_1 = dcmI2ShootSurface' * rectangle;
+rectangleNed_2 = [];
 rectangleNed = [];
+rectangleFov = rectangle;
+rectangleFov(1,:) = shootDistance;
+
 for i = 1:length(gridPosNED)
-    rectangleNed{i} = rectangle + gridPosNED(:,i);
+    rectangleNed{i} = rectangleShootSur_1 + gridPosNED(:,i);
 end
+
+for i = 1:length(gridPosNED)
+    rectangleNed_2{i} = rectangleShootSur_2 + gridPosNED(:,i);
+end
+
+fovNed =[];
+for i = 1:ftsize
+    fovNed{i} = dcmI2Nav(:,:,i)' * dcmI2Gimbal(:,:,i)' * rectangleFov + posNed(:,i);
+end
+
+% vertexStartFix = 61;
+% gridStartFix = 40;
+% fovStartFix = 1955;
+
+vertexStartFix = 1;
+gridStartFix = 1;
+fovStartFix = 1;
+
+%% plotting
 
 figure(1)
 clf
-plot3(maxvertexNED(2,:),maxvertexNED(1,:),-maxvertexNED(3,:),'r*--')
+plot3(maxvertexNED(2,vertexStartFix:end),maxvertexNED(1,vertexStartFix:end),-maxvertexNED(3,vertexStartFix:end),'r*--')
 hold on
 grid on
-plot3(minvertexNED(2,:),minvertexNED(1,:),-minvertexNED(3,:),'b*--')
-plot3(gridPosNED(2,:),gridPosNED(1,:),-gridPosNED(3,:),'gx-','LineWidth',0.3)
-for i = 1:length(gridPosNED)
-    plot3(rectangleNed{i}(2,:),rectangleNed{i}(1,:),-rectangleNed{i}(3,:),'k')
+plot3(minvertexNED(2,vertexStartFix:end),minvertexNED(1,vertexStartFix:end),-minvertexNED(3,vertexStartFix:end),'b*--')
+plot3(gridPosNED(2,gridStartFix:end),gridPosNED(1,gridStartFix:end),-gridPosNED(3,gridStartFix:end),'gx-','LineWidth',0.3)
+for i = gridStartFix:length(gridPosNED)
+    plot3(rectangleNed_2{i}(2,:),rectangleNed_2{i}(1,:),-rectangleNed_2{i}(3,:),'k')
 end
+% for i = fovStartFix : ftsize
+%     plot3(fovNed{i}(2,:),fovNed{i}(1,:),-fovNed{i}(3,:),'r')
+% end
 axis equal
-view(0,0)
+% view(0,0)
 title('Vertex grid situation','fontsize',15)
 xlabel('E [m]','fontsize',14)
 ylabel('N [m]','fontsize',14)
 zlabel('H [m]','fontsize',14)
-legend('max vertex','min vertex','inspection order','grid position')
+legend('max vertex','min vertex','inspection order','grid position','Location','northeast')
 
 rejectedGrid+1;
 figure(2)
@@ -128,20 +229,20 @@ clf
 % plot3(gridPosImageFrame(1,:),gridPosImageFrame(3,:),-gridPosImageFrame(2,:),'ro')
 % hold on
 if ~isempty(addedVertexImageFrame)
-    plot3(addedVertexImageFrame(1,:),addedVertexImageFrame(3,:),-addedVertexImageFrame(2,:),'kx')
+    plot3(addedVertexImageFrame(1,vertexStartFix:end),addedVertexImageFrame(3,vertexStartFix:end),-addedVertexImageFrame(2,vertexStartFix:end),'kx')
     hold on
 end
-plot3(maxvertexImage(1,:),maxvertexImage(3,:),-maxvertexImage(2,:),'bx--')
+plot3(maxvertexImage(1,vertexStartFix:end),maxvertexImage(3,vertexStartFix:end),-maxvertexImage(2,vertexStartFix:end),'bx--')
 hold on
-plot3(minvertexImage(1,:),minvertexImage(3,:),-minvertexImage(2,:),'rx--')
+plot3(minvertexImage(1,vertexStartFix:end),minvertexImage(3,vertexStartFix:end),-minvertexImage(2,vertexStartFix:end),'rx--')
 grid on
 axis equal
-view(0,0)
+% view(0,0)
 title('Vertex information','fontsize',15)
 xlabel('X [m]','FontSize',14)
 ylabel('Y [m]','fontsize',14)
 zlabel('-Z [m]','fontsize',14)
-legend('added vertex','max vertex','min vertex')
+legend('added vertex','max vertex','min vertex','Location','northeast')
 
 % n=1;
 % for i = 1:size(data,2)
@@ -151,3 +252,30 @@ legend('added vertex','max vertex','min vertex')
 %     end
 % end
 % 
+
+figure(3)
+clf
+plot3(maxvertexNED(2,1:vertexStartFix-1),maxvertexNED(1,1:vertexStartFix-1),-maxvertexNED(3,1:vertexStartFix-1),'r*--')
+hold on
+grid on
+plot3(minvertexNED(2,1:vertexStartFix-1),minvertexNED(1,1:vertexStartFix-1),-minvertexNED(3,1:vertexStartFix-1),'b*--')
+plot3(gridPosNED(2,1:gridStartFix-1),gridPosNED(1,1:gridStartFix-1),-gridPosNED(3,1:gridStartFix-1),'gx-','LineWidth',0.3)
+for i = 1:gridStartFix-1
+    plot3(rectangleNed{i}(2,:),rectangleNed{i}(1,:),-rectangleNed{i}(3,:),'k')
+end
+for i = 1 : fovStartFix-1
+    plot3(fovNed{i}(2,:),fovNed{i}(1,:),-fovNed{i}(3,:),'r')
+end
+axis equal
+% view(0,0)
+title('Vertex grid situation','fontsize',15)
+xlabel('E [m]','fontsize',14)
+ylabel('N [m]','fontsize',14)
+zlabel('H [m]','fontsize',14)
+legend('max vertex','min vertex','inspection order','grid position','Location','northeast')
+
+gimbalCommandTime
+gridAssignTime
+shootWorthyTime
+totalGridAssignTime
+initShootGridExec
