@@ -3,8 +3,8 @@ clear all
 %% Optimization param setting
 
 % Parameter setting
-V = 2;
-N = 10;
+V = 3;
+N = 30;
 T = N + 1;
 
 X = zeros(T,T,V); % selector
@@ -90,6 +90,11 @@ while flag == 1
     result = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub);
     tempResult = reshape(result,[T,T,V]);
     tempResult = sum(tempResult,3);
+    
+    % Stagnation error compensation
+    tempResult(tempResult<0.1) = 0;
+    
+    % Detect subtours
     subtour = detectSubtours(tempResult);
     flag = ~isempty(subtour); % check if there is any subtours generated
     
