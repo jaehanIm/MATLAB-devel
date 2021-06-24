@@ -1,6 +1,11 @@
-confidence = 0.9;
+%% Load Mission
+[data,time] = loader('');
+
+%% Parameter setting
+confidence = 0.9;       % set the value of confidence range to be highlighted [0~1]
+density = 500;          % mvncdf calculation cell resolution / adjust this value to control computation time
+range = 14508 : 15602;  % specify the range of data index.
 level = 1-confidence;
-density = 500;
 zRange = 5;
 cumulated = 0;
 
@@ -8,8 +13,6 @@ index = [];
 peripheral = [];
 
 %% Data selection
-% x_data = data.rpy_2(range);
-% y_data = data.rpy_1(range);
 
 % Pointing Accuracy
 dataset = [posXyz_0(range),posXyz_1(range),posXyz_2(range),data.gimbalRPY_1(range)*d2r,data.gimbalRPY_2(range)*d2r];
@@ -55,7 +58,7 @@ for i = xGrid
     end
 end
 
-cumulated
+cumulated % for verification. This value must be equal to 'confidence' param.
 
 for i = 1:length(index)
     if boxed(i,index,xGridSize,yGridSize)

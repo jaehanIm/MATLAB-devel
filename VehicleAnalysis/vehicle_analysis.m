@@ -1,14 +1,11 @@
-loadSkip = 0;
-fd = 0;
+% Arg.
+doplot = 0;
+
 addpath('/home/jaehan/Desktop/MATLAB devel');
 % 0904 flight test
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_141145/gdLog_200904_141145.csv";
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/200904_142605/gdLog_200904_142605.csv";
 % gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/200904_144201/gdLog_200904_144201.csv";
-
-% 0918 flight test
-% gdLogFile = "gdLog_KH_0918.mat"; loadSkip = 1; % 1st
-% gdLogFile = "/home/jaehan/Desktop/test flight/200918/200918_150250/gdLog_200918_150250.csv"; % 3rd
 
 % refsig gain simulation
 % gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201008_092545.csv"; % ref
@@ -18,38 +15,27 @@ addpath('/home/jaehan/Desktop/MATLAB devel');
 % gdLogFile = "/home/jaehan/Desktop/test flight/refsig_gain_sim/gdLog_201012_105630.csv"; % prop max
 
 % 1013 flight test
-% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/201013_104036/gdLog_201013_104036.csv"; % KH Step
-gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/201013_105028/gdLog_201013_105028.csv"; fd = 1; % KH Sweep
-% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/Default_Gain/gdLog_201013_114813.csv"; 
-% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/Prop_Gain_def_trimmed"; loadSkip = 1;
-% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/Advanced_Gain_90_100/gdLog_201013_120027.csv";
-% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/SB/CPP_100_130/gdLog_201013_121302.csv";
+gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/201013_104036/gdLog_201013_104036.csv"; % KH Step
+% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/201013_105028/gdLog_201013_105028.csv"; % KH Sweep
 
-if loadSkip == 0
-    [data, data_time] = loader(gdLogFile);
-    data_time = seconds(data_time);
-else
-    temp = load(gdLogFile);
-    data = temp.data;
-    data_time = temp.data_time;
-end
-
-d2r = pi/180;
-
-% Sweep signal param.
+% DO NOT CHANGE _ params.
 c1 = 4; c2 = 0.01866;
 wmin = 0.4*2*pi;
 wmax = 10*2*pi;
 T = 20;
+d2r = pi/180;
+r2d = 1/d2r;
 
-doplot = 0;
+%% Load data
+[data, data_time] = loader(gdLogFile);
+data_time = seconds(data_time);
 
-%% Coordination adjustment
+%% Coodinate adjustment
 posNed = [data.posNed_0,data.posNed_1,data.posNed_2];
 posNedCmd = [data.posCmdNed_0,data.posCmdNed_1,data.posCmdNed_2];
 velNed = [data.velNed_0,data.velNed_1,data.velNed_2];
 velNedCmd = [data.velCmdNav_0,data.velCmdNav_1,data.velCmdNav_2];
-dcmI2bridge = angle2dcm(wrapToPi(data.rpy_2*d2r), zeros(size(data,1),1), zeros(size(data,1),1),'zyx');
+dcmI2body = angle2dcm(wrapToPi(data.rpy_2*d2r), zeros(size(data,1),1), zeros(size(data,1),1),'zyx');
 
 posXyz = zeros(size(posNed));
 posXyzCmd = zeros(size(posNed));
@@ -58,10 +44,10 @@ velUvwCmd = velNedCmd;
 posXyzCmd = posNedCmd;
 posXyz = posNed;
 for i = 1:size(posNed,1)
-    posXyz(i,:) = dcmI2bridge(:,:,1) * posNed(i,:)';
-    posXyzCmd(i,:) = dcmI2bridge(:,:,1) * posNedCmd(i,:)';
-    velUvw(i,:) = dcmI2bridge(:,:,1) * velNed(i,:)';
-%     velUvwCmd(i,:) = dcmI2bridge(:,:,i) * velNedCmd(i,:)';
+    posXyz(i,:) = dcmI2body(:,:,1) * posNed(i,:)';
+    posXyzCmd(i,:) = dcmI2body(:,:,1) * posNedCmd(i,:)';
+    velUvw(i,:) = dcmI2body(:,:,1) * velNed(i,:)';
+%     velUvwCmd(i,:) = dcmI2body(:,:,i) * velNedCmd(i,:)';
 end
 
 posXyz_0 = posXyz(:,1);
@@ -104,13 +90,23 @@ cmdSet = [data.rpdCmd_0,velUvwCmd_1,posXyzCmd_1,data.rpdCmd_1,velUvwCmd_0,posXyz
 
 gimbaldev = sqrt(data.gimbalRPY_0.^2 + data.gimbalRPY_1.^2 + data.gimbalRPY_2.^2);
 
-%% Data Selection & TF estimation
+%% Select & Plot
 % Mission Type
 % 4-1: 2 / 4-2: 3 / 4-3: 4 / 5-1: 0 / 5-2: 1 / 6-1: 8 / 6-2: ?
 
-% 1개씩 테스트할 때 쓰기.
-doplot = 1;
-n = 10;
+%%% index guide
+%%% 1 : roll step test
+%%% 2 : v step test
+%%% 3 : Y step test
+%%% 4 : pitch step test
+%%% 5 : u step test
+%%% 6 : X step test
+%%% 7 : yaw step test
+%%% 8 : w step test
+%%% 9 : Z step test
+
+n = 6; % Select test index
+
 m = n;
 if m > 9
     m = m-9;
@@ -119,7 +115,10 @@ Cmd = cmdSet(testStartFlag(n):testFinishFlag(n)-1,m);
 time = data_time(testStartFlag(n):testFinishFlag(n)-1);
 response = responseSet(testStartFlag(n):testFinishFlag(n)-1,m);
 
-% Basic TF - All
+doplot = 1;
+
+%% TF estimation - use as required
+% Basic TF - All (Step & Sweep) - NOT USED AT THE MOMENT
 % tfResult = {};
 % for i = 1:18
 %     [Num,Den,delay]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
@@ -130,7 +129,7 @@ response = responseSet(testStartFlag(n):testFinishFlag(n)-1,m);
 %     disp(A)
 % end
 
-% Basic TF - Step only
+% Basic TF - (Step test only)
 % tfResult = {};
 % for i = 1:9
 %     [Num,Den,delay]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
@@ -141,7 +140,7 @@ response = responseSet(testStartFlag(n):testFinishFlag(n)-1,m);
 %     disp(A)
 % end
 
-% Mix TF
+% Mix TF - EXPERIMENTAL - NOT USED AT THE MOMENT
 % tfResult_mix = {};
 % for i = 1:3
 %     [Num,Den,delay]=estimate_tf(3,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
@@ -222,7 +221,7 @@ plot(time,data.rpy_2(range))
 
 end
 
-%% function
+%% Fcn definition
 function [Num, Den, delay] = estimate_tf(n,mix,responseSet,cmdSet,testStartFlag,testFinishFlag)
 m = n;
 if n>9

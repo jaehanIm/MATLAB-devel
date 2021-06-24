@@ -1,4 +1,5 @@
 d2r = pi/180;
+
 targetNed = [25,0,0];
 dcmI2B = angle2dcm(0,30*d2r,-10*d2r,'xyz');
 targetNed = dcmI2B * targetNed';

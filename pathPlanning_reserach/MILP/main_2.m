@@ -4,18 +4,25 @@ clear all
 
 % Parameter setting
 V = 3;
-N = 30;
+N = 31;
+capacity = 110;
 T = N + 1;
 
 X = zeros(T,T,V); % selector
 
 % Map gen. / dist. calc.
-posX = 0;
-posY = 0;
-for i = 1:N
-    posX(i+1) = rand(1) * 10 - 5;
-    posY(i+1) = rand(1) * 10 - 5;
-end
+% posX = 0;
+% posY = 0;
+% for i = 1:N
+%     posX(i+1) = rand(1) * 10 - 5;
+%     posY(i+1) = rand(1) * 10 - 5;
+% end
+
+posData = load('airpos.mat');
+posX = posData.airPosX(~isnan(posData.airPosX(:)));
+posX = posX(:);
+posY = posData.airPosY(~isnan(posData.airPosY(:)));
+posY = posY(:);
 
 for i = 1:T
     for j = 1:T
@@ -37,14 +44,13 @@ intL = length(f);
 % Inequality Constraint
 A = [];
 b = [];
-% for v = 1:V
-%     X = zeros(T,T,V);
-%     X(2:T,1:T,v) = 1;
-%     for num = 1:T
-%         X(num,num,v) = 0;
-%     end
-%     
-% end
+for v = 1:V
+    X = zeros(T,T,V);
+    X(:,:,v) = 1;
+    X = X.*Y;
+    A = vertcat(A,X(:)');
+    b = vertcat(b,capacity);
+end
 
 % Equality Constraint
 Aeq = [];
@@ -87,7 +93,8 @@ flag = 1;
 iterationNum = 0;
 while flag == 1
     iterationNum = iterationNum + 1;
-    result = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub);
+    options = optimoptions('intlinprog','AbsoluteGapTolerance',0.1);
+    [result, fval] = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options);
     tempResult = reshape(result,[T,T,V]);
     tempResult = sum(tempResult,3);
     
@@ -130,8 +137,8 @@ grid on
 hold on
 plot(posX(1),posY(1),'ro')
 plot(posX(2:end),posY(2:end),'ko')
-xlim([-5 5])
-ylim([-5 5])
+% xlim([-5 5])
+% ylim([-5 5])
 
 C = {'r','b','k','g','m'};
 for v = 1:V
