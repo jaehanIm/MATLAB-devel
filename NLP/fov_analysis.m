@@ -7,9 +7,9 @@ width = 6;
 height = 6 * 1.3143/1.7542;
 
 spdpath = '/home/jaehan/Desktop/210622FT/210622_170128_Sortie7/root_210622_170128.txt';
-gdpath = '/home/jaehan/Desktop/210622FT/210622_170128_Sortie7/gdLog_210622_170128.csv';
+% gdpath = '/home/jaehan/Desktop/210622FT/210622_170128_Sortie7/gdLog_210622_170128.csv';
 
-ftdata = readtable(gdpath);
+% ftdata = readtable(gdpath);
 
 fileID = fopen(spdpath);
 % [ftdata,time] = loader(gdpath);
@@ -56,12 +56,12 @@ end
 compensationAngle = compensationAngle(:,3);
 
 %% Post processing
-autoStartIndex = find(ftdata.fcMcMode == 2 & abs([0;diff(ftdata.fcMcMode)]) == 1);
-compensationAngleTmTc = zeros(size(ftdata,1),1);
-for i = 1:size(autoStartIndex,1)-1
-    compensationAngleTmTc(autoStartIndex(i):autoStartIndex(i+1)-1) = compensationAngle(i);
-end
-compensationAngleTmTc(autoStartIndex(end):end) = compensationAngle(end);
+% autoStartIndex = find(ftdata.fcMcMode == 2 & abs([0;diff(ftdata.fcMcMode)]) == 1);
+% compensationAngleTmTc = zeros(size(ftdata,1),1);
+% for i = 1:size(autoStartIndex,1)-1
+%     compensationAngleTmTc(autoStartIndex(i):autoStartIndex(i+1)-1) = compensationAngle(i);
+% end
+% compensationAngleTmTc(autoStartIndex(end):end) = compensationAngle(end);
 
 dataLen = size(posNed,1);
 zerosData = zeros(dataLen,1);
@@ -119,14 +119,14 @@ plot(gimbalAngleDeg(:,2))
 plot(gimbalAngleDeg(:,3))
 legend('Roll','Pitch','Yaw')
 
-figure(4)
-clf
-grid on
-hold on
-plot(ftdata.gimbalRpy_deg_0,'r')
-plot(ftdata.gimbalRpyCmd_deg_0,'r--')
-plot(ftdata.gimbalRpy_deg_1,'b')
-plot(ftdata.gimbalRpyCmd_deg_1,'b--')
-plot(ftdata.gimbalRpy_deg_2 - ftdata.rpy_deg_2 - compensationAngleTmTc,'m')
-plot(ftdata.gimbalRpyCmd_deg_2,'k--')
-ylim([-80 50])
+% figure(4)
+% clf
+% grid on
+% hold on
+% plot(ftdata.gimbalRpy_deg_0,'r')
+% plot(ftdata.gimbalRpyCmd_deg_0,'r--')
+% plot(ftdata.gimbalRpy_deg_1,'b')
+% plot(ftdata.gimbalRpyCmd_deg_1,'b--')
+% plot(ftdata.gimbalRpy_deg_2 - ftdata.rpy_deg_2 - compensationAngleTmTc,'m')
+% plot(ftdata.gimbalRpyCmd_deg_2,'k--')
+% ylim([-80 50])

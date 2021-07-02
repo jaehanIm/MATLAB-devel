@@ -5,7 +5,7 @@ clear all
 % Parameter setting
 V = 3;
 N = 31;
-capacity = 110;
+capacity = 1100;
 T = N + 1;
 
 X = zeros(T,T,V); % selector

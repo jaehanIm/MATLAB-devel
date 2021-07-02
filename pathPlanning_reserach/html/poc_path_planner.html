@@ -1,0 +1,573 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>poc_path_planner</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-07-01"><meta name="DC.source" content="poc_path_planner.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Parameter setting</a></li><li><a href="#3">Load data (Inspection Area Loading)</a></li><li><a href="#4">Grid Initialization</a></li><li><a href="#5">Curvature generation (Voxel Data Loading)</a></li><li><a href="#6">Voxel to grid localization</a></li><li><a href="#7">Local RSM gen.</a></li><li><a href="#8">Air point gen.</a></li><li><a href="#9">Path Planner (Sweep Algorithm)</a></li><li><a href="#10">Plot</a></li></ul></div><pre class="codeinput">clear <span class="string">all</span>
+<span class="comment">% tic</span>
+</pre><h2 id="2">Parameter setting</h2><pre class="codeinput">px = 6; <span class="comment">% fov x length</span>
+py = 4;
+ov_x = 0.1; <span class="comment">% overlap length</span>
+ov_y = 0.1;
+voxel_width = 0.05; <span class="comment">% voxel distance</span>
+inpection_dist = 7; <span class="comment">% Inspection distance</span>
+
+eff_x = px - ov_x; <span class="comment">% Effective fov size</span>
+eff_y = py - ov_y;
+</pre><h2 id="3">Load data (Inspection Area Loading)</h2><pre class="codeinput">area = imread(<span class="string">'area.png'</span>);
+area = area~=0;
+<span class="comment">% area = ones(size(area));</span>
+
+area_xl = size(area,2)*voxel_width; <span class="comment">% Acutal size[m] of area</span>
+area_yl = size(area,1)*voxel_width;
+[voxelPosX, voxelPosY] = meshgrid(linspace(voxel_width, voxel_width*(size(area,2)+1),size(area,2)),linspace(voxel_width, voxel_width*(size(area,1)+1),size(area,1)));
+areaPosX = voxelPosX;
+areaPosY = voxelPosY;
+</pre><h2 id="4">Grid Initialization</h2><pre class="codeinput">gridnum_x = ceil(area_xl/eff_x); <span class="comment">% required grid size</span>
+gridnum_y = ceil(area_yl/eff_y);
+
+[gridPosX, gridPosY] = meshgrid(eff_x/2:eff_x:eff_x*gridnum_x-eff_x/2,eff_y/2:eff_y:eff_y*gridnum_y-eff_y/2); <span class="comment">% grid coordinate</span>
+gridEdgeX = [gridPosX(1,:)-eff_x/2,gridPosX(end)+eff_x/2];
+gridEdgeY = [gridPosY(:,1)'-eff_y/2,gridPosY(end)+eff_y/2];
+</pre><h2 id="5">Curvature generation (Voxel Data Loading)</h2><pre class="codeinput">voxelData = peaks(length(area))*1;
+voxelData = voxelData(1:size(area,1),1:size(area,2));
+<span class="comment">% voxelData(200:300,300:430) = nan; % Simulating voxel fault</span>
+voxelFilterData = area.*voxelData;
+
+gridValue = griddata(voxelPosX(:),voxelPosY(:),voxelData(:),gridPosX,gridPosY);
+
+voxelFilterData(area==0) = nan; <span class="comment">% neglect unselected area</span>
+</pre><h2 id="6">Voxel to grid localization</h2><pre class="codeinput">vg = {};
+<span class="keyword">for</span> i = 1:size(gridPosX,2)
+    <span class="keyword">for</span> j = 1:size(gridPosX,1)
+        <span class="comment">% Linear type</span>
+        vg(i,j).x = voxelPosX(voxelPosX &gt; gridEdgeX(i) &amp; voxelPosX &lt; gridEdgeX(i+1) &amp; voxelPosY &gt; gridEdgeY(j) &amp; voxelPosY &lt; gridEdgeY(j+1) &amp; ~isnan(voxelData));
+        vg(i,j).y = voxelPosY(voxelPosX &gt; gridEdgeX(i) &amp; voxelPosX &lt; gridEdgeX(i+1) &amp; voxelPosY &gt; gridEdgeY(j) &amp; voxelPosY &lt; gridEdgeY(j+1) &amp; ~isnan(voxelData));
+        vg(i,j).data = voxelData(voxelPosX &gt; gridEdgeX(i) &amp; voxelPosX &lt; gridEdgeX(i+1) &amp; voxelPosY &gt; gridEdgeY(j) &amp; voxelPosY &lt; gridEdgeY(j+1) &amp; ~isnan(voxelData));
+        vg(i,j).filterData = voxelData(voxelPosX &gt; gridEdgeX(i) &amp; voxelPosX &lt; gridEdgeX(i+1) &amp; voxelPosY &gt; gridEdgeY(j) &amp; voxelPosY &lt; gridEdgeY(j+1) &amp; ~isnan(voxelFilterData));
+        vg(i,j).filterX = voxelPosX(voxelPosX &gt; gridEdgeX(i) &amp; voxelPosX &lt; gridEdgeX(i+1) &amp; voxelPosY &gt; gridEdgeY(j) &amp; voxelPosY &lt; gridEdgeY(j+1) &amp; ~isnan(voxelFilterData));
+        vg(i,j).filterY = voxelPosY(voxelPosX &gt; gridEdgeX(i) &amp; voxelPosX &lt; gridEdgeX(i+1) &amp; voxelPosY &gt; gridEdgeY(j) &amp; voxelPosY &lt; gridEdgeY(j+1) &amp; ~isnan(voxelFilterData));
+        vg(i,j).null = 0;
+<span class="comment">%         vg(i,j).xlen = length(find(voxelPosX(1,:) &gt; gridEdgeX(i) &amp; voxelPosX(1,:) &lt; gridEdgeX(i+1)));</span>
+<span class="comment">%         vg(i,j).ylen = length(vg(i,j).data)/vg(i,j).xlen;</span>
+        <span class="keyword">if</span> isempty(vg(i,j).filterData)
+           vg(i,j).null = 1;
+        <span class="keyword">end</span>
+        <span class="comment">% Mesh type</span>
+<span class="comment">%         vg(i,j).X = reshape(vg(i,j).x,[vg(i,j).xlen,vg(i,j).ylen]);</span>
+<span class="comment">%         vg(i,j).Y = reshape(vg(i,j).y,[vg(i,j).xlen,vg(i,j).ylen]);</span>
+<span class="comment">%         vg(i,j).Data = reshape(vg(i,j).data,[vg(i,j).xlen,vg(i,j).ylen]);</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2 id="7">Local RSM gen.</h2><pre class="codeinput">gridNormVector{size(gridValue,1),size(gridValue,2)} = [];
+gridNormVector_lin{size(gridValue,1),size(gridValue,2)} = [];
+
+<span class="keyword">for</span> i = 1:size(vg,1)
+    <span class="keyword">for</span> j = 1:size(vg,2)
+        <span class="keyword">if</span> vg(i,j).null == 0
+            <span class="comment">% Linear approximation</span>
+            coeff = linResponseSurface(vg(i,j).x, vg(i,j).y, vg(i,j).data);
+            planel = drawLinResponseSurf(coeff,vg(i,j).x,vg(i,j).y);
+            gridNormVector_lin{j,i} = [coeff(1),coeff(2),-1];
+
+            <span class="comment">% Quadratic approximation</span>
+            coeff = quadResponseSurface(vg(i,j).x, vg(i,j).y, vg(i,j).data);
+            plane = drawQuadResponseSurf(coeff,vg(i,j).x,vg(i,j).y);
+            temp_x = gridPosX(1,i);
+            temp_y = gridPosY(j,1);
+            gridNormVector{j,i} = slopeQuadResponseSurf(coeff,temp_x,temp_y);
+        <span class="keyword">else</span>
+            gridNormVector{j,i} = ones(1,3)*nan;
+            gridNormVector_lin{j,i} = ones(1,3)*nan;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2 id="8">Air point gen.</h2><pre class="codeinput">airPosX = zeros(size(gridValue)); airPosY = zeros(size(gridValue)); airPosZ = zeros(size(gridValue));
+airPosX_lin = zeros(size(gridValue)); airPosY_lin = zeros(size(gridValue)); airPosZ_lin = zeros(size(gridValue));
+<span class="keyword">for</span> i = 1:size(gridNormVector,1)
+    <span class="keyword">for</span> j = 1:size(gridNormVector,2)
+        airPosX(i,j) = gridPosX(i,j) - inpection_dist * gridNormVector{i,j}(1);
+        airPosY(i,j) = gridPosY(i,j) - inpection_dist * gridNormVector{i,j}(2);
+        airPosZ(i,j) = gridValue(i,j) - inpection_dist * gridNormVector{i,j}(3);
+        airPosX_lin(i,j) = gridPosX(i,j) - inpection_dist * gridNormVector_lin{i,j}(1);
+        airPosY_lin(i,j) = gridPosY(i,j) - inpection_dist * gridNormVector_lin{i,j}(2);
+        airPosZ_lin(i,j) = gridValue(i,j) - inpection_dist * gridNormVector_lin{i,j}(3);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2 id="9">Path Planner (Sweep Algorithm)</h2><p>Sweeping algorithm</p><pre class="codeinput">tic
+[short_l,short_axis]= min(size(airPosX));
+init_direction = -1; <span class="comment">% 1 is up, 0 is down</span>
+sweep_dir = ones(short_l,1);
+sweep_dir(1) = init_direction;
+<span class="comment">% short_axis = 1;</span>
+<span class="comment">% short_l = 7;</span>
+<span class="keyword">for</span> i = 2:short_l
+    sweep_dir(i) = -sweep_dir(i-1);
+<span class="keyword">end</span>
+sectorX = airPosX;
+sectorY = airPosY;
+
+<span class="keyword">if</span> short_axis == 1
+    sectorX = sectorX';
+    sectorY = sectorY';
+    <span class="keyword">for</span> i = 1:short_l
+        <span class="keyword">if</span> sweep_dir(i) == -1
+            sectorX(:,i) = flipud(sectorX(:,i));
+            sectorY(:,i) = flipud(sectorY(:,i));
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">elseif</span> short_axis == 2
+    <span class="keyword">for</span> i = 1:short_l
+        <span class="keyword">if</span> sweep_dir(i) == -1
+            sectorX(:,i) = flipud(sectorX(:,i));
+            sectorY(:,i) = flipud(sectorY(:,i));
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+toc
+<span class="comment">% waypoint alignment</span>
+sectorX = sectorX(:);
+sectorY = sectorY(:);
+sectorX = sectorX(~isnan(sectorX));
+sectorY = sectorY(~isnan(sectorY));
+
+net = [sectorX,sectorY];
+
+cost_Sweep = 0;
+<span class="keyword">for</span> i = 2:length(net)
+    cost_Sweep = cost_Sweep + euclideanDist(net(i,:),net(i-1,:));
+<span class="keyword">end</span>
+
+<span class="comment">% Cost Matrix gen.</span>
+dim = size(net,1);
+costMatrix = zeros(dim,dim);
+<span class="keyword">for</span> i = 1:dim
+    <span class="keyword">for</span> j = 1:dim
+        costMatrix(i,j) = euclideanDist(net(i,:),net(j,:)); <span class="comment">% by distance</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% Nearest Neighborhood Method</span>
+tic
+costMatrix(costMatrix == 0) = nan;
+
+record = zeros(size(net));
+record(1,:) = net(1,:);
+record(end,:) = net(end,:); <span class="comment">%restricted</span>
+cost_NNM = 0;
+curridx = 1;
+costMatrix_temp = costMatrix(:,1:end-1);
+costMatrix_temp(:,1) = nan;
+<span class="keyword">for</span> i = 1:length(net)-2
+[~,j]=min(costMatrix_temp(curridx,:));
+record(i+1,:) = net(j,:);
+cost_NNM = cost_NNM + costMatrix_temp(curridx,j);
+curridx = j;
+costMatrix_temp(:,j) = nan;
+<span class="keyword">end</span>
+cost_NNM = cost_NNM + costMatrix(curridx,end); <span class="comment">%restricted</span>
+record = vertcat(record,net(end,:)); <span class="comment">%restricted</span>
+toc
+<span class="comment">% toc</span>
+figure(4)
+plot(record(:,1),record(:,2))
+</pre><pre class="codeoutput">Elapsed time is 0.001160 seconds.
+Elapsed time is 0.001217 seconds.
+</pre><img vspace="5" hspace="5" src="poc_path_planner_01.png" alt=""> <h2 id="10">Plot</h2><p>figure(1) clf hold on % Draw area contourf(voxelPosX,voxelPosY,voxelFilterData); % mesh(voxelPosX,voxelPosY,voxelData-3); % Draw grid line([gridEdgeX;gridEdgeX],[ones(1,length(gridEdgeX))*gridEdgeY(1);ones(1,length(gridEdgeX))*gridEdgeY(end)],'Color','k') line([ones(1,length(gridEdgeY))*gridEdgeX(1);ones(1,length(gridEdgeY))*gridEdgeX(end)],[gridEdgeY;gridEdgeY],'Color','k') % Grid center plot(gridPosX(:),gridPosY(:),'ko') plot(airPosX(:),airPosY(:).*airPosZ(:)./abs(airPosZ(:)),'kx') plot(airPosX_lin(:),airPosY_lin(:).*airPosZ_lin(:)./abs(airPosZ_lin(:)),'mo') xlim([gridEdgeX(1) gridEdgeX(end)]) ylim([gridEdgeY(1) gridEdgeY(end)]) for i = 1:size(gridPosX,1)     for j= 1:size(gridPosX,2)        plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],'r--')        plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')     end end</p><pre class="codeinput">figure(2)
+clf
+hold <span class="string">on</span>
+grid <span class="string">on</span>
+mesh(voxelPosX,voxelPosY,voxelFilterData);
+contour3(voxelPosX,voxelPosY,voxelFilterData);
+plot3(gridPosX(:),gridPosY(:),gridValue(:),<span class="string">'ko'</span>)
+plot3(airPosX(:),airPosY(:),airPosZ(:),<span class="string">'kx'</span>)
+plot3(airPosX_lin(:),airPosY_lin(:),airPosZ_lin(:),<span class="string">'mo'</span>)
+plot3(vg(3,7).filterX,vg(3,7).filterY,vg(3,7).filterData,<span class="string">'.'</span>,<span class="string">'MarkerSize'</span>,0.1) <span class="comment">% Inspection area(voxel)</span>
+
+<span class="comment">% view(-45,45)</span>
+line([],[],<span class="string">'Color'</span>,<span class="string">'k'</span>)
+xlim([gridEdgeX(1) gridEdgeX(end)])
+ylim([gridEdgeY(1) gridEdgeY(end)])
+<span class="comment">% zlim([-7 11])</span>
+
+
+<span class="keyword">for</span> i = 1:size(gridPosX,1)
+    <span class="keyword">for</span> j= 1:size(gridPosX,2)
+       plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],<span class="string">'r--'</span>)
+       plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],<span class="string">'m:'</span>)
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% addpath('C:\Users\dlawo\Downloads\ACO_Code');</span>
+<span class="comment">% bestset = load('ACO_restricted');</span>
+<span class="comment">% bestset = bestset.bestset;</span>
+
+
+<span class="comment">% figure(3)</span>
+<span class="comment">% clf</span>
+<span class="comment">% hold on</span>
+<span class="comment">% grid on</span>
+<span class="comment">% line([gridEdgeX;gridEdgeX],[ones(1,length(gridEdgeX))*gridEdgeY(1);ones(1,length(gridEdgeX))*gridEdgeY(end)],'Color','k')</span>
+<span class="comment">% line([ones(1,length(gridEdgeY))*gridEdgeX(1);ones(1,length(gridEdgeY))*gridEdgeX(end)],[gridEdgeY;gridEdgeY],'Color','k')</span>
+<span class="comment">% plot(gridPosX(:),gridPosY(:),'ko')</span>
+<span class="comment">% plot(airPosX(:),airPosY(:),'kx')</span>
+<span class="comment">% plot(airPosX_lin(:),airPosY_lin(:),'mo')</span>
+<span class="comment">% xlim([gridEdgeX(1) gridEdgeX(end)])</span>
+<span class="comment">% ylim([gridEdgeY(1) gridEdgeY(end)])</span>
+<span class="comment">% % plot(sectorX,sectorY,'k')</span>
+<span class="comment">% % plot(record(:,1),record(:,2),'k')</span>
+<span class="comment">% % plot(bestset(:,1),bestset(:,2),'k')</span>
+<span class="comment">% mesh(voxelPosX,voxelPosY,voxelFilterData-10,'EdgeAlpha',0.1)</span>
+<span class="comment">% contour(voxelPosX,voxelPosY,voxelFilterData-10)</span>
+<span class="comment">% title('Path result','fontsize',14)</span>
+<span class="comment">% xlabel('X position [m]','fontsize',14)</span>
+<span class="comment">% xlabel('X position [m]')</span>
+<span class="comment">% ylabel('Y position [m]')</span>
+<span class="comment">%</span>
+<span class="comment">% for i = 1:size(gridPosX,1)</span>
+<span class="comment">%     for j= 1:size(gridPosX,2)</span>
+<span class="comment">%        plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],'r--')</span>
+<span class="comment">%        plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')</span>
+<span class="comment">%     end</span>
+<span class="comment">% end</span>
+<span class="comment">%</span>
+<span class="keyword">function</span> out = euclideanDist(pos1,pos2)
+out = sqrt((pos2(2)-pos1(2))^2+(pos2(1)-pos1(1))^2);
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="poc_path_planner_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clear all
+% tic
+%% Parameter setting
+px = 6; % fov x length
+py = 4;
+ov_x = 0.1; % overlap length
+ov_y = 0.1;
+voxel_width = 0.05; % voxel distance
+inpection_dist = 7; % Inspection distance
+
+eff_x = px - ov_x; % Effective fov size
+eff_y = py - ov_y;
+
+%% Load data (Inspection Area Loading)
+area = imread('area.png');
+area = area~=0;
+% area = ones(size(area));
+
+area_xl = size(area,2)*voxel_width; % Acutal size[m] of area
+area_yl = size(area,1)*voxel_width;
+[voxelPosX, voxelPosY] = meshgrid(linspace(voxel_width, voxel_width*(size(area,2)+1),size(area,2)),linspace(voxel_width, voxel_width*(size(area,1)+1),size(area,1)));
+areaPosX = voxelPosX;
+areaPosY = voxelPosY;
+
+%% Grid Initialization
+gridnum_x = ceil(area_xl/eff_x); % required grid size
+gridnum_y = ceil(area_yl/eff_y);
+
+[gridPosX, gridPosY] = meshgrid(eff_x/2:eff_x:eff_x*gridnum_x-eff_x/2,eff_y/2:eff_y:eff_y*gridnum_y-eff_y/2); % grid coordinate
+gridEdgeX = [gridPosX(1,:)-eff_x/2,gridPosX(end)+eff_x/2];
+gridEdgeY = [gridPosY(:,1)'-eff_y/2,gridPosY(end)+eff_y/2];
+
+%% Curvature generation (Voxel Data Loading)
+voxelData = peaks(length(area))*1;
+voxelData = voxelData(1:size(area,1),1:size(area,2));
+% voxelData(200:300,300:430) = nan; % Simulating voxel fault
+voxelFilterData = area.*voxelData;
+
+gridValue = griddata(voxelPosX(:),voxelPosY(:),voxelData(:),gridPosX,gridPosY);
+
+voxelFilterData(area==0) = nan; % neglect unselected area
+
+%% Voxel to grid localization
+vg = {};
+for i = 1:size(gridPosX,2)
+    for j = 1:size(gridPosX,1)
+        % Linear type
+        vg(i,j).x = voxelPosX(voxelPosX > gridEdgeX(i) & voxelPosX < gridEdgeX(i+1) & voxelPosY > gridEdgeY(j) & voxelPosY < gridEdgeY(j+1) & ~isnan(voxelData));
+        vg(i,j).y = voxelPosY(voxelPosX > gridEdgeX(i) & voxelPosX < gridEdgeX(i+1) & voxelPosY > gridEdgeY(j) & voxelPosY < gridEdgeY(j+1) & ~isnan(voxelData));
+        vg(i,j).data = voxelData(voxelPosX > gridEdgeX(i) & voxelPosX < gridEdgeX(i+1) & voxelPosY > gridEdgeY(j) & voxelPosY < gridEdgeY(j+1) & ~isnan(voxelData));
+        vg(i,j).filterData = voxelData(voxelPosX > gridEdgeX(i) & voxelPosX < gridEdgeX(i+1) & voxelPosY > gridEdgeY(j) & voxelPosY < gridEdgeY(j+1) & ~isnan(voxelFilterData));
+        vg(i,j).filterX = voxelPosX(voxelPosX > gridEdgeX(i) & voxelPosX < gridEdgeX(i+1) & voxelPosY > gridEdgeY(j) & voxelPosY < gridEdgeY(j+1) & ~isnan(voxelFilterData));
+        vg(i,j).filterY = voxelPosY(voxelPosX > gridEdgeX(i) & voxelPosX < gridEdgeX(i+1) & voxelPosY > gridEdgeY(j) & voxelPosY < gridEdgeY(j+1) & ~isnan(voxelFilterData));
+        vg(i,j).null = 0;
+%         vg(i,j).xlen = length(find(voxelPosX(1,:) > gridEdgeX(i) & voxelPosX(1,:) < gridEdgeX(i+1)));
+%         vg(i,j).ylen = length(vg(i,j).data)/vg(i,j).xlen;
+        if isempty(vg(i,j).filterData)
+           vg(i,j).null = 1;
+        end
+        % Mesh type
+%         vg(i,j).X = reshape(vg(i,j).x,[vg(i,j).xlen,vg(i,j).ylen]);
+%         vg(i,j).Y = reshape(vg(i,j).y,[vg(i,j).xlen,vg(i,j).ylen]);
+%         vg(i,j).Data = reshape(vg(i,j).data,[vg(i,j).xlen,vg(i,j).ylen]);
+    end
+end
+
+%% Local RSM gen.
+gridNormVector{size(gridValue,1),size(gridValue,2)} = [];
+gridNormVector_lin{size(gridValue,1),size(gridValue,2)} = [];
+
+for i = 1:size(vg,1)
+    for j = 1:size(vg,2)
+        if vg(i,j).null == 0
+            % Linear approximation
+            coeff = linResponseSurface(vg(i,j).x, vg(i,j).y, vg(i,j).data);
+            planel = drawLinResponseSurf(coeff,vg(i,j).x,vg(i,j).y);
+            gridNormVector_lin{j,i} = [coeff(1),coeff(2),-1];
+
+            % Quadratic approximation
+            coeff = quadResponseSurface(vg(i,j).x, vg(i,j).y, vg(i,j).data);
+            plane = drawQuadResponseSurf(coeff,vg(i,j).x,vg(i,j).y);
+            temp_x = gridPosX(1,i);
+            temp_y = gridPosY(j,1);
+            gridNormVector{j,i} = slopeQuadResponseSurf(coeff,temp_x,temp_y);
+        else
+            gridNormVector{j,i} = ones(1,3)*nan;
+            gridNormVector_lin{j,i} = ones(1,3)*nan;
+        end
+    end
+end
+
+%% Air point gen.
+airPosX = zeros(size(gridValue)); airPosY = zeros(size(gridValue)); airPosZ = zeros(size(gridValue));
+airPosX_lin = zeros(size(gridValue)); airPosY_lin = zeros(size(gridValue)); airPosZ_lin = zeros(size(gridValue));
+for i = 1:size(gridNormVector,1)
+    for j = 1:size(gridNormVector,2)
+        airPosX(i,j) = gridPosX(i,j) - inpection_dist * gridNormVector{i,j}(1);
+        airPosY(i,j) = gridPosY(i,j) - inpection_dist * gridNormVector{i,j}(2);
+        airPosZ(i,j) = gridValue(i,j) - inpection_dist * gridNormVector{i,j}(3);
+        airPosX_lin(i,j) = gridPosX(i,j) - inpection_dist * gridNormVector_lin{i,j}(1);
+        airPosY_lin(i,j) = gridPosY(i,j) - inpection_dist * gridNormVector_lin{i,j}(2);
+        airPosZ_lin(i,j) = gridValue(i,j) - inpection_dist * gridNormVector_lin{i,j}(3);
+    end
+end
+
+%% Path Planner (Sweep Algorithm)
+% Sweeping algorithm
+tic
+[short_l,short_axis]= min(size(airPosX));
+init_direction = -1; % 1 is up, 0 is down
+sweep_dir = ones(short_l,1);
+sweep_dir(1) = init_direction;
+% short_axis = 1;
+% short_l = 7;
+for i = 2:short_l
+    sweep_dir(i) = -sweep_dir(i-1);
+end
+sectorX = airPosX;
+sectorY = airPosY;
+
+if short_axis == 1
+    sectorX = sectorX';
+    sectorY = sectorY';
+    for i = 1:short_l
+        if sweep_dir(i) == -1
+            sectorX(:,i) = flipud(sectorX(:,i));
+            sectorY(:,i) = flipud(sectorY(:,i));
+        end
+    end
+elseif short_axis == 2
+    for i = 1:short_l
+        if sweep_dir(i) == -1
+            sectorX(:,i) = flipud(sectorX(:,i));
+            sectorY(:,i) = flipud(sectorY(:,i));
+        end
+    end
+end
+toc
+% waypoint alignment
+sectorX = sectorX(:);
+sectorY = sectorY(:);
+sectorX = sectorX(~isnan(sectorX));
+sectorY = sectorY(~isnan(sectorY));
+
+net = [sectorX,sectorY];
+
+cost_Sweep = 0;
+for i = 2:length(net)
+    cost_Sweep = cost_Sweep + euclideanDist(net(i,:),net(i-1,:));
+end
+
+% Cost Matrix gen.
+dim = size(net,1);
+costMatrix = zeros(dim,dim);
+for i = 1:dim
+    for j = 1:dim
+        costMatrix(i,j) = euclideanDist(net(i,:),net(j,:)); % by distance
+    end
+end
+
+% Nearest Neighborhood Method
+tic
+costMatrix(costMatrix == 0) = nan;
+
+record = zeros(size(net));
+record(1,:) = net(1,:);
+record(end,:) = net(end,:); %restricted
+cost_NNM = 0;
+curridx = 1;
+costMatrix_temp = costMatrix(:,1:end-1);
+costMatrix_temp(:,1) = nan;
+for i = 1:length(net)-2
+[~,j]=min(costMatrix_temp(curridx,:));
+record(i+1,:) = net(j,:);
+cost_NNM = cost_NNM + costMatrix_temp(curridx,j);
+curridx = j;
+costMatrix_temp(:,j) = nan;
+end
+cost_NNM = cost_NNM + costMatrix(curridx,end); %restricted
+record = vertcat(record,net(end,:)); %restricted
+toc
+% toc
+figure(4)
+plot(record(:,1),record(:,2))
+
+%% Plot
+% figure(1)
+% clf
+% hold on
+% % Draw area
+% contourf(voxelPosX,voxelPosY,voxelFilterData);
+% % mesh(voxelPosX,voxelPosY,voxelData-3);
+% % Draw grid
+% line([gridEdgeX;gridEdgeX],[ones(1,length(gridEdgeX))*gridEdgeY(1);ones(1,length(gridEdgeX))*gridEdgeY(end)],'Color','k')
+% line([ones(1,length(gridEdgeY))*gridEdgeX(1);ones(1,length(gridEdgeY))*gridEdgeX(end)],[gridEdgeY;gridEdgeY],'Color','k')
+% % Grid center
+% plot(gridPosX(:),gridPosY(:),'ko')
+% plot(airPosX(:),airPosY(:).*airPosZ(:)./abs(airPosZ(:)),'kx')
+% plot(airPosX_lin(:),airPosY_lin(:).*airPosZ_lin(:)./abs(airPosZ_lin(:)),'mo')
+% xlim([gridEdgeX(1) gridEdgeX(end)])
+% ylim([gridEdgeY(1) gridEdgeY(end)])
+% for i = 1:size(gridPosX,1)
+%     for j= 1:size(gridPosX,2)
+%        plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],'rREPLACE_WITH_DASH_DASH')
+%        plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')
+%     end
+% end
+
+figure(2)
+clf
+hold on
+grid on
+mesh(voxelPosX,voxelPosY,voxelFilterData);
+contour3(voxelPosX,voxelPosY,voxelFilterData);
+plot3(gridPosX(:),gridPosY(:),gridValue(:),'ko')
+plot3(airPosX(:),airPosY(:),airPosZ(:),'kx')
+plot3(airPosX_lin(:),airPosY_lin(:),airPosZ_lin(:),'mo')
+plot3(vg(3,7).filterX,vg(3,7).filterY,vg(3,7).filterData,'.','MarkerSize',0.1) % Inspection area(voxel)
+
+% view(-45,45)
+line([],[],'Color','k')
+xlim([gridEdgeX(1) gridEdgeX(end)])
+ylim([gridEdgeY(1) gridEdgeY(end)])
+% zlim([-7 11])
+
+
+for i = 1:size(gridPosX,1)
+    for j= 1:size(gridPosX,2)
+       plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],'rREPLACE_WITH_DASH_DASH')
+       plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')
+    end
+end
+
+% addpath('C:\Users\dlawo\Downloads\ACO_Code');
+% bestset = load('ACO_restricted');
+% bestset = bestset.bestset;
+
+
+% figure(3) 
+% clf
+% hold on
+% grid on
+% line([gridEdgeX;gridEdgeX],[ones(1,length(gridEdgeX))*gridEdgeY(1);ones(1,length(gridEdgeX))*gridEdgeY(end)],'Color','k')
+% line([ones(1,length(gridEdgeY))*gridEdgeX(1);ones(1,length(gridEdgeY))*gridEdgeX(end)],[gridEdgeY;gridEdgeY],'Color','k')
+% plot(gridPosX(:),gridPosY(:),'ko')
+% plot(airPosX(:),airPosY(:),'kx')
+% plot(airPosX_lin(:),airPosY_lin(:),'mo')
+% xlim([gridEdgeX(1) gridEdgeX(end)])
+% ylim([gridEdgeY(1) gridEdgeY(end)])
+% % plot(sectorX,sectorY,'k')
+% % plot(record(:,1),record(:,2),'k')
+% % plot(bestset(:,1),bestset(:,2),'k')
+% mesh(voxelPosX,voxelPosY,voxelFilterData-10,'EdgeAlpha',0.1)
+% contour(voxelPosX,voxelPosY,voxelFilterData-10)
+% title('Path result','fontsize',14)
+% xlabel('X position [m]','fontsize',14)
+% xlabel('X position [m]')
+% ylabel('Y position [m]')
+% 
+% for i = 1:size(gridPosX,1)
+%     for j= 1:size(gridPosX,2)
+%        plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],'rREPLACE_WITH_DASH_DASH')
+%        plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')
+%     end
+% end
+% 
+function out = euclideanDist(pos1,pos2)
+out = sqrt((pos2(2)-pos1(2))^2+(pos2(1)-pos1(1))^2);
+end
+##### SOURCE END #####
+--></body></html>

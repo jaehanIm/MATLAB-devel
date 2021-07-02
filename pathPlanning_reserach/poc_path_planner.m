@@ -1,12 +1,12 @@
 clear all
 % tic
 %% Parameter setting
-px = 3; % fov x length
-py = 3;
-ov_x = 0.2; % overlap length
+px = 6; % fov x length
+py = 4;
+ov_x = 0.1; % overlap length
 ov_y = 0.1;
 voxel_width = 0.05; % voxel distance
-inpection_dist = 4; % Inspection distance
+inpection_dist = 7; % Inspection distance
 
 eff_x = px - ov_x; % Effective fov size
 eff_y = py - ov_y;
@@ -14,6 +14,7 @@ eff_y = py - ov_y;
 %% Load data (Inspection Area Loading)
 area = imread('area.png');
 area = area~=0;
+% area = ones(size(area));
 
 area_xl = size(area,2)*voxel_width; % Acutal size[m] of area
 area_yl = size(area,1)*voxel_width;
@@ -183,27 +184,27 @@ figure(4)
 plot(record(:,1),record(:,2))
 
 %% Plot
-figure(1)
-clf
-hold on
-% Draw area
-contourf(voxelPosX,voxelPosY,voxelFilterData);
-% mesh(voxelPosX,voxelPosY,voxelData-3);
-% Draw grid
-line([gridEdgeX;gridEdgeX],[ones(1,length(gridEdgeX))*gridEdgeY(1);ones(1,length(gridEdgeX))*gridEdgeY(end)],'Color','k')
-line([ones(1,length(gridEdgeY))*gridEdgeX(1);ones(1,length(gridEdgeY))*gridEdgeX(end)],[gridEdgeY;gridEdgeY],'Color','k')
-% Grid center
-plot(gridPosX(:),gridPosY(:),'ko')
-plot(airPosX(:),airPosY(:).*airPosZ(:)./abs(airPosZ(:)),'kx')
-plot(airPosX_lin(:),airPosY_lin(:).*airPosZ_lin(:)./abs(airPosZ_lin(:)),'mo')
-xlim([gridEdgeX(1) gridEdgeX(end)])
-ylim([gridEdgeY(1) gridEdgeY(end)])
-for i = 1:size(gridPosX,1)
-    for j= 1:size(gridPosX,2)
-       plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],'r--')
-       plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')
-    end
-end
+% figure(1)
+% clf
+% hold on
+% % Draw area
+% contourf(voxelPosX,voxelPosY,voxelFilterData);
+% % mesh(voxelPosX,voxelPosY,voxelData-3);
+% % Draw grid
+% line([gridEdgeX;gridEdgeX],[ones(1,length(gridEdgeX))*gridEdgeY(1);ones(1,length(gridEdgeX))*gridEdgeY(end)],'Color','k')
+% line([ones(1,length(gridEdgeY))*gridEdgeX(1);ones(1,length(gridEdgeY))*gridEdgeX(end)],[gridEdgeY;gridEdgeY],'Color','k')
+% % Grid center
+% plot(gridPosX(:),gridPosY(:),'ko')
+% plot(airPosX(:),airPosY(:).*airPosZ(:)./abs(airPosZ(:)),'kx')
+% plot(airPosX_lin(:),airPosY_lin(:).*airPosZ_lin(:)./abs(airPosZ_lin(:)),'mo')
+% xlim([gridEdgeX(1) gridEdgeX(end)])
+% ylim([gridEdgeY(1) gridEdgeY(end)])
+% for i = 1:size(gridPosX,1)
+%     for j= 1:size(gridPosX,2)
+%        plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],'r--')
+%        plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')
+%     end
+% end
 
 figure(2)
 clf
@@ -220,7 +221,7 @@ plot3(vg(3,7).filterX,vg(3,7).filterY,vg(3,7).filterData,'.','MarkerSize',0.1) %
 line([],[],'Color','k')
 xlim([gridEdgeX(1) gridEdgeX(end)])
 ylim([gridEdgeY(1) gridEdgeY(end)])
-zlim([-7 11])
+% zlim([-7 11])
 
 
 for i = 1:size(gridPosX,1)
@@ -230,37 +231,39 @@ for i = 1:size(gridPosX,1)
     end
 end
 
-addpath('C:\Users\dlawo\Downloads\ACO_Code');
-bestset = load('ACO_restricted');
-bestset = bestset.bestset;
-figure(3) 
-clf
-hold on
-grid on
-line([gridEdgeX;gridEdgeX],[ones(1,length(gridEdgeX))*gridEdgeY(1);ones(1,length(gridEdgeX))*gridEdgeY(end)],'Color','k')
-line([ones(1,length(gridEdgeY))*gridEdgeX(1);ones(1,length(gridEdgeY))*gridEdgeX(end)],[gridEdgeY;gridEdgeY],'Color','k')
-plot(gridPosX(:),gridPosY(:),'ko')
-plot(airPosX(:),airPosY(:),'kx')
-plot(airPosX_lin(:),airPosY_lin(:),'mo')
-xlim([gridEdgeX(1) gridEdgeX(end)])
-ylim([gridEdgeY(1) gridEdgeY(end)])
-% plot(sectorX,sectorY,'k')
-% plot(record(:,1),record(:,2),'k')
-plot(bestset(:,1),bestset(:,2),'k')
-mesh(voxelPosX,voxelPosY,voxelFilterData-10,'EdgeAlpha',0.1)
-contour(voxelPosX,voxelPosY,voxelFilterData-10)
-title('Path result','fontsize',14)
-xlabel('X position [m]','fontsize',14)
-xlabel('X position [m]')
-ylabel('Y position [m]')
+% addpath('C:\Users\dlawo\Downloads\ACO_Code');
+% bestset = load('ACO_restricted');
+% bestset = bestset.bestset;
 
-for i = 1:size(gridPosX,1)
-    for j= 1:size(gridPosX,2)
-       plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],'r--')
-       plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')
-    end
-end
 
+% figure(3) 
+% clf
+% hold on
+% grid on
+% line([gridEdgeX;gridEdgeX],[ones(1,length(gridEdgeX))*gridEdgeY(1);ones(1,length(gridEdgeX))*gridEdgeY(end)],'Color','k')
+% line([ones(1,length(gridEdgeY))*gridEdgeX(1);ones(1,length(gridEdgeY))*gridEdgeX(end)],[gridEdgeY;gridEdgeY],'Color','k')
+% plot(gridPosX(:),gridPosY(:),'ko')
+% plot(airPosX(:),airPosY(:),'kx')
+% plot(airPosX_lin(:),airPosY_lin(:),'mo')
+% xlim([gridEdgeX(1) gridEdgeX(end)])
+% ylim([gridEdgeY(1) gridEdgeY(end)])
+% % plot(sectorX,sectorY,'k')
+% % plot(record(:,1),record(:,2),'k')
+% % plot(bestset(:,1),bestset(:,2),'k')
+% mesh(voxelPosX,voxelPosY,voxelFilterData-10,'EdgeAlpha',0.1)
+% contour(voxelPosX,voxelPosY,voxelFilterData-10)
+% title('Path result','fontsize',14)
+% xlabel('X position [m]','fontsize',14)
+% xlabel('X position [m]')
+% ylabel('Y position [m]')
+% 
+% for i = 1:size(gridPosX,1)
+%     for j= 1:size(gridPosX,2)
+%        plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],'r--')
+%        plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')
+%     end
+% end
+% 
 function out = euclideanDist(pos1,pos2)
 out = sqrt((pos2(2)-pos1(2))^2+(pos2(1)-pos1(1))^2);
 end

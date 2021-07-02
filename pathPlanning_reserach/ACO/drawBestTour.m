@@ -1,5 +1,5 @@
 function [ ] = drawBestTour(colony , graph)
-
+figure(2)
 queenTour = colony.queen.tour;
 hold on
 for i = 1 : length(queenTour) - 1

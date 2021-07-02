@@ -10,8 +10,8 @@ clc
 % Draw the graph 
 figure 
  
-subplot(1,3,1)
-drawGraph( graph); 
+% subplot(1,3,1)
+% drawGraph( graph); 
 
 
 %% ACO algorithm 
@@ -67,20 +67,22 @@ for t = 1 : maxIter
     
     outmsg = [ 'Iteration #' , num2str(t) , ' Shortest length = ' , num2str(colony.queen.fitness)  ];
     disp(outmsg)
-    subplot(1,3,1)
-    title(['Iteration #' , num2str(t) ])
-    % Visualize best tour and phromone concentration
-    subplot(1,3,2)
-    cla
-    drawBestTour( colony, graph );
-    
-    
-    subplot(1,3,3)
-    cla
-    drawPhromone( tau , graph );
-   
-   drawnow
+%     subplot(1,3,1)
+%     title(['Iteration #' , num2str(t) ])
+%     % Visualize best tour and phromone concentration
+%     subplot(1,3,2)
+%     cla
+%     drawBestTour( colony, graph );
+%     
+%     
+%     subplot(1,3,3)
+%     cla
+%     drawPhromone( tau , graph );
+%    
+%    drawnow
 end
+
+drawBestTour( colony, graph );
 
 
 
