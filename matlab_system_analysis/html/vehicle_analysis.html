@@ -1,0 +1,491 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>vehicle_analysis</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-07-12"><meta name="DC.source" content="vehicle_analysis.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Load data</a></li><li><a href="#3">Coodinate adjustment</a></li><li><a href="#4">Data parsing</a></li><li><a href="#5">Select &amp; Plot</a></li><li><a href="#6">index guide</a></li><li><a href="#7">1 : roll step test</a></li><li><a href="#8">2 : v step test</a></li><li><a href="#9">3 : Y step test</a></li><li><a href="#10">4 : pitch step test</a></li><li><a href="#11">5 : u step test</a></li><li><a href="#12">6 : X step test</a></li><li><a href="#13">7 : yaw step test</a></li><li><a href="#14">8 : w step test</a></li><li><a href="#15">9 : Z step test</a></li><li><a href="#16">TF estimation - use as required</a></li><li><a href="#17">Sweep signal</a></li><li><a href="#18">Plotting</a></li><li><a href="#19">Fcn definition</a></li></ul></div><pre class="codeinput"><span class="comment">% Arg.</span>
+doplot = 0;
+
+gdLogFile = <span class="string">"/home/jaehan/catkin_ws/src/niv_gnc/niv_gnc/utility/matlab_system_analysis/gdLog_sample_KH.csv"</span>; <span class="comment">% KH Step</span>
+<span class="comment">% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/201013_105028/gdLog_201013_105028.csv"; % KH Sweep</span>
+
+<span class="comment">% DO NOT CHANGE _ params.</span>
+c1 = 4; c2 = 0.01866;
+wmin = 0.4*2*pi;
+wmax = 10*2*pi;
+T = 20;
+d2r = pi/180;
+r2d = 1/d2r;
+</pre><h2 id="2">Load data</h2><pre class="codeinput">[data, data_time] = loader(gdLogFile);
+data_time = seconds(data_time);
+</pre><h2 id="3">Coodinate adjustment</h2><pre class="codeinput">posNed = [data.posNed_0,data.posNed_1,data.posNed_2];
+posNedCmd = [data.posCmdNed_0,data.posCmdNed_1,data.posCmdNed_2];
+velNed = [data.velNed_0,data.velNed_1,data.velNed_2];
+velNedCmd = [data.velCmdNav_0,data.velCmdNav_1,data.velCmdNav_2];
+dcmI2body = angle2dcm(wrapToPi(data.rpy_2*d2r), zeros(size(data,1),1), zeros(size(data,1),1),<span class="string">'zyx'</span>);
+
+posXyz = zeros(size(posNed));
+posXyzCmd = zeros(size(posNed));
+velUvw = zeros(size(posNed));
+velUvwCmd = velNedCmd;
+posXyzCmd = posNedCmd;
+posXyz = posNed;
+<span class="keyword">for</span> i = 1:size(posNed,1)
+    posXyz(i,:) = dcmI2body(:,:,1) * posNed(i,:)';
+    posXyzCmd(i,:) = dcmI2body(:,:,1) * posNedCmd(i,:)';
+    velUvw(i,:) = dcmI2body(:,:,1) * velNed(i,:)';
+<span class="comment">%     velUvwCmd(i,:) = dcmI2body(:,:,i) * velNedCmd(i,:)';</span>
+<span class="keyword">end</span>
+
+posXyz_0 = posXyz(:,1);
+posXyz_1 = posXyz(:,2);
+posXyz_2 = posXyz(:,3);
+posXyzCmd_0 = posXyzCmd(:,1);
+posXyzCmd_1 = posXyzCmd(:,2);
+posXyzCmd_2 = posXyzCmd(:,3);
+velUvw_0 = velUvw(:,1);
+velUvw_1 = velUvw(:,2);
+velUvw_2 = velUvw(:,3);
+velUvwCmd_0 = velUvwCmd(:,1);
+velUvwCmd_1 = velUvwCmd(:,2);
+velUvwCmd_2 = velUvwCmd(:,3);
+</pre><h2 id="4">Data parsing</h2><pre class="codeinput">testStartFlag = [];
+testFinishFlag = [];
+missionStartFlag = [];
+missionFinishFlag = [];
+fcMode = data.fcMcMode;
+missionType = data.missionType;
+
+ns = 1; nf = 1; nsm = 1; nfm = 1;
+<span class="keyword">for</span> i = 2:length(fcMode)
+    <span class="keyword">if</span> fcMode(i) ~= fcMode(i-1) &amp;&amp; fcMode(i) == 2
+        testStartFlag(ns) = i; ns = ns+1;
+    <span class="keyword">elseif</span> fcMode(i) ~= fcMode(i-1) &amp;&amp; fcMode(i-1) == 2
+        testFinishFlag(nf) = i; nf = nf+1;
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> fcMode(i-1) == 0 &amp;&amp; fcMode(i) == 1
+        missionStartFlag(nsm) = i; nsm = nsm + 1;
+    <span class="keyword">elseif</span> fcMode(i-1) == 1 &amp;&amp; fcMode(i) == 0
+        missionFinishFlag(nfm) = i; nfm = nfm + 1;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+responseSet = [data.rpy_0,velUvw_1,posXyz_1,data.rpy_1,velUvw_0,posXyz_0,data.rpy_2,velUvw_2,posXyz_2];
+cmdSet = [data.rpdCmd_0,velUvwCmd_1,posXyzCmd_1,data.rpdCmd_1,velUvwCmd_0,posXyzCmd_0,data.ySp,velUvwCmd_2,posXyzCmd_2];
+
+gimbaldev = sqrt(data.gimbalRPY_0.^2 + data.gimbalRPY_1.^2 + data.gimbalRPY_2.^2);
+</pre><h2 id="5">Select &amp; Plot</h2><p>Mission Type 4-1: 2 / 4-2: 3 / 4-3: 4 / 5-1: 0 / 5-2: 1 / 6-1: 8 / 6-2: ?</p><h2 id="6">index guide</h2><h2 id="7">1 : roll step test</h2><h2 id="8">2 : v step test</h2><h2 id="9">3 : Y step test</h2><h2 id="10">4 : pitch step test</h2><h2 id="11">5 : u step test</h2><h2 id="12">6 : X step test</h2><h2 id="13">7 : yaw step test</h2><h2 id="14">8 : w step test</h2><h2 id="15">9 : Z step test</h2><pre class="codeinput">n = 6; <span class="comment">% Select test index</span>
+
+m = n;
+<span class="keyword">if</span> m &gt; 9
+    m = m-9;
+<span class="keyword">end</span>
+Cmd = cmdSet(testStartFlag(n):testFinishFlag(n)-1,m);
+time = data_time(testStartFlag(n):testFinishFlag(n)-1);
+response = responseSet(testStartFlag(n):testFinishFlag(n)-1,m);
+
+doplot = 1;
+</pre><h2 id="16">TF estimation - use as required</h2><p>Basic TF - All (Step &amp; Sweep) - NOT USED AT THE MOMENT tfResult = {}; for i = 1:18     [Num,Den,delay]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);     tfResult{i}.Num = Num;     tfResult{i}.Den = Den;     tfResult{i}.Delay = delay;     A = [num2str(i),'th transfer function estimation complete'];     disp(A) end</p><pre class="codeinput"><span class="comment">% Basic TF - (Step test only)</span>
+<span class="comment">% tfResult = {};</span>
+<span class="comment">% for i = 1:9</span>
+<span class="comment">%     [Num,Den,delay]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);</span>
+<span class="comment">%     tfResult{i}.Num = Num;</span>
+<span class="comment">%     tfResult{i}.Den = Den;</span>
+<span class="comment">%     tfResult{i}.Delay = delay;</span>
+<span class="comment">%     A = [num2str(i),'th transfer function estimation complete'];</span>
+<span class="comment">%     disp(A)</span>
+<span class="comment">% end</span>
+
+<span class="comment">% Mix TF - EXPERIMENTAL - NOT USED AT THE MOMENT</span>
+<span class="comment">% tfResult_mix = {};</span>
+<span class="comment">% for i = 1:3</span>
+<span class="comment">%     [Num,Den,delay]=estimate_tf(3,i,responseSet,cmdSet,testStartFlag,testFinishFlag);</span>
+<span class="comment">%     tfResult_mix{i}.Num = Num;</span>
+<span class="comment">%     tfResult_mix{i}.Den = Den;</span>
+<span class="comment">%     tfResult_mix{i}.Delay = delay;</span>
+<span class="comment">%     A = [num2str(i),'th transfer function estimation complete'];</span>
+<span class="comment">%     disp(A)</span>
+<span class="comment">% end</span>
+</pre><h2 id="17">Sweep signal</h2><p>res = c2*(wmax-wmin)*T/c1; omega = wmin + (exp((time-time(1))/T*c1)-1)*c2*(wmax-wmin); freq = omega/2/pi; theta = wmin*t + c2*(wmax-wmin)*(T/c1*exp(c1/T*t)-t) - res;</p><h2 id="18">Plotting</h2><pre class="codeinput"><span class="keyword">if</span> doplot == 1
+range = testStartFlag(n):testFinishFlag(n)-1;
+
+figure(10)
+clf
+hold <span class="string">on</span>
+grid <span class="string">on</span>
+plot(time,data.rpy_0(range),<span class="string">'k'</span>)
+plot(time,data.rpy_1(range),<span class="string">'b'</span>)
+plot(time,data.rpy_2(range),<span class="string">'r'</span>)
+plot(time,data.rpdCmd_0(range),<span class="string">'k:'</span>)
+plot(time,data.rpdCmd_1(range),<span class="string">'b:'</span>)
+plot(time,data.ySp(range),<span class="string">'r:'</span>)
+title(<span class="string">'angle'</span>)
+legend(<span class="string">'r'</span>,<span class="string">'p'</span>,<span class="string">'y'</span>)
+
+figure(11)
+<span class="comment">% clf</span>
+hold <span class="string">on</span>
+grid <span class="string">on</span>
+plot(time-time(1),velUvw_0(range),<span class="string">'k'</span>)
+plot(time-time(1),velUvw_1(range),<span class="string">'b'</span>)
+plot(time-time(1),-velUvw_2(range),<span class="string">'r'</span>)
+plot(time-time(1),velUvwCmd_0(range),<span class="string">'k:'</span>)
+plot(time-time(1),velUvwCmd_1(range),<span class="string">'b:'</span>)
+plot(time-time(1),-velUvwCmd_2(range),<span class="string">'r:'</span>)
+title(<span class="string">'vel'</span>)
+legend(<span class="string">'u'</span>,<span class="string">'v'</span>,<span class="string">'w'</span>)
+
+figure(12)
+clf
+hold <span class="string">on</span>
+grid <span class="string">on</span>
+plot(time,posXyz_0(range),<span class="string">'k'</span>)
+plot(time,posXyz_1(range),<span class="string">'b'</span>)
+plot(time,-posXyz_2(range),<span class="string">'r'</span>)
+plot(time,posXyzCmd_0(range),<span class="string">'k:'</span>)
+plot(time,posXyzCmd_1(range),<span class="string">'b:'</span>)
+plot(time,-posXyzCmd_2(range),<span class="string">'r:'</span>)
+title(<span class="string">'pos'</span>)
+legend(<span class="string">'x'</span>,<span class="string">'y'</span>,<span class="string">'z'</span>)
+
+figure(13)
+clf
+hold <span class="string">on</span>
+grid <span class="string">on</span>
+title(<span class="string">'Gimbal Response (POS)'</span>)
+plot(time,gimbaldev(range),<span class="string">'m.-'</span>)
+plot(time,data.gimbalRPY_0(range),<span class="string">'.:'</span>)
+plot(time,data.gimbalRPY_1(range),<span class="string">'.:'</span>)
+plot(time,data.gimbalRPY_2(range),<span class="string">'.:'</span>)
+legend(<span class="string">'tot'</span>,<span class="string">'r'</span>,<span class="string">'p'</span>,<span class="string">'y'</span>)
+
+figure(14)
+clf
+hold <span class="string">on</span>
+grid <span class="string">on</span>
+title(<span class="string">'Yaw angle history'</span>)
+plot(time,data.rpy_2(range))
+
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="vehicle_analysis_01.png" alt=""> <img vspace="5" hspace="5" src="vehicle_analysis_02.png" alt=""> <h2 id="19">Fcn definition</h2><pre class="codeinput"><span class="keyword">function</span> [Num, Den, delay] = estimate_tf(n,mix,responseSet,cmdSet,testStartFlag,testFinishFlag)
+m = n;
+<span class="keyword">if</span> n&gt;9
+    m = n-9;
+<span class="keyword">end</span>
+<span class="keyword">if</span> mix&gt;9
+    mix = mix-9;
+<span class="keyword">end</span>
+Cmd = cmdSet(testStartFlag(n):testFinishFlag(n)-1,m);
+Response = responseSet(testStartFlag(n):testFinishFlag(n)-1,m);
+<span class="keyword">if</span> mix ~= m
+    Response = responseSet(testStartFlag(n):testFinishFlag(n)-1,mix);
+<span class="keyword">end</span>
+Cmd = detrend(Cmd,0);
+Response = detrend(Response,0);
+
+timeseriesSet = iddata(Response,Cmd,0.02);
+sys = tfest(timeseriesSet,2,1,nan);
+Num = sys.Numerator;
+Den = sys.Denominator;
+delay = sys.IODelay;
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Arg.
+doplot = 0;
+
+gdLogFile = "/home/jaehan/catkin_ws/src/niv_gnc/niv_gnc/utility/matlab_system_analysis/gdLog_sample_KH.csv"; % KH Step
+% gdLogFile = "/home/jaehan/Desktop/test flight/Vehicle_Analysis/KH/201013_105028/gdLog_201013_105028.csv"; % KH Sweep
+
+% DO NOT CHANGE _ params.
+c1 = 4; c2 = 0.01866;
+wmin = 0.4*2*pi;
+wmax = 10*2*pi;
+T = 20;
+d2r = pi/180;
+r2d = 1/d2r;
+
+%% Load data
+[data, data_time] = loader(gdLogFile);
+data_time = seconds(data_time);
+
+%% Coodinate adjustment
+posNed = [data.posNed_0,data.posNed_1,data.posNed_2];
+posNedCmd = [data.posCmdNed_0,data.posCmdNed_1,data.posCmdNed_2];
+velNed = [data.velNed_0,data.velNed_1,data.velNed_2];
+velNedCmd = [data.velCmdNav_0,data.velCmdNav_1,data.velCmdNav_2];
+dcmI2body = angle2dcm(wrapToPi(data.rpy_2*d2r), zeros(size(data,1),1), zeros(size(data,1),1),'zyx');
+
+posXyz = zeros(size(posNed));
+posXyzCmd = zeros(size(posNed));
+velUvw = zeros(size(posNed));
+velUvwCmd = velNedCmd;
+posXyzCmd = posNedCmd;
+posXyz = posNed;
+for i = 1:size(posNed,1)
+    posXyz(i,:) = dcmI2body(:,:,1) * posNed(i,:)';
+    posXyzCmd(i,:) = dcmI2body(:,:,1) * posNedCmd(i,:)';
+    velUvw(i,:) = dcmI2body(:,:,1) * velNed(i,:)';
+%     velUvwCmd(i,:) = dcmI2body(:,:,i) * velNedCmd(i,:)';
+end
+
+posXyz_0 = posXyz(:,1);
+posXyz_1 = posXyz(:,2);
+posXyz_2 = posXyz(:,3);
+posXyzCmd_0 = posXyzCmd(:,1);
+posXyzCmd_1 = posXyzCmd(:,2);
+posXyzCmd_2 = posXyzCmd(:,3);
+velUvw_0 = velUvw(:,1);
+velUvw_1 = velUvw(:,2);
+velUvw_2 = velUvw(:,3);
+velUvwCmd_0 = velUvwCmd(:,1);
+velUvwCmd_1 = velUvwCmd(:,2);
+velUvwCmd_2 = velUvwCmd(:,3);
+
+%% Data parsing 
+testStartFlag = [];
+testFinishFlag = [];
+missionStartFlag = [];
+missionFinishFlag = [];
+fcMode = data.fcMcMode;
+missionType = data.missionType;
+
+ns = 1; nf = 1; nsm = 1; nfm = 1;
+for i = 2:length(fcMode)
+    if fcMode(i) ~= fcMode(i-1) && fcMode(i) == 2
+        testStartFlag(ns) = i; ns = ns+1;
+    elseif fcMode(i) ~= fcMode(i-1) && fcMode(i-1) == 2
+        testFinishFlag(nf) = i; nf = nf+1;
+    end
+    if fcMode(i-1) == 0 && fcMode(i) == 1
+        missionStartFlag(nsm) = i; nsm = nsm + 1;
+    elseif fcMode(i-1) == 1 && fcMode(i) == 0
+        missionFinishFlag(nfm) = i; nfm = nfm + 1;
+    end
+end
+
+responseSet = [data.rpy_0,velUvw_1,posXyz_1,data.rpy_1,velUvw_0,posXyz_0,data.rpy_2,velUvw_2,posXyz_2];
+cmdSet = [data.rpdCmd_0,velUvwCmd_1,posXyzCmd_1,data.rpdCmd_1,velUvwCmd_0,posXyzCmd_0,data.ySp,velUvwCmd_2,posXyzCmd_2];
+
+gimbaldev = sqrt(data.gimbalRPY_0.^2 + data.gimbalRPY_1.^2 + data.gimbalRPY_2.^2);
+
+%% Select & Plot
+% Mission Type
+% 4-1: 2 / 4-2: 3 / 4-3: 4 / 5-1: 0 / 5-2: 1 / 6-1: 8 / 6-2: ?
+
+%%% index guide
+%%% 1 : roll step test
+%%% 2 : v step test
+%%% 3 : Y step test
+%%% 4 : pitch step test
+%%% 5 : u step test
+%%% 6 : X step test
+%%% 7 : yaw step test
+%%% 8 : w step test
+%%% 9 : Z step test
+
+n = 6; % Select test index
+
+m = n;
+if m > 9
+    m = m-9;
+end
+Cmd = cmdSet(testStartFlag(n):testFinishFlag(n)-1,m);
+time = data_time(testStartFlag(n):testFinishFlag(n)-1);
+response = responseSet(testStartFlag(n):testFinishFlag(n)-1,m);
+
+doplot = 1;
+
+%% TF estimation - use as required
+% Basic TF - All (Step & Sweep) - NOT USED AT THE MOMENT
+% tfResult = {};
+% for i = 1:18
+%     [Num,Den,delay]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+%     tfResult{i}.Num = Num;
+%     tfResult{i}.Den = Den;
+%     tfResult{i}.Delay = delay;
+%     A = [num2str(i),'th transfer function estimation complete'];
+%     disp(A)
+% end
+
+% Basic TF - (Step test only)
+% tfResult = {};
+% for i = 1:9
+%     [Num,Den,delay]=estimate_tf(i,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+%     tfResult{i}.Num = Num;
+%     tfResult{i}.Den = Den;
+%     tfResult{i}.Delay = delay;
+%     A = [num2str(i),'th transfer function estimation complete'];
+%     disp(A)
+% end
+
+% Mix TF - EXPERIMENTAL - NOT USED AT THE MOMENT
+% tfResult_mix = {};
+% for i = 1:3
+%     [Num,Den,delay]=estimate_tf(3,i,responseSet,cmdSet,testStartFlag,testFinishFlag);
+%     tfResult_mix{i}.Num = Num;
+%     tfResult_mix{i}.Den = Den;
+%     tfResult_mix{i}.Delay = delay;
+%     A = [num2str(i),'th transfer function estimation complete'];
+%     disp(A)
+% end
+
+%% Sweep signal
+% res = c2*(wmax-wmin)*T/c1;
+% omega = wmin + (exp((time-time(1))/T*c1)-1)*c2*(wmax-wmin);
+% freq = omega/2/pi;
+% theta = wmin*t + c2*(wmax-wmin)*(T/c1*exp(c1/T*t)-t) - res;
+
+%% Plotting
+
+if doplot == 1
+range = testStartFlag(n):testFinishFlag(n)-1;
+
+figure(10)
+clf
+hold on
+grid on
+plot(time,data.rpy_0(range),'k')
+plot(time,data.rpy_1(range),'b')
+plot(time,data.rpy_2(range),'r')
+plot(time,data.rpdCmd_0(range),'k:')
+plot(time,data.rpdCmd_1(range),'b:')
+plot(time,data.ySp(range),'r:')
+title('angle')
+legend('r','p','y')
+
+figure(11)
+% clf
+hold on
+grid on
+plot(time-time(1),velUvw_0(range),'k')
+plot(time-time(1),velUvw_1(range),'b')
+plot(time-time(1),-velUvw_2(range),'r')
+plot(time-time(1),velUvwCmd_0(range),'k:')
+plot(time-time(1),velUvwCmd_1(range),'b:')
+plot(time-time(1),-velUvwCmd_2(range),'r:')
+title('vel')
+legend('u','v','w')
+
+figure(12)
+clf
+hold on
+grid on
+plot(time,posXyz_0(range),'k')
+plot(time,posXyz_1(range),'b')
+plot(time,-posXyz_2(range),'r')
+plot(time,posXyzCmd_0(range),'k:')
+plot(time,posXyzCmd_1(range),'b:')
+plot(time,-posXyzCmd_2(range),'r:')
+title('pos')
+legend('x','y','z')
+
+figure(13)
+clf
+hold on
+grid on
+title('Gimbal Response (POS)')
+plot(time,gimbaldev(range),'m.-')
+plot(time,data.gimbalRPY_0(range),'.:')
+plot(time,data.gimbalRPY_1(range),'.:')
+plot(time,data.gimbalRPY_2(range),'.:')
+legend('tot','r','p','y')
+
+figure(14)
+clf
+hold on
+grid on
+title('Yaw angle history')
+plot(time,data.rpy_2(range))
+
+end
+
+%% Fcn definition
+function [Num, Den, delay] = estimate_tf(n,mix,responseSet,cmdSet,testStartFlag,testFinishFlag)
+m = n;
+if n>9
+    m = n-9;
+end
+if mix>9
+    mix = mix-9;
+end
+Cmd = cmdSet(testStartFlag(n):testFinishFlag(n)-1,m);
+Response = responseSet(testStartFlag(n):testFinishFlag(n)-1,m);
+if mix ~= m
+    Response = responseSet(testStartFlag(n):testFinishFlag(n)-1,mix);
+end
+Cmd = detrend(Cmd,0);
+Response = detrend(Response,0);
+
+timeseriesSet = iddata(Response,Cmd,0.02);
+sys = tfest(timeseriesSet,2,1,nan);
+Num = sys.Numerator;
+Den = sys.Denominator;
+delay = sys.IODelay;
+end
+##### SOURCE END #####
+--></body></html>
