@@ -44,5 +44,8 @@ for i = 1 : graph.n
     end
 end
 
+graph = load('graph_complete.mat');
+graph = graph.graph;
+
 
 end

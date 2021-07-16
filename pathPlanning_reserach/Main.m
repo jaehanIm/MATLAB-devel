@@ -1,7 +1,7 @@
 addpath('./ACO')
 addpath('./MILP')
 
-poc_path_planner
+% poc_path_planner
 
 node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
 N = size(node,1);
@@ -17,7 +17,7 @@ end
 
 
 %% Build Network
-conThres = 8.2;
+conThres = 15;
 for i = 1:N
     for j = 1:N
         if i~=j
@@ -95,4 +95,12 @@ for i = 1:size(G.Edges,1)
 end
 axis equal
 
+%% save
+graph.n = N;
+graph.node.x = node(:,1);
+graph.node.y = node(:,2);
+graph.node.z = node(:,3);
+graph.edges = L;
+
+save('graph_complete.mat','graph');
 

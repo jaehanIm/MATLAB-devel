@@ -27,7 +27,7 @@ for i = 1 : antNo
             P_allNodes(colony.ant(i).tour) = 0 ;  % Passing 0 to all the nodes visited so far
             P = P_allNodes ./ sum(P_allNodes);
 
-            nextNode = rouletteWheel2(P); 
+            nextNode = rouletteWheel(P); 
             colony.ant(i).tour = [  colony.ant(i).tour , nextNode ];
             
         end

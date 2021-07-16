@@ -1,5 +1,5 @@
 clear all
-close all
+% close all
 clc
 
 %% Problem preparation 
@@ -8,14 +8,14 @@ clc
 [ graph ]  = createGraph();
 
 % Draw the graph 
-figure 
+% figure 
  
 % subplot(1,3,1)
 % drawGraph( graph); 
 
 
 %% ACO algorithm 
-
+global exploreP
 %% Initial parameters of ACO 
 maxIter = 500;
 antNo = 50;
@@ -24,16 +24,19 @@ tau0 = 10 * 1 / (  graph.n * mean( graph.edges(:)  )  );  % Initial phromone con
 
 tau = tau0 * ones( graph.n , graph.n); % Phromone matirx 
 eta = 1./ graph.edges;  % desirability of each edge 
+% eta = ones(graph.n,graph.n);
 
 rho = 0.5; % Evaporation rate 
 alpha = 1;  % Phromone exponential parameters 
 beta = 1;  % Desirability exponetial paramter
+exploreP = 0.05;
 
 
 %% Main loop of ACO 
 
 bestFitness = inf;
 bestTour = [];
+history = zeros(maxIter,1);
 for t = 1 : maxIter
     % Create Ants 
     
@@ -67,6 +70,7 @@ for t = 1 : maxIter
     
     outmsg = [ 'Iteration #' , num2str(t) , ' Shortest length = ' , num2str(colony.queen.fitness)  ];
     disp(outmsg)
+    history(t,1) = colony.queen.fitness;
 %     subplot(1,3,1)
 %     title(['Iteration #' , num2str(t) ])
 %     % Visualize best tour and phromone concentration
@@ -82,9 +86,12 @@ for t = 1 : maxIter
 %    drawnow
 end
 
-drawBestTour( colony, graph );
+drawBestTour2( colony, graph );
 
-
+figure(10)
+hold on
+grid on
+plot(history,'x--')
 
 
 
