@@ -1,5 +1,10 @@
 %% Load Mission
-[data,time] = loader('/home/jaehan/log/gdLogCsv/gdLog_210309_155929.csv');   % put gdLog address
+% [data,time] = loader('/home/jaehan/log/gdLogCsv/gdLog_210309_155929.csv');   % put gdLog address
+gdLogFile = '/home/jaehan/Desktop/MATLAB devel/matlab_system_analysis/gdLog_210702_110357.csv';
+data = readtable(gdLogFile);
+time = data.rosTime;
+time = time - time(1);
+time = seconds(time);
 
 %% Parameter setting
 confidence = 0.9;       % set the value of confidence range to be highlighted [0~1]
@@ -17,7 +22,7 @@ peripheral = [];
 %% Data selection // Change if required
 
 % Pointing Accuracy - example set
-dataset = [posXyz_0(range),posXyz_1(range),posXyz_2(range),data.gimbalRPY_1(range)*d2r,data.gimbalRPY_2(range)*d2r];
+dataset = [posXyz_0(range),posXyz_1(range),posXyz_2(range),data.gimbalRpy_deg_1(range)*d2r,data.gimbalRpy_deg_2(range)*d2r];
 num = 1e5;
 covData = cov(dataset);
 randomData = mvnrnd(zeros(size(dataset,2),1),covData,num);

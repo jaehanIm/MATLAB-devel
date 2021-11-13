@@ -6,7 +6,11 @@ L = length(X);
 
 Y = fft(X);
 P2 = abs(Y/L);
+
 fftResult = P2(1:L/2+1);
+
+Fs
+L
 
 freq = Fs*(0:L/2)/L;
 freq = freq';

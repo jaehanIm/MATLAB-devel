@@ -6,7 +6,7 @@ inspectionDistance = 12;
 width = 6;
 height = 6 * 1.3143/1.7542;
 
-spdpath = '/home/jaehan/Desktop/210622FT/210622_170128_Sortie7/root_210622_170128.txt';
+spdpath = '/home/jaehan/Desktop/210909/210909_112157/root_210909_112157.txt';
 % gdpath = '/home/jaehan/Desktop/210622FT/210622_170128_Sortie7/gdLog_210622_170128.csv';
 
 % ftdata = readtable(gdpath);

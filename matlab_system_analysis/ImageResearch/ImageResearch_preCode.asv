@@ -1,0 +1,11 @@
+TIP = imread('/home/jaehan/Desktop/MATLAB devel/matlab_system_analysis/ImageResearch/BBB_5350.JPG');
+TIP = im2gray(TIP);
+TIP_delX = diff(TIP,1,1);
+TIP_delY = diff(TIP,1,2);
+
+TIP_del = TIP_delX(:,1:end-1) + TIP_delY(1:end-1,:);
+
+maxDel = max(max(TIP_del));
+normCoeff = 255 / maxDel;
+
+TIP_del = TIP_del * normCoef

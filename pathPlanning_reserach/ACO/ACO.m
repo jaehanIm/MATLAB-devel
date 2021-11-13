@@ -29,7 +29,7 @@ eta = 1./ graph.edges;  % desirability of each edge
 rho = 0.5; % Evaporation rate 
 alpha = 1;  % Phromone exponential parameters 
 beta = 1;  % Desirability exponetial paramter
-exploreP = 0.05;
+exploreP = 0.00;
 
 
 %% Main loop of ACO 

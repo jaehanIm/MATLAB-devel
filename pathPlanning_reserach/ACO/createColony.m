@@ -23,7 +23,9 @@ for i = 1 : antNo
         else
             
             currentNode =  colony.ant(i).tour(end);
-            P_allNodes = tau( currentNode , :  );
+            
+            P_allNodes = eta( currentNode , :  )  .^ beta;
+%             P_allNodes = ones(size(tau));
             P_allNodes(colony.ant(i).tour) = 0 ;  % Passing 0 to all the nodes visited so far
             P = P_allNodes ./ sum(P_allNodes);
 

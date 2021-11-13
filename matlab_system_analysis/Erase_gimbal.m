@@ -113,8 +113,10 @@ figure(2)
 clf
 hold on
 grid on
-plot(rollRT(3:end))
-plot(pitchRT(3:end))
+plot(rollRT(1:end))
+plot(pitchRT(1:end))
+ylim([0 0.5])
+xlim([3 end])
 
 %% Step plot
 figure(3)
@@ -170,6 +172,23 @@ subplot(2,1,1)
 step(tfSetSweepPitch)
 subplot(2,1,2)
 margin(tfSetSweepPitch)
+
+figure(9)
+clf
+% subplot(2,1,1)
+step(tfSetRoll{5});
+title('Roll response')
+grid on
+figure(10)
+clf
+% subplot(2,1,1)
+step(tfSetPitch{6})
+title('Pitch response')
+grid on
+% subplot(2,1,2)
+% step(tfSetPitch{7})
+% title('Pitch case #7')
+% grid on
 
 %%
 function tf = tfestimator(input, output)

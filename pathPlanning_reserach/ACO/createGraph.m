@@ -5,8 +5,8 @@ function [ graph ]  = createGraph()
 % 
  
 % 14 nodes
-x = [16.47000,16.47000,20.09000,22.39000,25.23000,22,20.47000,17.20000,16.30000,14.05000,16.53000,21.52000,19.41000,20.09000];
- y = [96.10000,94.44000,92.54000,93.37000,97.24000,96.05000,97.02000,96.29000,97.38000,98.12000,97.38000,95.59000,97.13000,94.55000]
+% x = [16.47000,16.47000,20.09000,22.39000,25.23000,22,20.47000,17.20000,16.30000,14.05000,16.53000,21.52000,19.41000,20.09000];
+%  y = [96.10000,94.44000,92.54000,93.37000,97.24000,96.05000,97.02000,96.29000,97.38000,98.12000,97.38000,95.59000,97.13000,94.55000]
 
  
 %     % 50 nodes
@@ -23,29 +23,35 @@ x = [16.47000,16.47000,20.09000,22.39000,25.23000,22,20.47000,17.20000,16.30000,
 
   
   
-graph.n = length(x); 
+% graph.n = length(x); 
+% 
+% for i = 1 : graph.n
+%     graph.node(i).x = x(i);
+%     graph.node(i).y = y(i);
+% end
+% 
+% graph.edges = zeros(  graph.n , graph.n );
+% 
+% for i = 1 : graph.n
+%     for j = 1: graph.n
+%         x1 = graph.node(i).x ;
+%         x2 = graph.node(j).x;
+%         y1 = graph.node(i).y;
+%         y2 = graph.node(j).y;
+%         
+%         graph.edges(i,j) = sqrt(  (x1 - x2) ^2 + (y1 - y2)^2  ); 
+%         
+%     end
+% end
+% 
 
-for i = 1 : graph.n
-    graph.node(i).x = x(i);
-    graph.node(i).y = y(i);
-end
+%%%%%%%%%%%%%% for my research IJH %%%%%%%%%%%%%%
 
-graph.edges = zeros(  graph.n , graph.n );
-
-for i = 1 : graph.n
-    for j = 1: graph.n
-        x1 = graph.node(i).x ;
-        x2 = graph.node(j).x;
-        y1 = graph.node(i).y;
-        y2 = graph.node(j).y;
-        
-        graph.edges(i,j) = sqrt(  (x1 - x2) ^2 + (y1 - y2)^2  ); 
-        
-    end
-end
 
 graph = load('graph_complete.mat');
 graph = graph.graph;
 
+
+%%%%%%%%%%%%%% for my research IJH %%%%%%%%%%%%%%
 
 end
