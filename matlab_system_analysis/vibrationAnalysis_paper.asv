@@ -52,12 +52,10 @@ end
 
 [U,S,V] = svd(test_hankel);
 test_regen_full = U * S * V';
-rate = 10;
+rate = 50;
 test_regen = U(:,1:rate) * S(1:rate,1:rate) * V(:,1:rate)';
 
-signal_regen_r = test_regen(1,:);
-signal_regen_c = test_regen(2:end,end)';
-signal_regen = [signal_regen_r,signal_regen_c];
+signal_regen = testregen(
 
 figure(4)
 clf
@@ -65,10 +63,10 @@ hold on
 grid on
 plot(test,'LineWidth',1)
 % plot(test_regen_full(1,:))
-plot(signal_regen(1,:),'LineWidth',1)
+plot(test_regen(1,:),'LineWidth',1)
 
 [freq1, fftResult1, psdResult1] = data2fftpsd(test,Fs);
-[freq2, fftResult2, psdResult2] = data2fftpsd(signal_regen(1,:),Fs);
+[freq2, fftResult2, psdResult2] = data2fftpsd(test_regen(1,:),Fs);
 
 figure(5)
 clf

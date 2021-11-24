@@ -5,7 +5,7 @@ px = 6; % fov x length
 py = 4;
 ov_x = 0.1; % overlap length
 ov_y = 0.1;
-voxel_width = 0.1; % voxel distance
+voxel_width = 0.03; % voxel distance
 inpection_dist = 7; % Inspection distance
 
 eff_x = px - ov_x; % Effective fov size
@@ -215,7 +215,7 @@ contour3(voxelPosX,voxelPosY,voxelFilterData);
 plot3(gridPosX(:),gridPosY(:),gridValue(:),'ko')
 plot3(airPosX(:),airPosY(:),airPosZ(:),'kx')
 plot3(airPosX_lin(:),airPosY_lin(:),airPosZ_lin(:),'mo')
-plot3(vg(3,7).filterX,vg(3,7).filterY,vg(3,7).filterData,'.','MarkerSize',0.1) % Inspection area(voxel)
+% plot3(vg(3,7).filterX,vg(3,7).filterY,vg(3,7).filterData,'.','MarkerSize',0.1) % Inspection area(voxel)
 
 % view(-45,45)
 line([],[],'Color','k')

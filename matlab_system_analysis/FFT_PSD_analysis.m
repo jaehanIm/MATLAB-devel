@@ -61,7 +61,7 @@ X_rev = ifft(Y_rev);
 
 figure(1)
 hold on
-plot(T,abs(X_rev).*real(X_rev)./abs(real(X_rev)),'r');
+plot(T,real(X_rev),'r');
 title('Frequency Discrimination','fontsize',14)
 ylabel('m','fontsize',14)
 grid on

@@ -1,7 +1,7 @@
 addpath('./ACO')
 addpath('./MILP')
 
-% poc_path_planner
+poc_path_planner
 
 node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
 N = size(node,1);
@@ -94,6 +94,9 @@ for i = 1:size(G.Edges,1)
     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
 end
 axis equal
+
+%% reverse edge vertex
+G
 
 %% save
 graph.n = N;
