@@ -1,0 +1,16 @@
+function [upper, lower] = findPeaks(A)
+
+L = length(A);
+prevsgn = 0;
+cursgn = 0;
+
+for i = 2:L
+    if A(i) > A(i-1)
+        cursgn = 1;
+    else
+        cursgn  = -1;
+    end
+    
+end
+
+end
