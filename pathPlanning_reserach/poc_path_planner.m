@@ -5,8 +5,8 @@ px = 6; % fov x length
 py = 4;
 ov_x = 0.1; % overlap length
 ov_y = 0.1;
-voxel_width = 0.03; % voxel distance
-inpection_dist = 7; % Inspection distance
+voxel_width = 0.05; % voxel distance
+inpection_dist = 3; % Inspection distance
 
 eff_x = px - ov_x; % Effective fov size
 eff_y = py - ov_y;

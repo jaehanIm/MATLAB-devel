@@ -1,0 +1,22 @@
+function [ fitness ] = fitnessFunctionVRP ( tour , graph)
+
+global vehNum vehCapacity
+
+fitness = 0;
+
+for i = 1 : length(tour) -1
+    
+    currentNode = tour(i);
+    nextNode = tour(i+1);
+    
+    fitness = fitness + graph.edges( currentNode ,  nextNode );
+    
+end
+
+
+for i = 1:vehNum
+    currentNode = tour
+end
+
+
+end

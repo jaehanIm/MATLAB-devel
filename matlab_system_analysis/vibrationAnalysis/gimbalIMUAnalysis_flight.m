@@ -1,7 +1,28 @@
+addpath('./..')
+
 %% Load data
 
-imuData = readtable('/home/jaehan/log/211126/211126_110526/aSensorLog_211126_110526.csv');
-gdLog = readtable('/home/jaehan/log/211126/211126_110526/gdLog_211126_110526.csv');
+% imuData = readtable('/home/jaehan/log/211126/211126_110526/aSensorLog_211126_110526.csv');
+% gdLog = readtable('/home/jaehan/log/211126/211126_110526/gdLog_211126_110526.csv');
+% photoDir = dir('/home/jaehan/Desktop/M300G_Nikon_Test/1');
+% photoXml = readtable('/home/jaehan/Desktop/M300G_Nikon_Test/df_xmp_1.csv');
+% faultPhotoIdx = [10 13 15 17 29 43 65 67 68 69 70 71 72 73 74 75 79 81 82 85 86 87 91 97 104 110 125 126];
+% realBadPhotoIdx = [15    29    65    67    70    74    81    85    86   110];
+
+imuData = readtable('/home/jaehan/log/211126/211126_113400/aSensorLog_211126_113400.csv');
+gdLog = readtable('/home/jaehan/log/211126/211126_113400/gdLog_211126_113400.csv');
+photoDir = dir('/home/jaehan/Desktop/M300G_Nikon_Test/2');
+photoXml = readtable('/home/jaehan/Desktop/M300G_Nikon_Test/df_xmp.csv');
+faultPhotoIdx = [26 44 69 85 88 93 113 128 129];
+realBadPhotoIdx = [69];
+
+photoDir(1:2) = [];
+photoDir(end) = [];
+photoL = length(photoDir); 
+
+photoTime = photoXml.xmpTime;
+photoTime = datetime(photoTime,'TimeZone','Asia/Tokyo');
+
 
 % Job index parser
 jobStartIdx = [];
@@ -17,31 +38,35 @@ for i = 2:size(gdLog,1)
     end
 end
 
+
 jobName = ["SME","#2 LE bf","PP","#2 UPSS bf","PP","#1 LTSS bf","PP","#1 TE bf","PP","#0 UPSS bf","PP","#0 TE bf", "ShutOff"];
 parseStart = 1;
 parseEnd = size(imuData,1);
-% 
-% parseStart = 800000;
-% parseEnd = 1400000;
-% 
-% parseStart = 816600; %302419;
-% parseEnd = 830600;%1743950;
-% parseStart = 302419;
-% parseEnd = 1743950;
-% parseStart = 300000;
-% parseEnd = 340000;
 
+% time synchronization
 imuTime = datetime(imuData.rosTime(parseStart:parseEnd),'ConvertFrom','posixtime','TimeZone','Asia/Tokyo');
 gdTime = datetime(gdLog.rosTime(1:end),'ConvertFrom','posixtime','TimeZone','Asia/Tokyo');
 imuTimeDelay = seconds(imuTime(1) - gdTime(1));
+photoTimeDelay = photoTime(1) - gdTime(1);
 imuTimeS = imuData.rosTime(parseStart:parseEnd) - imuData.rosTime(1) + imuTimeDelay;
+photoTimeS = seconds(photoTime - photoTime(1) + photoTimeDelay);
 gdTimeS = gdLog.rosTime - gdLog.rosTime(1);
+photoTimeS(photoTimeS<=0) = 0;
 
-landIdx = 22000;
+landIdx = 21666;
 jobStartIdxS = gdTimeS(jobStartIdx);
 jobEndIdxS = gdTimeS(jobEndIdx);
 landIdxS = gdTimeS(landIdx);
 
+% Job index to imudata idx
+imuJobStartIdx = [];
+imuJobEndIdx = [];
+for i = 1:length(jobStartIdx)
+    imuJobStartIdx(i) = findNearestIdx(imuTimeS,gdTimeS(jobStartIdx(i)));
+    imuJobEndIdx(i) = findNearestIdx(imuTimeS,gdTimeS(jobEndIdx(i)));
+end
+
+% Assign data
 acc_0 = imuData.acc_mpss_0(parseStart:parseEnd);
 acc_1 = imuData.acc_mpss_1(parseStart:parseEnd);
 acc_2 = imuData.acc_mpss_2(parseStart:parseEnd);
@@ -50,11 +75,6 @@ gyro_1 = imuData.gyro_dps_1(parseStart:parseEnd);
 gyro_2 = imuData.gyro_dps_2(parseStart:parseEnd);
 
 Fs = round(1/mean(diff(imuTimeS)));
-
-% Reparse gdLog to match with imuData
-% gdTime(1:Fs*imuTimeDelay) = [];
-% gdTimeS(1:Fs*imuTimeDelay) = [];
-% gdLog(1:Fs*imuTimeDelay,:) = [];
 
 disp("Data Loading Complete!")
 
@@ -66,91 +86,81 @@ gyro_0 = detrend(gyro_0,1);
 gyro_1 = detrend(gyro_1,1);
 gyro_2 = detrend(gyro_2,1);
 
-%% Window analysis
-
 %% Raw plot
 figure(1)
 clf
 
-subplot(3,1,1)
+subplot(6,1,1)
 plot(imuTimeS,gyro_0)
 title('gyro R')
 xlabel('time[s]');
 ylabel('[rad/s]');
 hold on
-plot([(jobIdx(1)-parseStart)/Fs (jobIdx(1)-parseStart)/Fs],[-0.6 0.6],'k--')
-plot([(jobIdx(2)-parseStart)/Fs (jobIdx(2)-parseStart)/Fs],[-0.6 0.6],'k--')
-plot([(jobIdx(3)-parseStart)/Fs (jobIdx(3)-parseStart)/Fs],[-0.6 0.6],'k--')
-plot([(jobIdx(4)-parseStart)/Fs (jobIdx(4)-parseStart)/Fs],[-0.6 0.6],'k--')
-plot([(jobIdx(5)-parseStart)/Fs (jobIdx(5)-parseStart)/Fs],[-0.6 0.6],'k--')
-plot([(jobIdx(6)-parseStart)/Fs (jobIdx(6)-parseStart)/Fs],[-0.6 0.6],'k--')
+for i = 1:length(jobStartIdxS)
+    plot([jobStartIdxS(i) jobStartIdxS(i)],[-std(gyro_0)*5 std(gyro_0)*5],'r--')
+    plot([jobEndIdxS(i) jobEndIdxS(i)],[-std(gyro_0)*5 std(gyro_0)*5],'g--')
+end
+ylim([-10*std(gyro_0) 10*std(gyro_0)])
 
-subplot(3,1,2)
+subplot(6,1,2)
 plot(imuTimeS,gyro_1)
 title('gyro P')
 xlabel('time[s]')
 ylabel('[rad/s]');
 hold on
-plot([(jobIdx(1)-parseStart)/Fs (jobIdx(1)-parseStart)/Fs],[-0.5 0.5],'k--')
-plot([(jobIdx(2)-parseStart)/Fs (jobIdx(2)-parseStart)/Fs],[-0.5 0.5],'k--')
-plot([(jobIdx(3)-parseStart)/Fs (jobIdx(3)-parseStart)/Fs],[-0.5 0.5],'k--')
-plot([(jobIdx(4)-parseStart)/Fs (jobIdx(4)-parseStart)/Fs],[-0.5 0.5],'k--')
-plot([(jobIdx(5)-parseStart)/Fs (jobIdx(5)-parseStart)/Fs],[-0.5 0.5],'k--')
-plot([(jobIdx(6)-parseStart)/Fs (jobIdx(6)-parseStart)/Fs],[-0.5 0.5],'k--')
+for i = 1:length(jobStartIdxS)
+    plot([jobStartIdxS(i) jobStartIdxS(i)],[-std(gyro_1)*5 std(gyro_1)*5],'r--')
+    plot([jobEndIdxS(i) jobEndIdxS(i)],[-std(gyro_1)*5 std(gyro_1)*5],'g--')
+end
+ylim([-10*std(gyro_1) 10*std(gyro_1)])
 
-subplot(3,1,3)
+subplot(6,1,3)
 plot(imuTimeS,gyro_2)
 title('gyro Y')
 xlabel('time[s]')
 ylabel('[rad/s]');
 hold on
-plot([(jobIdx(1)-parseStart)/Fs (jobIdx(1)-parseStart)/Fs],[-2 2],'k--')
-plot([(jobIdx(2)-parseStart)/Fs (jobIdx(2)-parseStart)/Fs],[-2 2],'k--')
-plot([(jobIdx(3)-parseStart)/Fs (jobIdx(3)-parseStart)/Fs],[-2 2],'k--')
-plot([(jobIdx(4)-parseStart)/Fs (jobIdx(4)-parseStart)/Fs],[-2 2],'k--')
-plot([(jobIdx(5)-parseStart)/Fs (jobIdx(5)-parseStart)/Fs],[-2 2],'k--')
-plot([(jobIdx(6)-parseStart)/Fs (jobIdx(6)-parseStart)/Fs],[-2 2],'k--')
+for i = 1:length(jobStartIdxS)
+    plot([jobStartIdxS(i) jobStartIdxS(i)],[-std(gyro_2)*5 std(gyro_2)*5],'r--')
+    plot([jobEndIdxS(i) jobEndIdxS(i)],[-std(gyro_2)*5 std(gyro_2)*5],'g--')
+end
+ylim([-10*std(gyro_2) 10*std(gyro_2)])
 
-figure(11)
-clf
-subplot(3,1,1)
+subplot(6,1,4)
 plot(imuTimeS,acc_0)
 title('acc X')
 xlabel('time[s]');
 ylabel('[m/s^2]');
 hold on
-plot([(jobIdx(1)-parseStart)/Fs (jobIdx(1)-parseStart)/Fs],[-0.6 0.6],'k--')
-plot([(jobIdx(2)-parseStart)/Fs (jobIdx(2)-parseStart)/Fs],[-0.6 0.6],'k--')
-plot([(jobIdx(3)-parseStart)/Fs (jobIdx(3)-parseStart)/Fs],[-0.6 0.6],'k--')
-plot([(jobIdx(4)-parseStart)/Fs (jobIdx(4)-parseStart)/Fs],[-0.6 0.6],'k--')
-plot([(jobIdx(5)-parseStart)/Fs (jobIdx(5)-parseStart)/Fs],[-0.6 0.6],'k--')
-plot([(jobIdx(6)-parseStart)/Fs (jobIdx(6)-parseStart)/Fs],[-0.6 0.6],'k--')
+for i = 1:length(jobStartIdxS)
+    plot([jobStartIdxS(i) jobStartIdxS(i)],[-std(acc_0)*5 std(acc_0)*5],'r--')
+    plot([jobEndIdxS(i) jobEndIdxS(i)],[-std(acc_0)*5 std(acc_0)*5],'g--')
+end
+ylim([-10*std(acc_0) 10*std(acc_0)])
 
-subplot(3,1,2)
+subplot(6,1,5)
 plot(imuTimeS,acc_1)
 title('acc Y')
 xlabel('time[s]')
 ylabel('[m/s^2]');
 hold on
-plot([(jobIdx(1)-parseStart)/Fs (jobIdx(1)-parseStart)/Fs],[-0.5 0.5],'k--')
-plot([(jobIdx(2)-parseStart)/Fs (jobIdx(2)-parseStart)/Fs],[-0.5 0.5],'k--')
-plot([(jobIdx(3)-parseStart)/Fs (jobIdx(3)-parseStart)/Fs],[-0.5 0.5],'k--')
-plot([(jobIdx(4)-parseStart)/Fs (jobIdx(4)-parseStart)/Fs],[-0.5 0.5],'k--')
-plot([(jobIdx(5)-parseStart)/Fs (jobIdx(5)-parseStart)/Fs],[-0.5 0.5],'k--')
-plot([(jobIdx(6)-parseStart)/Fs (jobIdx(6)-parseStart)/Fs],[-0.5 0.5],'k--')
+for i = 1:length(jobStartIdxS)
+    plot([jobStartIdxS(i) jobStartIdxS(i)],[-std(acc_1)*5 std(acc_1)*5],'r--')
+    plot([jobEndIdxS(i) jobEndIdxS(i)],[-std(acc_1)*5 std(acc_1)*5],'g--')
+end
+ylim([-10*std(acc_1) 10*std(acc_1)])
 
-subplot(3,1,3)
+subplot(6,1,6)
 plot(imuTimeS,acc_2)
 title('acc Z')
 xlabel('time[s]')
 ylabel('[m/s^2]');
 hold on
-plot([(jobIdx(1)-parseStart)/Fs (jobIdx(1)-parseStart)/Fs],[-2 2],'k--')
-plot([(jobIdx(2)-parseStart)/Fs (jobIdx(2)-parseStart)/Fs],[-2 2],'k--')
-plot([(jobIdx(3)-parseStart)/Fs (jobIdx(3)-parseStart)/Fs],[-2 2],'k--')
-plot([(jobIdx(4)-parseStart)/Fs (jobIdx(4)-parseStart)/Fs],[-2 2],'k--')
-plot([(jobIdx(5)-parseStart)/Fs (jobIdx(5)-parseStart)/Fs],[-2 2],'k--')
-plot([(jobIdx(6)-parseStart)/Fs (jobIdx(6)-parseStart)/Fs],[-2 2],'k--')
+for i = 1:length(jobStartIdxS)
+    plot([jobStartIdxS(i) jobStartIdxS(i)],[-std(acc_2)*5 std(acc_2)*5],'r--')
+    plot([jobEndIdxS(i) jobEndIdxS(i)],[-std(acc_2)*5 std(acc_2)*5],'g--')
+end
+ylim([-10*std(acc_2) 10*std(acc_2)])
 
 %% FDI
 
@@ -166,15 +176,15 @@ v = FDI(ay,Fs);
 w = FDI(az,Fs);
 
 % HPF
-filterFreqUpper = 0.15; %hz
+filterFreqUpper = 3; %hz
 U = fft(u);
 V = fft(v);
 W = fft(w);
 
 df = L/Fs;
 kernel = ones(L,1);
-kernel(1:filterFreqUpper*df) = 0;
-kernel(L-filterFreqUpper*df:end) = 0;
+kernel(1:ceil(filterFreqUpper*df)) = 0;
+kernel(L-ceil(filterFreqUpper*df)+1:end) = 0;
 
 U_filter = U .* kernel;
 V_filter = V .* kernel;
@@ -186,20 +196,68 @@ w = real(ifft(W_filter));
 
 figure(4)
 clf
+subplot(2,1,1)
 hold on
-plot(imuTimeS,w)
-% plot(imuTimeS,filteredv)
-% plot(imuTimeS,detrend(filteredv,0))
+plot(imuTimeS,v)
 grid on
 xlabel('time[s]')
 ylabel('v [m/s]');
-plot(gdTimeS-80,gdLog.velUVW_mps_2)
-legend('integrated v (HP filtered)','gdLog v')
+plot(gdTimeS,gdLog.velUVW_mps_1)
 title('velocity trend comparison')
-xlim([10 60])
-ylim([-5 5])
+for i = 1:length(jobStartIdxS)
+plot([jobStartIdxS(i) jobStartIdxS(i)],[-std(v)*5 std(v)*5],'r--')
+plot([jobEndIdxS(i) jobEndIdxS(i)],[-std(v)*5 std(v)*5],'g--')
+end
+legend('integrated v (HP filtered)','gdLog v')
 
 
+%% Partial FDI
+for i = 1:length(gdTimeS)-1
+    interest = find(imuTimeS>gdTimeS(i) & imuTimeS<gdTimeS(i+1));
+    
+    gimbalR = gdLog.gimbalRpy_deg_0(i);
+    gimbalP = gdLog.gimbalRpy_deg_1(i);
+    gimbalY = 0;
+    dcmI2G = angle2dcm(gimbalY, gimbalR, gimbalP,'ZXY');
+    
+    timeF = gdTimeS(i);
+    timeB = gdTimeS(i+1);
+    gduF = gdLog.velUVW_mps_0(i);
+    gduB = gdLog.velUVW_mps_0(i+1);
+    gdvF = gdLog.velUVW_mps_1(i);
+    gdvB = gdLog.velUVW_mps_1(i+1);
+    gdwF = gdLog.velUVW_mps_2(i);
+    gdwB = gdLog.velUVW_mps_2(i+1);
+    
+    gdVelF = dcmI2G * [gduF;gdvF;gdwF];
+    gdVelB = dcmI2G * [gduB;gdvB;gdwB];
+    
+    gduF = gdVelF(1); gdvF = gdVelF(2); gdwF = gdVelF(3);
+    gduB = gdVelB(1); gdvB = gdVelB(2); gdwB = gdVelB(3);
+    
+    interestRatio = (imuTimeS(interest)-timeF)/(timeB-timeF);
+    
+    u(interest) = u(interest) + (1-interestRatio) * gduF + interestRatio * gduB;
+    v(interest) = v(interest) + (1-interestRatio) * gdvF + interestRatio * gdvB;
+    w(interest) = w(interest) + (1-interestRatio) * gdwF + interestRatio * gdwB;
+end
+
+figure(4)
+subplot(2,1,2)
+hold on
+plot(imuTimeS,v)
+grid on
+xlabel('time[s]')
+ylabel('v [m/s]');
+plot(gdTimeS,gdLog.velUVW_mps_1)
+title('velocity trend comparison')
+for i = 1:length(jobStartIdxS)
+plot([jobStartIdxS(i) jobStartIdxS(i)],[-std(v)*5 std(v)*5],'r--')
+plot([jobEndIdxS(i) jobEndIdxS(i)],[-std(v)*5 std(v)*5],'g--')
+end
+legend('integrated v (HP filtered)','gdLog v')
+
+disp('Partial FDI complete!')
 %% data selection
 y = gyro_0;
 
@@ -323,7 +381,7 @@ sgtitle('FFT spectral decompostion','fontsize',14)
 % sgtitle('SVD decomposition [3s duration]') 
 
 %% Spectrogram
-y = gyro_1;
+y = gyro_0;
 timeStep = .5; %[s]
 
 dspec = timeStep * Fs;
@@ -409,7 +467,7 @@ colorbar
 
 figure(888)
 clf
-subplot(2,1,1)
+subplot(3,1,1)
 hold on
 grid on
 imagesc([imuTimeS(1) imuTimeS(end)],[0 200],spectrogram(:,0*timeStep+1:200*timeStep)');
@@ -428,7 +486,7 @@ text(landIdxS+2,2,jobName(end),'Color',[1 1 1])
 xlim([imuTimeS(1) imuTimeS(end)])
 ylim([0 200])
 
-subplot(2,1,2)
+subplot(3,1,2)
 hold on
 grid on
 plot(gdTimeS,gdLog.pqrBody_dps_0)
@@ -443,7 +501,9 @@ for i = 1:length(jobStartIdxS)
 end
 plot([landIdxS landIdxS], [-100 100], 'k--','LineWidth',1.5)
 text(landIdxS+2,2,jobName(end),'Color',[1 1 1])
+
 disp("Spectrogram plotting complete!")
+
 
 %% Vibration component analysis - pqr
 p = gyro_0;
@@ -506,7 +566,7 @@ U = fft(u);
 V = fft(v);
 W = fft(w);
 
-freqL = [1 5  30  100 500 800 1200];
+freqL = [0.05 5  30  100 500 800 1200];
 freqH = [5 30 100 500 800 1200 2000];
 df = L/Fs;
 
@@ -551,6 +611,8 @@ velBarTrans = vertcat(transvel,residueTrans);
 
 start = 1;
 finish = L;
+% start = imuJobStartIdx(4);
+% finish = imuJobEndIdx(4);
 
 figure(9)
 clf
@@ -588,12 +650,12 @@ dpsViolationRate = size(find(totalVelocity >= threshold),2)/L * 100
 dpsViolationRate = size(find(totalVelocity(start:finish) >= threshold),2)/(finish-start) * 100
 
 count = 0;
-for i= 1:L-40
-if(~isempty(find(totalVelocity(i:i+40) > threshold)))
+for i= 1:L-20
+if(~isempty(find(totalVelocity(i:i+20) > threshold)))
 count = count + 1;
 end
 end
-count/(L-40) * 100
+count/(L-20) * 100
 
 %% vibration component plot translational
 
@@ -619,6 +681,13 @@ title('Contribution ratio area plot - translational component')
 hold on
 % a(8).FaceColor = [0.7 0.7 0.7];
 plot([imuTimeS(start) imuTimeS(finish)],[thresholdTrans thresholdTrans], 'r:','LineWidth',2.4)
+for i = 1:length(jobStartIdxS)
+plot([jobStartIdxS(i) jobStartIdxS(i)],[0 std(v)*5],'r--')
+plot([jobEndIdxS(i) jobEndIdxS(i)],[0 std(v)*5],'g--')
+end
+for i = 1:length(jobStartIdx)
+    text(jobStartIdxS(i)+2,3,jobName(i),'Fontsize',10,'FontWeight','bold','Color','m')
+end
 legend('1-5hz','5-30hz','30-100hz','100-500hz','500-800hz','800-1200hz','1200~hz','residue','threshold')
 grid on
 % xlim([110 110.1])
@@ -643,7 +712,7 @@ vel = [];
 x_comp = [];
 y_comp = [];
 pixelPosAngle = pi/4;
-pixelDist = 0;
+pixelDist = 3;
 for i = 1:length(freqL)
     x_comp(i,:) = filteredFreq_r(i,:) * 9 - pixelDist * filteredFreq_p(i,:) * cos(pixelPosAngle) + filteredFreq_v(i,:);
     y_comp(i,:) = filteredFreq_q(i,:) * 9 + pixelDist * filteredFreq_p(i,:) * sin(pixelPosAngle) - filteredFreq_w(i,:);
@@ -655,8 +724,6 @@ threshold = 3.9; % m/s
 residue = threshold - totalVelocity;
 velBar = vertcat(vel,residue);
 
-start = 1;
-finish = L;
 
 figure(11)
 clf
@@ -674,11 +741,26 @@ for i = 1:size(jobStartIdx,2)
     plot([jobEndIdxS(i) jobEndIdxS(i)], [0 max(totalVelocity)],'g--')
 end
 plot([landIdxS landIdxS], [0 max(totalVelocity)],'k--')
+
+for i = 1:length(photoTimeS)
+    plot(photoTimeS(i),0,'g*','LineWidth',4,'MarkerSize',10)
+end
+for i = 1:length(faultPhotoIdx)
+    plot(photoTimeS(faultPhotoIdx(i)),0,'rx','LineWidth',4,'MarkerSize',10)
+end
+for i = 1:length(realBadPhotoIdx)
+    plot(photoTimeS(realBadPhotoIdx(i)),0,'mo','LineWidth',4,'MarkerSize',10)
+end
+
+for i = 1:length(jobStartIdx)
+    text(jobStartIdxS(i)+2,30,jobName(i),'Fontsize',10,'FontWeight','bold','Color','m')
+end
+
 legend('pointing velocity','threshold');
+ylim([0 40])
 
 
-start = 250000;
-finish = 300000;
+%% Total contribution
 
 figure(1111)
 clf
@@ -701,9 +783,99 @@ plot([],[],'g:','LineWidth',1.5)
 dpsViolationRate = size(find(totalVelocity(start:finish) >= threshold),2)/(finish-start) * 100
 
 count = 0;
-for i= 1:L-40
-if(~isempty(find(totalVelocity(i:i+40) > threshold)))
+for i= 1:L-20
+if(~isempty(find(totalVelocity(i:i+20) > threshold)))
 count = count + 1;
 end
 end
-count/(L-40) * 100
+
+% sortie 1
+% shotNum = [0 20 0 18 0 21 0 27 0 19 0 20];
+% sortie 2
+shotNum = [0 20 0 19 0 22 0 27 0 20 0 19];
+
+disp('violation rate')
+(count- sum(shotNum) * 560)/(L-20 - sum(shotNum) * 560) * 100
+
+
+
+%% Partial satisfaction rate
+
+partialSatis = [];
+for i = 1:length(imuJobStartIdx)
+    jobLength = imuJobEndIdx(i) - imuJobStartIdx(i);
+    count = 0;
+    for j = imuJobStartIdx(i):imuJobEndIdx(i)-20
+        if (~isempty(find(totalVelocity(j:j+20)>threshold)))
+            count = count + 1;
+        end
+    end
+    partialSatis(i) = (count - shotNum(i) * 560)/(jobLength-20- shotNum(i) * 560)*100;
+    if partialSatis(i) < 0
+        partialSatis(i) = 0;
+    end
+end
+
+partialSatis
+
+%% job satisfactory rate trend
+partialSatis1 = load('partialSatis_sortie1.mat');
+partialSatis1 = partialSatis1.partialSatis;
+partialSatis2 = load('partialSatis_sortie2.mat');
+partialSatis2 = partialSatis2.partialSatis;
+
+shotNum1 = [0 20 0 18 0 21 0 27 0 19 0 20];
+shotNum2 = [0 20 0 19 0 22 0 27 0 20 0 19];
+
+photoCount1 = shotNum1;
+faultPhotoCount1 = [0 4 0 1 0 1 0 16 0 3 0 3];
+realBadPhotoCount1 = [0 1 0 1 0 0 0 7 0 0 0 1];
+
+photoCount2 = shotNum2;
+faultPhotoCount2 = [0 0 0 1 0 1 0 3 0 1 0 3];
+realBadphotoCount2 = [0 0 0 0 0 0 0 1 0 0 0 0];
+
+faultRatio1 = faultPhotoCount1 ./ photoCount1 * 100;
+realBadRatio1 = realBadPhotoCount1 ./ photoCount1 * 100;
+faultRatio2 = faultPhotoCount2 ./ photoCount2 * 100;
+realBadRatio2 = realBadphotoCount2 ./ photoCount2 * 100;
+
+figure(12)
+clf
+hold on
+grid on
+scatter(horzcat(partialSatis1,partialSatis2),horzcat(faultRatio1,faultRatio2),'LineWidth',5)
+scatter(horzcat(partialSatis1,partialSatis2),horzcat(realBadRatio1,realBadRatio2),'LineWidth',5)
+plot([0 60], [0 60], 'k')
+% axis equal
+xlim([0 60])
+ylim([0 60])
+
+disp('real violation rate')
+sum(faultPhotoCount1)/sum(photoCount1)*100
+sum(faultPhotoCount2)/sum(photoCount2)*100
+
+xlabel('Expected fault ratio [%]')
+ylabel('Actual fault ratio [%]')
+title('Fault ratio expectation - actual comparison')
+
+%% comparison plot
+figure(888)
+subplot(3,1,3)
+clf
+hold on
+grid on
+plot(imuTimeS,totalVelocity)
+
+kernel = [2 4 6 8 10 12];
+figure(13)
+clf
+bar([partialSatis1(kernel)' , partialSatis2(kernel)'])
+hold on
+plot(faultRatio1(kernel),'bx','MarkerSize',10,'LineWidth',4)
+plot(faultRatio2(kernel),'rx','MarkerSize',10,'LineWidth',4)
+grid on
+legend('sortie 1 (ouster 20hz)','sortie 2 (ouster 10hz)')
+xlabel('job #')
+ylabel('expected fault ratio')
+
