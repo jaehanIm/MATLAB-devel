@@ -1,6 +1,6 @@
 function [ colony ] = createColonyVRP( graph, colony, antNo, tau, eta, alpha,  beta)
 
-global homeIdx vehNum
+global homeIdx vehNum temp mutationRate
 
 nodeNo = graph.n;
 
@@ -11,17 +11,29 @@ for i = 1 : antNo
     initial_node = homeIdx;
     colony.ant(i).tour(:,1) = ones(vehNum,1) * initial_node;
     unvisitedNum = unvisitedNum - 1;
-    vehTourLen = zeros(vehNum,1);
+    vehTourLen = ones(vehNum,1);
 
     while unvisitedNum ~= 0
         for j = 1:vehNum
             if unvisitedNum == 0
                 break;
             end
-            currentNode = colony.ant(i).tour(j,vehTourLen(j))
+            currentNode = colony.ant(i).tour(j,vehTourLen(j));
             P_allNodes = tau(currentNode,:).^alpha.*eta(currentNode,:).^beta;
-            P_allNodes(colony.ant(i).tour) = 0;
+            P_allNodes(nonzeros(colony.ant(i).tour(:))) = 0;
             P = P_allNodes./sum(P_allNodes);
+            
+            % for debugging
+            temp.P_allNodes = P_allNodes;
+            temp.currentNode = currentNode;
+            temp.i = i;
+            temp.j = j;
+            temp.colony = colony;
+            temp.vehTourLen = vehTourLen;
+            
+            if rand(1) < mutationRate
+                
+            end
             
             nextNode = rouletteWheel(P);
             vehTourLen(j) = vehTourLen(j) +1;

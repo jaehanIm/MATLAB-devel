@@ -12,8 +12,8 @@ graph = graph.graph;
 %% ACOVRP algorithm 
 
 %% Initial parameters of ACO 
-maxIter = 2000;
-antNo = 20;
+maxIter = 500;
+antNo = 200;
 
 tau0 = 10 * 1 / (  graph.n * mean( graph.edges(:)  )  );  % Initial phromone concentration
 
@@ -25,10 +25,11 @@ rho = 0.2; % Evaporation rate
 alpha = 1;  % Phromone exponential parameters 
 beta = 1;  % Desirability exponetial paramter
 
-global homeIdx vehNum vehCapacity temp temp2
+global homeIdx vehNum vehCapacity temp  mutationRate
 homeIdx = 60;
 vehNum = 2;
 vehCapacity = [100 100 100 100 100];
+mutationRate = 0.0;
 
 %% Main loop of ACO 
 

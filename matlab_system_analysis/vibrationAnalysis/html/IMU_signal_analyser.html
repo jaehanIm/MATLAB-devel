@@ -1,0 +1,260 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>IMU_signal_analyser</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-12-17"><meta name="DC.source" content="IMU_signal_analyser.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">pre processing</a></li></ul></div><pre class="codeinput">imuData = readtable(<span class="string">'/home/jaehan/log/211215_131651_rooftop_test_toktok/aSensorLog_211215_131651.csv'</span>);
+<span class="comment">% gdData = readtable('/home/jaehan/log/211215_131651_rooftop_test_toktok/gdLog_211215_131651.csv');</span>
+
+parseStart = 1;
+parseEnd = size(imuData,1);
+
+imuTime = datetime(imuData.rosTime(1:end),<span class="string">'ConvertFrom'</span>,<span class="string">'posixtime'</span>,<span class="string">'TimeZone'</span>,<span class="string">'Asia/Tokyo'</span>);
+<span class="comment">% gdTime = datetime(gdData.rosTime(1:end),'ConvertFrom','posixtime','TimeZone','Asia/Tokyo');</span>
+
+imuTimeS = imuData.rosTime(parseStart:parseEnd) - imuData.rosTime(1);
+
+<span class="comment">% Assign data</span>
+acc_0 = imuData.acc_mpss_0(parseStart:parseEnd);
+acc_1 = imuData.acc_mpss_1(parseStart:parseEnd);
+acc_2 = imuData.acc_mpss_2(parseStart:parseEnd);
+gyro_0 = imuData.gyro_dps_0(parseStart:parseEnd);
+gyro_1 = imuData.gyro_dps_1(parseStart:parseEnd);
+gyro_2 = imuData.gyro_dps_2(parseStart:parseEnd);
+
+Fs = round(1/mean(diff(imuTimeS)));
+L = size(imuTimeS,1);
+
+disp(<span class="string">"Data Loading Complete!"</span>)
+</pre><pre class="codeoutput">Data Loading Complete!
+</pre><h2 id="2">pre processing</h2><pre class="codeinput">acc_0 = detrend(acc_0,1);
+acc_1 = detrend(acc_1,1);
+acc_2 = detrend(acc_2,2);
+gyro_0 = detrend(gyro_0,1);
+gyro_1 = detrend(gyro_1,1);
+gyro_2 = detrend(gyro_2,1);
+</pre><pre class="codeinput">y = gyro_0(1:L);
+timeStep = .5; <span class="comment">%[s]</span>
+
+dspec = timeStep * Fs;
+specNum = floor(L/dspec);
+<span class="comment">% spectrogram = zeros(specNum,L);</span>
+spectrogram = [];
+
+<span class="keyword">for</span> i = 1:specNum
+    y_spec = y(dspec*(i-1)+1:dspec*i);
+    [freq,fftResult,~] = data2fftpsd(y_spec,Fs);
+    spectrogram(i,1:length(freq)) = fftResult';
+<span class="keyword">end</span>
+
+spectrogram(:,length(freq)+1:end) = [];
+
+figure(8)
+imagesc([freq(1) freq(end)],[imuTimeS(1) imuTimeS(end)],spectrogram(:,1:end));
+xlabel(<span class="string">'freq [hz]'</span>)
+ylabel(<span class="string">'time [s]'</span>)
+<span class="comment">% xlim([0 200])</span>
+<span class="comment">% ylim([0 250])</span>
+title(<span class="string">'Spectrogram Analysis [dt = 1.0s]'</span>)
+colorbar
+
+figure(88)
+clf
+sgtitle(<span class="string">'spectrogram'</span>)
+
+subplot(1,4,1)
+imagesc([0 200],[imuTimeS(1) imuTimeS(end)],spectrogram(:,0*timeStep+1:200*timeStep));
+colorbar
+xlabel(<span class="string">'hz'</span>)
+ylabel(<span class="string">'time [s]'</span>)
+title(<span class="string">'0~200hz'</span>)
+hold <span class="string">on</span>
+
+
+subplot(1,4,2)
+imagesc([40 500],[imuTimeS(1) imuTimeS(end)],spectrogram(:,40*timeStep:500*timeStep));
+hold <span class="string">on</span>
+xlabel(<span class="string">'hz'</span>)
+ylabel(<span class="string">'time [s]'</span>)
+title(<span class="string">'40~500hz'</span>)
+colorbar
+
+subplot(1,4,3)
+imagesc([500 900],[imuTimeS(1) imuTimeS(end)],spectrogram(:,500*timeStep:900*timeStep));
+hold <span class="string">on</span>
+xlabel(<span class="string">'hz'</span>)
+ylabel(<span class="string">'time [s]'</span>)
+title(<span class="string">'500~900'</span>)
+colorbar
+
+subplot(1,4,4)
+imagesc([900 1300],[imuTimeS(1) imuTimeS(end)],spectrogram(:,900*timeStep:1300*timeStep));
+hold <span class="string">on</span>
+xlabel(<span class="string">'hz'</span>)
+ylabel(<span class="string">'time [s]'</span>)
+title(<span class="string">'900~1300hz'</span>)
+colorbar
+</pre><img vspace="5" hspace="5" src="IMU_signal_analyser_01.png" alt=""> <img vspace="5" hspace="5" src="IMU_signal_analyser_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+
+imuData = readtable('/home/jaehan/log/211215_131651_rooftop_test_toktok/aSensorLog_211215_131651.csv');
+% gdData = readtable('/home/jaehan/log/211215_131651_rooftop_test_toktok/gdLog_211215_131651.csv');
+
+parseStart = 1;
+parseEnd = size(imuData,1);
+
+imuTime = datetime(imuData.rosTime(1:end),'ConvertFrom','posixtime','TimeZone','Asia/Tokyo');
+% gdTime = datetime(gdData.rosTime(1:end),'ConvertFrom','posixtime','TimeZone','Asia/Tokyo');
+
+imuTimeS = imuData.rosTime(parseStart:parseEnd) - imuData.rosTime(1);
+
+% Assign data
+acc_0 = imuData.acc_mpss_0(parseStart:parseEnd);
+acc_1 = imuData.acc_mpss_1(parseStart:parseEnd);
+acc_2 = imuData.acc_mpss_2(parseStart:parseEnd);
+gyro_0 = imuData.gyro_dps_0(parseStart:parseEnd);
+gyro_1 = imuData.gyro_dps_1(parseStart:parseEnd);
+gyro_2 = imuData.gyro_dps_2(parseStart:parseEnd);
+
+Fs = round(1/mean(diff(imuTimeS)));
+L = size(imuTimeS,1);
+
+disp("Data Loading Complete!")
+
+%% pre processing
+acc_0 = detrend(acc_0,1);
+acc_1 = detrend(acc_1,1);
+acc_2 = detrend(acc_2,2);
+gyro_0 = detrend(gyro_0,1);
+gyro_1 = detrend(gyro_1,1);
+gyro_2 = detrend(gyro_2,1);
+
+%%
+y = gyro_0(1:L);
+timeStep = .5; %[s]
+
+dspec = timeStep * Fs;
+specNum = floor(L/dspec);
+% spectrogram = zeros(specNum,L);
+spectrogram = [];
+
+for i = 1:specNum
+    y_spec = y(dspec*(i-1)+1:dspec*i);
+    [freq,fftResult,~] = data2fftpsd(y_spec,Fs);
+    spectrogram(i,1:length(freq)) = fftResult';
+end
+
+spectrogram(:,length(freq)+1:end) = [];
+
+figure(8)
+imagesc([freq(1) freq(end)],[imuTimeS(1) imuTimeS(end)],spectrogram(:,1:end));
+xlabel('freq [hz]')
+ylabel('time [s]')
+% xlim([0 200])
+% ylim([0 250])
+title('Spectrogram Analysis [dt = 1.0s]')
+colorbar
+
+figure(88)
+clf
+sgtitle('spectrogram')
+
+subplot(1,4,1)
+imagesc([0 200],[imuTimeS(1) imuTimeS(end)],spectrogram(:,0*timeStep+1:200*timeStep));
+colorbar
+xlabel('hz')
+ylabel('time [s]')
+title('0~200hz')
+hold on
+
+
+subplot(1,4,2)
+imagesc([40 500],[imuTimeS(1) imuTimeS(end)],spectrogram(:,40*timeStep:500*timeStep));
+hold on
+xlabel('hz')
+ylabel('time [s]')
+title('40~500hz')
+colorbar
+
+subplot(1,4,3)
+imagesc([500 900],[imuTimeS(1) imuTimeS(end)],spectrogram(:,500*timeStep:900*timeStep));
+hold on
+xlabel('hz')
+ylabel('time [s]')
+title('500~900')
+colorbar
+
+subplot(1,4,4)
+imagesc([900 1300],[imuTimeS(1) imuTimeS(end)],spectrogram(:,900*timeStep:1300*timeStep));
+hold on
+xlabel('hz')
+ylabel('time [s]')
+title('900~1300hz')
+colorbar
+
+##### SOURCE END #####
+--></body></html>
