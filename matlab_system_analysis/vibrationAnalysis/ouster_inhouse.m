@@ -23,12 +23,16 @@ addpath('./..')
 % gdLog = readtable('/home/jaehan/log/220113_[0]_oksang/220113_141431/gdLog_220113_141431.csv');
 
 % 220114 oksang - 10hz
-imuData = readtable('/home/jaehan/log/220114_[0]_oksang/220114_132544/aSensorLog_220114_132544.csv');
-gdLog = readtable('/home/jaehan/log/220114_[0]_oksang/220114_132544/gdLog_220114_132544.csv');
+% imuData = readtable('/home/jaehan/log/220114_[0]_oksang/220114_132544/aSensorLog_220114_132544.csv');
+% gdLog = readtable('/home/jaehan/log/220114_[0]_oksang/220114_132544/gdLog_220114_132544.csv');
 
 % 220114 oksang - 20hz
 % imuData = readtable('/home/jaehan/log/220114_[0]_oksang/220114_133507/aSensorLog_220114_133507.csv');
 % gdLog = readtable('/home/jaehan/log/220114_[0]_oksang/220114_133507/gdLog_220114_133507.csv');
+
+% 220117 oksang - 10hz
+imuData = readtable('/home/jaehan/log/220117_165029_10hz_wind/aSensorLog_220117_165029.csv');
+gdLog = readtable('/home/jaehan/log/220117_165029_10hz_wind/gdLog_220117_165029.csv');
 
 % Job index parser
 jobStartIdx = [];
@@ -597,8 +601,8 @@ ylim([0 40])
 %% Total contribution
 
 move = -400 * 0;
-start = 560000 + move;
-finish = 560000 + move + 200;
+start = 480000 + move;
+finish = 480000 + move + 200;
 
 figure(111111)
 clf
@@ -632,8 +636,8 @@ totalSatis
 mean(totalVelocity(start:finish))
 
 %% Contribution analysis
-% temp = sum(velBar(:,6000:10000),2)/4000
-% save('10hz_inhouse.mat','temp')
+temp = sum(velBar(:,480000:484000),2)/4000
+save('10hz_inhouse2.mat','temp')
 
 % temp = sum(velBar(:,460000:464000),2)/4000
 % save('0hz_inhouse.mat','temp')

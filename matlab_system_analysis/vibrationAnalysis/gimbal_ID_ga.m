@@ -3,7 +3,7 @@ k = 1; D = 5; P = 10; I = 0.2;
 sys = tf([k*D k*P k*I],[1 k*D k*P k*I]);
 [Y,T] = step(sys);
 L = length(Y);
-Y = Y + (randn(L,1)-0.5)/100;
+Y = Y + (randn(L,1)-0.5)/10000;
 
 %% linearize function
 L = length(Y);
