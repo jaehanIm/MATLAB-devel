@@ -31,8 +31,12 @@ addpath('./..')
 % gdLog = readtable('/home/jaehan/log/220114_[0]_oksang/220114_133507/gdLog_220114_133507.csv');
 
 % 220117 oksang - 10hz
-imuData = readtable('/home/jaehan/log/220117_165029_10hz_wind/aSensorLog_220117_165029.csv');
-gdLog = readtable('/home/jaehan/log/220117_165029_10hz_wind/gdLog_220117_165029.csv');
+% imuData = readtable('/home/jaehan/log/220117_165029_10hz_wind/aSensorLog_220117_165029.csv');
+% gdLog = readtable('/home/jaehan/log/220117_165029_10hz_wind/gdLog_220117_165029.csv');
+
+imuData = readtable('/home/jaehan/log/220124_162416/aSensorImu_220124_162416.csv');
+gdLog = readtable('/home/jaehan/log/220124_162416/gdLog_220124_162416.csv');
+imuData = imuData(500:end,:);
 
 % Job index parser
 jobStartIdx = [];
@@ -219,7 +223,7 @@ legend('integrated v (HP filtered)','gdLog v')
 
 disp('Partial FDI complete!')
 %% data selection
-y = gyro_0;
+y = gyro_1;
 
 %% FFT plot
 figure(2)
@@ -253,7 +257,7 @@ legend('gyro_R','gyro_P')
 xlim([0.1 2000])
 
 %% Spectrogram
-y = gyro_0;
+y = gyro_1;
 timeStep = 1; %[s]
 
 dspec = timeStep * Fs;
@@ -332,9 +336,12 @@ ylim([0 200])
 subplot(3,1,2)
 hold on
 grid on
-plot(gdTimeS,gdLog.pqr_dps_0)
-plot(gdTimeS,gdLog.pqr_dps_1)
-plot(gdTimeS,gdLog.pqr_dps_2)
+% plot(gdTimeS,gdLog.pqr_dps_0)
+% plot(gdTimeS,gdLog.pqr_dps_1)
+% plot(gdTimeS,gdLog.pqr_dps_2)
+plot(gdTimeS,gdLog.pqrBody_dps_0)
+plot(gdTimeS,gdLog.pqrBody_dps_1)
+plot(gdTimeS,gdLog.pqrBody_dps_2)
 xlim([imuTimeS(1) imuTimeS(end)])
 colorbar
 
@@ -604,6 +611,9 @@ move = -400 * 0;
 start = 480000 + move;
 finish = 480000 + move + 200;
 
+start = 1;
+finish = L;
+
 figure(111111)
 clf
 a = area(imuTimeS(start:finish),velBar(1:end-1,start:finish)');
@@ -636,8 +646,8 @@ totalSatis
 mean(totalVelocity(start:finish))
 
 %% Contribution analysis
-temp = sum(velBar(:,480000:484000),2)/4000
-save('10hz_inhouse2.mat','temp')
+% temp = sum(velBar(:,480000:484000),2)/4000
+% save('10hz_inhouse2.mat','temp')
 
 % temp = sum(velBar(:,460000:464000),2)/4000
 % save('0hz_inhouse.mat','temp')

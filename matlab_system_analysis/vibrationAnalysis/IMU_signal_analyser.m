@@ -1,13 +1,8 @@
 
-imuData = readtable('/home/jaehan/log/211215_131651_rooftop_test_toktok/aSensorLog_211215_131651.csv');
-% gdData = readtable('/home/jaehan/log/211215_131651_rooftop_test_toktok/gdLog_211215_131651.csv');
-
+imuData = readtable('/home/jaehan/Downloads/aSensorImu_220125_121103.csv');
 parseStart = 1;
 parseEnd = size(imuData,1);
-
 imuTime = datetime(imuData.rosTime(1:end),'ConvertFrom','posixtime','TimeZone','Asia/Tokyo');
-% gdTime = datetime(gdData.rosTime(1:end),'ConvertFrom','posixtime','TimeZone','Asia/Tokyo');
-
 imuTimeS = imuData.rosTime(parseStart:parseEnd) - imuData.rosTime(1);
 
 % Assign data

@@ -1,4 +1,4 @@
-function [ colony ] = createColonyVRP( graph, colony, antNo, tau, eta, alpha,  beta)
+function [ colony ] = createColonyVRPVehSel( graph, colony, antNo, tau, eta, alpha,  beta)
 
 global homeIdx vehNum temp mutationRate
 
@@ -30,7 +30,7 @@ for i = 1 : antNo
             temp.j = j;
             temp.colony = colony;
             temp.vehTourLen = vehTourLen;
-            n
+            
             if rand(1) < mutationRate
                P(P~=0) = 1;
             end
