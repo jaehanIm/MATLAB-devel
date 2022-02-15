@@ -1,0 +1,15 @@
+function [home, rt, blNum, fixNum]=nodeInterpreter(num)
+
+if num == 1
+    home = 1;
+    rt = 0;
+    blNum = 0;
+    fixNum = 0;
+else
+    index = num-1;
+    home = 0;
+    blNum = ceil(index/8);
+    leftover = 25-
+end
+
+end

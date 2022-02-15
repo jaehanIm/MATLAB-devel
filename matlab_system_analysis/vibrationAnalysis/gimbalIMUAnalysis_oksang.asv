@@ -1,5 +1,5 @@
 addpath('./..')
-
+withBlurEst = true;
 %% Load data
 
 % 211223 oksang
@@ -44,12 +44,13 @@ for i = 1:length(manPhotoFaultTotal)
 end
 
 % 220107 oksang - 10hz
-% imuData = readtable('/home/jaehan/log/220107_[1]_oksang/220107_150302_10hz/aSensorLog_220107_150302.csv');
-% gdLog = readtable('/home/jaehan/log/220107_[1]_oksang/220107_150302_10hz/gdLog_220107_150302.csv');
-% photoXml = readtable('/home/jaehan/log/220107_[1]_oksang/220107_150302_10hz/df_xmp.csv');
-% opts = detectImportOptions('/home/jaehan/log/220107_[1]_oksang/220107_150302_10hz/output_1.csv');
+% imuData = readtable('/home/jaehan/log/220107_150302_10hz/aSensorLog_220107_150302.csv');
+% gdLog = readtable('/home/jaehan/log/220107_150302_10hz/gdLog_220107_150302.csv');
+% photoXml = readtable('/home/jaehan/log/220107_150302_10hz/df_xmp.csv');그냥
+
+% opts = detectImportOptions('/home/jaehan/log/220107_150302_10hz/output_1.csv');
 % opts.DataLines = 2;
-% photoBlurEst = readtable('/home/jaehan/log/220107_[1]_oksang/220107_150302_10hz/output_1.csv');
+% photoBlurEst = readtable('/home/jaehan/log/220107_150302_10hz/output_1.csv');
 % photoTimeTrim = seconds(1.179-0.626+0.39);
 % manPhotoFault1 = [003  009  014  015  016 018  020  021  026  027 029  032  037  042  043 050  057  071  072  073 075  079  082  083  085 090  093  095  096  097 101  149  155  157  159 164  170  176  184]- 2;
 % manPhotoFault2 = [3 9 10 11 14 15 16 18 20 21 23 27 29 32 33 35 37 42 43 50 57 70 71 72 73 75 77 80 83 85 90 93 95 96 101 106 109 155 157 164 170 173 180 186 197]- 2;
@@ -68,16 +69,47 @@ end
 %     end
 % end
 
+% 220208 _ oksang
+% sortie1
+gdLog = readtable('/home/jaehan/log/220208_oksang/220208_112559/gdLog_220208_112559.csv');
+imuData = readtable('/home/jaehan/log/220208_oksang/220208_112559/aSensorImu_220208_112559.csv');
+imuData(1:143,:) = [];
+withBlurEst = false;
+photoXml = readtable('/home/jaehan/log/220208_oksang/220208_112559/df_xmp.csv');
+
+% sortie2
+% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_113911/gdLog_220208_113911.csv');
+% imuData = readtable('/home/jaehan/log/220208_oksang/220208_113911/aSensorImu_220208_113911.csv');
+% imuData(1:143,:) = [];
+
+% sortie3 - stiff soft
+% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_113911/gdLog_220208_113911.csv');
+% imuData = readtable('/home/jaehan/log/220208_oksang/220208_113911/aSensorImu_220208_113911.csv');
+% imuData(1:143,:) = [];
+
+% sortie4 - stiff stiff
+% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_120441/gdLog_220208_120441.csv');
+% imuData = readtable('/home/jaehan/log/220208_oksang/220208_120441/aSensorImu_220208_120441.csv');
+% imuData(1:143,:) = [];
+
+% sortie5 - soft soft
+% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_122239/gdLog_220208_122239.csv');
+% imuData = readtable('/home/jaehan/log/220208_oksang/220208_122239/aSensorImu_220208_122239.csv');
+% imuData(1:143,:) = [];
+
+%% Preprocess
 % photoMaxVal?
-for i = 1:size(photoBlurEst,1)
-    if ~isempty(photoBlurEst.totalRecord{i})
-        tempRecord = str2num(photoBlurEst.totalRecord{i});
-        photoBlurEst.maxVal(i) = max(tempRecord);
-        photoBlurEst.meanVal(i) = mean(tempRecord);
-    else
-        photoBlurEst.maxVal(i) = nan;
-        photoBlurEst.maxVal(i) = nan;
-        photoBlurEst.meanVal(i) = nan;
+if withBlurEst
+    for i = 1:size(photoBlurEst,1)
+        if ~isempty(photoBlurEst.totalRecord{i})
+            tempRecord = str2num(photoBlurEst.totalRecord{i});
+            photoBlurEst.maxVal(i) = max(tempRecord);
+            photoBlurEst.meanVal(i) = mean(tempRecord);
+        else
+            photoBlurEst.maxVal(i) = nan;
+            photoBlurEst.maxVal(i) = nan;
+            photoBlurEst.meanVal(i) = nan;
+        end
     end
 end
 
@@ -1171,30 +1203,46 @@ for i = 1:jobLen
     partialPhotoScore(i) = mean(photoScoreMax(photoJobCategory{i}),'omitnan');
 end
 
+% omit YawRL
+processed.partialPhotoScore = partialPhotoScore;
+processed.partialPhotoFault = partialPhotoFault;
+processed.jobName = jobName;
+processed.partialSatis = partialSatis;
+processed.partialVel = partialVel;
+processed.partialPhotoScore(6) = [];
+processed.partialPhotoFault(6) = [];
+processed.jobName(6) = [];
+processed.partialSatis(6) = [];
+processed.partialVel(6) = [];
+
 % job - FFTS
 figure(18)
 clf
 hold on
 grid on
-plot(partialPhotoScore,partialPhotoFault,'*','MarkerSize',10)
-text(partialPhotoScore,partialPhotoFault,jobName)
+plot(processed.partialPhotoScore,processed.partialPhotoFault,'r*','MarkerSize',10,'LineWidth',3)
+text(processed.partialPhotoScore,processed.partialPhotoFault,processed.jobName)
 
 % job - partialSatis / partialVel
 figure(17)
 clf
 hold on
 grid on
-plot(partialSatis,partialPhotoFault,'*','MarkerSize',10)
-text(partialSatis,partialPhotoFault,jobName)
+plot(processed.partialSatis,processed.partialPhotoFault,'*','MarkerSize',10)
+text(processed.partialSatis,processed.partialPhotoFault,processed.jobName)
 
 figure(1717)
 clf
 hold on
 grid on
-plot(partialVel,partialPhotoFault,'*','MarkerSize',10)
-text(partialVel,partialPhotoFault,jobName)
+plot(processed.partialVel,processed.partialPhotoFault,'*','MarkerSize',10)
+text(processed.partialVel,processed.partialPhotoFault,processed.jobName)
 
 % mission - partialVel
 totalPhotoScore = mean(photoScoreMax,'omitnan');
-savetemp = [totalVel,totalSatis, totalPhotoScore];
-save('2sortie_mission_fault.mat','savetemp')
+% savetemp = [totalVel,totalSatis, totalPhotoScore];
+savetemp = {};
+savetemp.totalVel = totalVel;
+savetemp.totalSatis = totalSatis;
+savetemp.totalPhotoScore = totalPhotoScore;
+save('1sortie_mission_fault.mat','savetemp')

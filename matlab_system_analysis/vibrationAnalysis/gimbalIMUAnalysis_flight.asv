@@ -18,25 +18,23 @@ addpath('./..')
 % photoTimeTrim = seconds(1.0);
 
 % 220210 ss1
-% imuData = readtable('/home/jaehan/log/220210_temp/220210_141454_soso1/aSensorImu_220210_141454.csv');
-% imuData(1:165,:) = [];
-% % imuData(1680000:end,:) = []; % 6-1
-% imuData(1:1680000,:) = []; % 6-2
-% gdLog = readtable('/home/jaehan/log/220210_temp/220210_141454_soso1/gdLog_220210_141454.csv');
-% % gdLog(21600:end,:) = []; % 6-1
-% gdLog(1:21600,:) = []; % 6-2
-% photoDir = dir('/home/jaehan/log/220210_temp/220210_141454_soso1/soft-soft sortie 1');
-% photoXml = readtable('/home/jaehan/log/220210_temp/220210_141454_soso1/df_xmp.csv');
-% photoTimeTrim = seconds(0.8 + 0.6780 - 0.1);
+imuData = readtable('/home/jaehan/log/220210_temp/220210_141454_soso1/aSensorImu_220210_141454.csv');
+imuData(1:165,:) = [];
+% imuData(1680000:end,:) = []; % 6-1
+imuData(1:1680000,:) = []; % 6-2
+gdLog = readtable('/home/jaehan/log/220210_temp/220210_141454_soso1/gdLog_220210_141454.csv');
+% gdLog(21600:end,:) = []; % 6-1
+gdLog(1:21600,:) = []; % 6-2
+photoDir = dir('/home/jaehan/log/220210_temp/220210_141454_soso1/soft-soft sortie 1');
+photoXml = readtable('/home/jaehan/log/220210_temp/220210_141454_soso1/df_xmp.csv');
+photoTimeTrim = seconds(0.8 + 0.6780 - 0.1);
 
 % 220210 ss2
 % imuData = readtable('/home/jaehan/log/220210_temp/220210_143844_soso2/aSensorImu_220210_143844.csv');
 % imuData(1:165,:) = [];
-% % imuData(1:1978220-160000,:) = []; % 6-1
-% imuData(1978220:end,:) = [];  % 6-2
+% imuData(1:1978220-160000,:) = [];
 % gdLog = readtable('/home/jaehan/log/220210_temp/220210_143844_soso2/gdLog_220210_143844.csv');
-% % gdLog(1:22542,:) = [];
-% gdLog(22542:end,:) = [];
+% gdLog(1:22542,:) = [];
 % photoDir = dir('/home/jaehan/log/220210_temp/220210_143844_soso2/soft-soft sortie 2');
 % photoXml = readtable('/home/jaehan/log/220210_temp/220210_143844_soso2/df_xmp.csv');
 % photoTimeTrim = seconds(0.8 + 0.6780 - 0.1 + 0.0730);
@@ -44,11 +42,9 @@ addpath('./..')
 % 220210 st1
 % imuData = readtable('/home/jaehan/log/220210_temp/220210_150409_stso1/aSensorImu_220210_150409.csv');
 % imuData(1:165,:) = [];
-% % imuData(1731564:end,:) = []; % 6-1
-% imuData(1:1731564,:) = []; % 6-2
+% imuData(1731564:end,:) = [];
 % gdLog = readtable('/home/jaehan/log/220210_temp/220210_150409_stso1/gdLog_220210_150409.csv');
-% % gdLog(19179:end,:) = [];
-% gdLog(1:19179,:) = [];
+% gdLog(19179:end,:) = [];
 % photoDir = dir('/home/jaehan/log/220210_temp/220210_150409_stso1/stiff-soft sortie 1');
 % photoXml = readtable('/home/jaehan/log/220210_temp/220210_150409_stso1/df_xmp.csv');
 % photoTimeTrim = seconds(0.8 + 0.6780 - 0.1);
@@ -56,17 +52,12 @@ addpath('./..')
 % 220210 st2
 % imuData = readtable('/home/jaehan/log/220210_temp/220210_163334_stso2/aSensorImu_220210_163334.csv');
 % imuData(1:165,:) = [];
-% % imuData(1:1731564,:) = [];
-% imuData(1731564:end,:) = [];
+% imuData(1:1731564,:) = [];
 % gdLog = readtable('/home/jaehan/log/220210_temp/220210_163334_stso2/gdLog_220210_163334.csv');
-% % gdLog(1:20559,:) = [];
-% gdLog(20559:end,:) = [];
+% gdLog(1:20559,:) = [];
 % photoDir = dir('/home/jaehan/log/220210_temp/220210_163334_stso2/stiff-soft sortie 4');
 % photoXml = readtable('/home/jaehan/log/220210_temp/220210_163334_stso2/df_xmp.csv');
 % photoTimeTrim = seconds(0.8 + 0.6780 - 0.1550);
-
-% 220211 ss1
-
 
 
 %% Preprocessing
@@ -95,8 +86,8 @@ for i = 2:size(gdLog,1)
 end
 
 
-% jobName = ["SME","#2 LE bf","PP","#2 UPSS bf","PP","#1 LTSS bf","PP","#1 TE bf","PP","#0 UPSS bf","PP","#0 TE bf", "ShutOff"];
-jobName = ["SME","PP","#0 DNSS","PP","#0 LE","PP","#1 RTSS","PP","#1 LE","PP","#2 DNSS","PP","#2 TE","ShutOff"];
+jobName = ["SME","#2 LE bf","PP","#2 UPSS bf","PP","#1 LTSS bf","PP","#1 TE bf","PP","#0 UPSS bf","PP","#0 TE bf", "ShutOff"];
+jobName = ["SME","PP","#0 DNSS","PP","#0 LE","PP","#1 RTSS","PP","#1 LE","PP","#2 DNSS","PP","","ShutOff"];
 % jobName6_2 = ["SME","","","",""];
 parseStart = 1;
 parseEnd = size(imuData,1);

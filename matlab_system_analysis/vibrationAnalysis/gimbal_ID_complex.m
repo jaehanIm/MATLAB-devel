@@ -41,7 +41,7 @@ fun = @(x) sum(((Y - lsim(feedback(...
 
 % fmincon 쓰고싶다면 아래 두 줄 사용
 options = optimoptions('fmincon','ConstraintTolerance',1e-8);
-[result,score] = fmincon(fun,[prelog(1) prelog(2) prelog(3) prelog(4) 1 100 0],[],[],[],[],[],[],[],options);
+[result,score] = fmincon(fun,[prelog(1) prelog(2) prelog(3) prelog(4) 1 100 0],[],[],[],[],[-inf -inf 0 -inf -inf -inf -inf],[],[],options);
 
 %% plot result
 figure(2)

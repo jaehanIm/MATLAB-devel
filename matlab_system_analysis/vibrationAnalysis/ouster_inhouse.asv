@@ -35,8 +35,8 @@ addpath('./..')
 % gdLog = readtable('/home/jaehan/log/220117_165029_10hz_wind/gdLog_220117_165029.csv');
 
 % 220107 oksang - 20hz
-% imuData = readtable('/home/jaehan/log/220107_152745_20hz/aSensorLog_220107_152745.csv');
-% gdLog = readtable('/home/jaehan/log/220107_152745_20hz/gdLog_220107_152745.csv');
+imuData = readtable('/home/jaehan/log/220107_152745_20hz/aSensorLog_220107_152745.csv');
+gdLog = readtable('/home/jaehan/log/220107_152745_20hz/gdLog_220107_152745.csv');
 
 % 220204 _ set1 - contaminated
 % gdLog = readtable('/home/jaehan/log/220204_oksang/220204_105529/gdLog_220204_105529.csv');

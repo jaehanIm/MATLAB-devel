@@ -1,4 +1,6 @@
 addpath('./..')
+withBlurEst = true;
+postShootCut = 0.34;
 
 %% Load data
 
@@ -19,13 +21,14 @@ addpath('./..')
 % photoTimeTrim = seconds(1.179-0.626-0.1);
 
 % 220107 oksang - 20hz
-% imuData = readtable('/home/jaehan/log/220107_152745_20hz/aSensorLog_220107_152745.csv');
-% gdLog = readtable('/home/jaehan/log/220107_152745_20hz/gdLog_220107_152745.csv');
-% photoXml = readtable('/home/jaehan/log/220107_152745_20hz/df_xmp.csv');
+imuData = readtable('/home/jaehan/log/220107_152745_20hz/aSensorLog_220107_152745.csv');
+gdLog = readtable('/home/jaehan/log/220107_152745_20hz/gdLog_220107_152745.csv');
+photoXml = readtable('/home/jaehan/log/220107_152745_20hz/df_xmp.csv');
+withBlurEst = false;
 % opts = detectImportOptions('/home/jaehan/log/220107_152745_20hz/output_2.csv');
 % opts.DataLines = 2;
 % photoBlurEst = readtable('/home/jaehan/log/220107_152745_20hz/output_2.csv',opts);
-% photoTimeTrim = seconds(1.179-0.626+0.366-0.1);
+photoTimeTrim = seconds(1.179-0.626+0.366-0.1+0.082);
 % manPhotoFault1 = [014  015  016  017  018 022  023  024  027  028 029  031  032  033  034 036  038  040  065  069 076  080  083  084  086 087  089  090  091  092 093  094  096  097  099 100  132  135  161  165 169  177  180  189  191 193  196  199]- 3;
 % manPhotoFault2 = [13 15 16 17 18 22 23 24 27 28 29 30 32 33 34 36 38 40 48 65 66 69 72 76 80 83 84 86 87 89 90 91 92 93 94 96 97 99 100 103 112 116 132 133 135 136 142 161 164 165 169 177 180 189 191 193 195 196 199]- 3;
 % manPhotoFault3 = [14, 15, 16, 17, 18, 22, 23, 24, 27, 28, 29, 31, 32, 33, 34, 38, 66, 69, 76, 80, 83, 84, 86, 87, 89, 90, 91, 92, 93, 94, 96, 97, 99, 100, 132, 135, 161, 165, 169, 177, 180, 189, 191, 193, 196, 199]- 3;
@@ -44,41 +47,82 @@ addpath('./..')
 % end
 
 % 220107 oksang - 10hz
-imuData = readtable('/home/jaehan/log/220107_150302_10hz/aSensorLog_220107_150302.csv');
-gdLog = readtable('/home/jaehan/log/220107_150302_10hz/gdLog_220107_150302.csv');
-photoXml = readtable('/home/jaehan/log/220107_150302_10hz/df_xmp.csv');
-opts = detectImportOptions('/home/jaehan/log/220107_150302_10hz/output_1.csv');
-opts.DataLines = 2;
-photoBlurEst = readtable('/home/jaehan/log/220107_150302_10hz/output_1.csv');
-photoTimeTrim = seconds(1.179-0.626+0.39);
-manPhotoFault1 = [003  009  014  015  016 018  020  021  026  027 029  032  037  042  043 050  057  071  072  073 075  079  082  083  085 090  093  095  096  097 101  149  155  157  159 164  170  176  184]- 2;
-manPhotoFault2 = [3 9 10 11 14 15 16 18 20 21 23 27 29 32 33 35 37 42 43 50 57 70 71 72 73 75 77 80 83 85 90 93 95 96 101 106 109 155 157 164 170 173 180 186 197]- 2;
-manPhotoFault3 = [3 9 14 15 16 20 21 26 27 29 32 42 43 59 63 71 72 73 75 77 79 83 85 90 93 95 97 101 149 155 159 164 170 173 184 196]- 2;
-manPhotoFaultTotal = union(union(manPhotoFault1,manPhotoFault2),manPhotoFault3);
-singleFault = []; doubleFault = []; tripleFault = [];
-for i = 1:length(manPhotoFaultTotal)
-    candidate = manPhotoFaultTotal(i);
-    detectNum = sum([ismember(candidate,manPhotoFault1),ismember(candidate,manPhotoFault2),ismember(candidate,manPhotoFault3)]);
-    if detectNum == 1
-        singleFault = horzcat(singleFault,candidate);
-    elseif detectNum == 2
-        doubleFault = horzcat(doubleFault,candidate);
-    else
-        tripleFault = horzcat(tripleFault,candidate);
-    end
-end
+% imuData = readtable('/home/jaehan/log/220107_150302_10hz/aSensorLog_220107_150302.csv');
+% gdLog = readtable('/home/jaehan/log/220107_150302_10hz/gdLog_220107_150302.csv');
+% photoXml = readtable('/home/jaehan/log/220107_150302_10hz/df_xmp.csv');
+% opts = detectImportOptions('/home/jaehan/log/220107_150302_10hz/output_1.csv');
+% opts.DataLines = 2;
+% photoBlurEst = readtable('/home/jaehan/log/220107_150302_10hz/output_1.csv');
+% photoTimeTrim = seconds(1.179-0.626+0.39);
+% manPhotoFault1 = [003  009  014  015  016 018  020  021  026  027 029  032  037  042  043 050  057  071  072  073 075  079  082  083  085 090  093  095  096  097 101  149  155  157  159 164  170  176  184]- 2;
+% manPhotoFault2 = [3 9 10 11 14 15 16 18 20 21 23 27 29 32 33 35 37 42 43 50 57 70 71 72 73 75 77 80 83 85 90 93 95 96 101 106 109 155 157 164 170 173 180 186 197]- 2;
+% manPhotoFault3 = [3 9 14 15 16 20 21 26 27 29 32 42 43 59 63 71 72 73 75 77 79 83 85 90 93 95 97 101 149 155 159 164 170 173 184 196]- 2;
+% manPhotoFaultTotal = union(union(manPhotoFault1,manPhotoFault2),manPhotoFault3);
+% singleFault = []; doubleFault = []; tripleFault = [];
+% for i = 1:length(manPhotoFaultTotal)
+%     candidate = manPhotoFaultTotal(i);
+%     detectNum = sum([ismember(candidate,manPhotoFault1),ismember(candidate,manPhotoFault2),ismember(candidate,manPhotoFault3)]);
+%     if detectNum == 1
+%         singleFault = horzcat(singleFault,candidate);
+%     elseif detectNum == 2
+%         doubleFault = horzcat(doubleFault,candidate);
+%     else
+%         tripleFault = horzcat(tripleFault,candidate);
+%     end
+% end
 
+% 220208 _ oksang
+% sortie1
+% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_112559/gdLog_220208_112559.csv');
+% imuData = readtable('/home/jaehan/log/220208_oksang/220208_112559/aSensorImu_220208_112559.csv');
+% imuData(1:143,:) = [];
+% withBlurEst = false;
+% photoXml = readtable('/home/jaehan/log/220208_oksang/220208_112559/df_xmp.csv');
+% photoTimeTrim = seconds(1.3);
 
+% sortie2
+% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_113911/gdLog_220208_113911.csv');
+% imuData = readtable('/home/jaehan/log/220208_oksang/220208_113911/aSensorImu_220208_113911.csv');
+% imuData(1:143,:) = [];
+% withBlurEst = false;
+% photoXml = readtable('/home/jaehan/log/220208_oksang/220208_113911/df_xmp.csv');
+% photoTimeTrim = seconds(1.3 +0.185);
+
+% sortie3 - stiff soft
+% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_113911/gdLog_220208_113911.csv');
+% imuData = readtable('/home/jaehan/log/220208_oksang/220208_113911/aSensorImu_220208_113911.csv');
+% imuData(1:143,:) = [];
+
+% sortie4 - stiff stiff
+% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_120441/gdLog_220208_120441.csv');
+% imuData = readtable('/home/jaehan/log/220208_oksang/220208_120441/aSensorImu_220208_120441.csv');
+% imuData(1:143,:) = [];
+% withBlurEst = false;
+% photoXml = readtable('/home/jaehan/log/220208_oksang/220208_120441/df_xmp.csv');
+% photoTimeTrim = seconds(1.3 +0.185 - 0.376);
+
+% sortie5 - soft soft
+% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_122239/gdLog_220208_122239.csv');
+% imuData = readtable('/home/jaehan/log/220208_oksang/220208_122239/aSensorImu_220208_122239.csv');
+% imuData(1:143,:) = [];
+% withBlurEst = false;
+% photoXml = readtable('/home/jaehan/log/220208_oksang/220208_122239/df_xmp.csv');
+% photoTimeTrim = seconds(1.305);
+
+%% Preprocess
 % photoMaxVal?
-for i = 1:size(photoBlurEst,1)
-    if ~isempty(photoBlurEst.totalRecord{i})
-        tempRecord = str2num(photoBlurEst.totalRecord{i});
-        photoBlurEst.maxVal(i) = max(tempRecord);
-        photoBlurEst.meanVal(i) = mean(tempRecord);
-    else
-        photoBlurEst.maxVal(i) = nan;
-        photoBlurEst.maxVal(i) = nan;
-        photoBlurEst.meanVal(i) = nan;
+
+if withBlurEst
+    for i = 1:size(photoBlurEst,1)
+        if ~isempty(photoBlurEst.totalRecord{i})
+            tempRecord = str2num(photoBlurEst.totalRecord{i});
+            photoBlurEst.maxVal(i) = max(tempRecord);
+            photoBlurEst.meanVal(i) = mean(tempRecord);
+        else
+            photoBlurEst.maxVal(i) = nan;
+            photoBlurEst.maxVal(i) = nan;
+            photoBlurEst.meanVal(i) = nan;
+        end
     end
 end
 
@@ -516,9 +560,9 @@ ylim([0 200])
 subplot(3,1,2)
 hold on
 grid on
-plot(gdTimeS,gdLog.pqr_dps_0)
-plot(gdTimeS,gdLog.pqr_dps_1)
-plot(gdTimeS,gdLog.pqr_dps_2)
+% plot(gdTimeS,gdLog.pqr_dps_0)
+% plot(gdTimeS,gdLog.pqr_dps_1)
+% plot(gdTimeS,gdLog.pqr_dps_2)
 xlim([imuTimeS(1) imuTimeS(end)])
 colorbar
 for i = 1:length(jobStartIdxS)
@@ -758,6 +802,7 @@ velBar = vertcat(vel,residue);
 start = 1;
 finish = L;
 
+
 figure(11)
 clf
 hold on
@@ -776,13 +821,16 @@ end
 
 for i = 1:length(photoTimeS)
     plot(photoTimeS(i),0,'g*','LineWidth',4,'MarkerSize',10)
+    plot(photoTimeS(i)+postShootCut,0,'r*','LineWidth',2,'MarkerSize',5)
 end
 
 for i = 1:length(jobStartIdx)
     text(jobStartIdxS(i)+2,30,jobName(i),'Fontsize',10,'FontWeight','bold','Color','m')
 end
 
-plot(photoTimeS,photoBlurEst.minVal,'rx--','LineWidth',3,'MarkerSize',8)
+if withBlurEst
+    plot(photoTimeS,photoBlurEst.minVal,'rx--','LineWidth',3,'MarkerSize',8)
+end
 
 legend('pointing velocity','threshold');
 ylim([0 40])
@@ -793,7 +841,7 @@ ylim([0 40])
 % start = imuJobStartIdx(7);
 % finish = imuJobEndIdx(7);
 
-start = imuJobEndIdx(6);
+start = imuJobEndIdx(5);
 finish = L;
 
 figure(1111)
@@ -834,9 +882,8 @@ disp('violation rate')
 
 
 %% Partial satisfaction rate
-postShootCut = 0.34;
 cutEnd = photoTimeS + postShootCut;
-syncLen = 3;
+syncLen = 20;
 
 partialSatis = [];
 for i = 1:length(imuJobStartIdx)
@@ -1172,28 +1219,40 @@ for i = 1:jobLen
     partialPhotoScore(i) = mean(photoScoreMax(photoJobCategory{i}),'omitnan');
 end
 
+% omit YawRL
+processed.partialPhotoScore = partialPhotoScore;
+processed.partialPhotoFault = partialPhotoFault;
+processed.jobName = jobName;
+processed.partialSatis = partialSatis;
+processed.partialVel = partialVel;
+processed.partialPhotoScore(6) = [];
+processed.partialPhotoFault(6) = [];
+processed.jobName(6) = [];
+processed.partialSatis(6) = [];
+processed.partialVel(6) = [];
+
 % job - FFTS
 figure(18)
 clf
 hold on
 grid on
-plot(partialPhotoScore,partialPhotoFault,'*','MarkerSize',10)
-text(partialPhotoScore,partialPhotoFault,jobName)
+plot(processed.partialPhotoScore,processed.partialPhotoFault,'r*','MarkerSize',10,'LineWidth',3)
+text(processed.partialPhotoScore,processed.partialPhotoFault,processed.jobName)
 
 % job - partialSatis / partialVel
 figure(17)
 clf
 hold on
 grid on
-plot(partialSatis,partialPhotoFault,'*','MarkerSize',10)
-text(partialSatis,partialPhotoFault,jobName)
+plot(processed.partialSatis,processed.partialPhotoFault,'*','MarkerSize',10)
+text(processed.partialSatis,processed.partialPhotoFault,processed.jobName)
 
 figure(1717)
 clf
 hold on
 grid on
-plot(partialVel,partialPhotoFault,'*','MarkerSize',10)
-text(partialVel,partialPhotoFault,jobName)
+plot(processed.partialVel,processed.partialPhotoFault,'*','MarkerSize',10)
+text(processed.partialVel,processed.partialPhotoFault,processed.jobName)
 
 % mission - partialVel
 totalPhotoScore = mean(photoScoreMax,'omitnan');
