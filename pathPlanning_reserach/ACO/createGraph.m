@@ -1,4 +1,4 @@
-function [ graph ]  = createGraph()
+function [ graph1 ]  = createGraph()
 % To create the graph and calculate the distances between each nodes 
 % x = [ 0.09 , 0.16 , 0.84 , 0.70 ];
 % y = [0.17,   0.52,  0.92, 0.16];
@@ -48,8 +48,9 @@ function [ graph ]  = createGraph()
 %%%%%%%%%%%%%% for my research IJH %%%%%%%%%%%%%%
 
 
-graph = load('graph_complete.mat');
-graph = graph.graph;
+graph1 = load('graph_complete.mat');
+graph1
+graph1 = graph1.graph1;
 
 
 %%%%%%%%%%%%%% for my research IJH %%%%%%%%%%%%%%

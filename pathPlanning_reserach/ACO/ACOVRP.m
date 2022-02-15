@@ -1,19 +1,18 @@
-clear all
+% clear all
 % close all
 clc
 
 %% Problem preparation 
 
 % Create the graph 
-[ graph ]  = createGraph();graph = load('graph_complete.mat');
-graph = graph.graph;
+graph  = createGraph();
 
 
 %% ACOVRP algorithm 
 
 %% Initial parameters of ACO 
-maxIter = 500;
-antNo = 50;
+maxIter = 300;
+antNo = 100;
 
 tau0 = 10 * 1 / (  graph.n * mean( graph.edges(:)  )  );  % Initial phromone concentration
 
@@ -21,13 +20,13 @@ tau = tau0 * ones( graph.n , graph.n); % Phromone matirx
 eta = 1./ graph.edges;  % desirability of each edge 
 % eta = ones(graph.n,graph.n);
 
-rho = 0.2; % Evaporation rate 
+rho = 0.02; % Evaporation rate 
 alpha = 1;  % Phromone exponential parameters 
 beta = 1;  % Desirability exponetial paramter
 
 global homeIdx vehNum vehCapacity temp  mutationRate
-homeIdx = 30; %60 is the main
-vehNum = 5;
+homeIdx = 16; %60 is the main
+vehNum = 4;
 vehCapacity = [100 100 100 100 100];
 mutationRate = 0.0;
 
@@ -85,5 +84,5 @@ plot(history,'x--')
 
 
 
-
+% bestScore = horzcat(bestScore,colony.queen.fitness);
 

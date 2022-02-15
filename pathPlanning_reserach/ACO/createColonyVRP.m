@@ -18,6 +18,7 @@ for i = 1 : antNo
             if unvisitedNum == 0
                 break;
             end
+            % i = antNo, j = vehNum
             currentNode = colony.ant(i).tour(j,vehTourLen(j));
             P_allNodes = tau(currentNode,:).^alpha.*eta(currentNode,:).^beta;
             P_allNodes(nonzeros(colony.ant(i).tour(:))) = 0;
@@ -30,7 +31,7 @@ for i = 1 : antNo
             temp.j = j;
             temp.colony = colony;
             temp.vehTourLen = vehTourLen;
-            n
+
             if rand(1) < mutationRate
                P(P~=0) = 1;
             end

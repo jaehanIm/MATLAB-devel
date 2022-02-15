@@ -1,5 +1,7 @@
 addpath('./ACO')
 addpath('./MILP')
+addpath('./../ComDetTBv090/')
+PathAdd
 
 poc_path_planner
 
@@ -17,7 +19,7 @@ end
 
 
 %% Build Network
-conThres = 15;
+conThres = 10;
 for i = 1:N
     for j = 1:N
         if i~=j
@@ -31,7 +33,7 @@ for i = 1:N
     end
 end
 
-figure(5)
+
 G = graph(C);
 degree = centrality(G,'degree');
 closeness = centrality(G,'closeness');
@@ -39,6 +41,7 @@ betweenness = centrality(G,'betweenness');
 pagerank = centrality(G,'pagerank');
 eigenvector = centrality(G,'eigenvector');
 
+figure(5)
 p = plot(G,'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
 p.NodeCData = betweenness;
 colormap jet
@@ -95,15 +98,32 @@ for i = 1:size(G.Edges,1)
 end
 axis equal
 
-%% reverse edge vertex
-G
-
 %% save
-graph.n = N;
-graph.node.x = node(:,1);
-graph.node.y = node(:,2);
-graph.node.z = node(:,3);
-graph.edges = L;
+graph1.n = N;
+graph1.node.x = node(:,1);
+graph1.node.y = node(:,2);
+graph1.node.z = node(:,3);
+graph1.edges = L;
 
-save('graph_complete.mat','graph');
+save('graph_complete.mat','graph1');
 
+%% Cluster & Plot
+
+B = GCModulMax1(A);
+
+figure(5)
+p = plot(G,'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
+p.NodeCData = betweenness;
+colormap jet
+colorbar
+
+figure(9)
+clf
+p = plot(graph(A),'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
+p.NodeCData = B;
+colormap jet
+colorbar
+
+%% complete-fy
+
+A;
