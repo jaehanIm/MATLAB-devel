@@ -5,7 +5,7 @@ px = 6; % fov x length
 py = 4;
 ov_x = 0.1; % overlap length
 ov_y = 0.1;
-voxel_width = 0.05; % voxel distance
+voxel_width = 0.1; % voxel distance
 inpection_dist = 3; % Inspection distance
 
 eff_x = px - ov_x; % Effective fov size
@@ -206,7 +206,7 @@ plot(record(:,1),record(:,2))
 %     end
 % end
 
-figure(2)
+figure(1)
 clf
 hold on
 grid on

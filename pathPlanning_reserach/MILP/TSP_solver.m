@@ -1,4 +1,4 @@
-function routeResult=TSP_solver(map)
+function [routeResult,score]=TSP_solver(map)
 % Very Very Inefficient MILP solver
 
 %% Optimization param setting
@@ -100,7 +100,7 @@ iterationNum = 0;
 while flag == 1
     iterationNum = iterationNum + 1;
     options = optimoptions('intlinprog','AbsoluteGapTolerance',0.1,'IntegerTolerance',1e-6);
-    result = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options);
+    [result,score] = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options);
     tempResult = reshape(result,[T,T,V]);
     tempResult = sum(tempResult,3);
     

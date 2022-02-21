@@ -117,13 +117,12 @@ nodeInCluIdx = [];
 for i = 1:cluNum
     nodeInCluIdx{i} = find(cluIdx == i);
 end
-intraCluIdxSet = [];
 intraCluIdx = [];
 for i = 1:cluNum-1
     for j = i+1:cluNum
         [I,J]=find(A(nodeInCluIdx{i},nodeInCluIdx{j}));
-        intraCluIdxSet{i,j} = [I,J];
-        intraCluIdxSet{j,i} = [J,I];
+        intraCluIdx{i,j} = [I,J];
+        intraCluIdx{j,i} = [J,I];
     end
 end
 

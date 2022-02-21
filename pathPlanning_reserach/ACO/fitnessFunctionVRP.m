@@ -1,6 +1,6 @@
 function [ fitness ] = fitnessFunctionVRP (tour, tourLen, graph)
 
-global vehNum vehCapacity homeIdx
+global vehNum
 
 fitness = 0;
 

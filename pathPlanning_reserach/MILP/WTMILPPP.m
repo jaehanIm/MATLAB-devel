@@ -60,15 +60,15 @@ tempCenter = reshape(centerWp(j,:,:),4,3);
 for i = 1:4
 plot3(tempRoot(i,2),tempRoot(i,1),-tempRoot(i,3),'k*')
 plot3(tempTip(i,2),tempTip(i,1),-tempTip(i,3),'k*')
-plot3(tempCenter(i,2),tempCenter(i,1),-tempCenter(i,3),'k*')
+% plot3(tempCenter(i,2),tempCenter(i,1),-tempCenter(i,3),'k*')
 end
 end
-axis equal
 
 plot3(wtCore(2),wtCore(1),-wtCore(3),'rx')
 plot3(nosePos(2),nosePos(1),-nosePos(3),'o')
 plot3(homePos(2),homePos(1),homePos(3),'o','MarkerSize',5,'LineWidth',3)
 view(35,40)
+axis equal
 
 %% Network formulation
 
@@ -164,13 +164,13 @@ end
 map.N = N;
 map.capacity = 1e6;
 map.C = C;
-map.vnum = 2;
+map.vnum = 3;
 map.oblig = ...
     [4,8;3,7;2,6;5,9;...
     12,16;11,15;10,14;13,17;...
     20,24;21,25;18,22;19,23];
 tic
-routeResult = TSP_solver(map);
+[routeResult,score] = TSP_solver(map);
 toc
 
 % Home edition

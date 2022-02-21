@@ -4,8 +4,8 @@ clear all
 
 % Parameter setting
 V = 3;
-N = 15;
-capacity = 20;
+N = 14;
+capacity = 2000;
 T = N + 1;
 
 X = zeros(T,T,V); % selector
@@ -38,12 +38,21 @@ intL = length(f);
 % Inequality Constraint
 A = [];
 b = [];
-for v = 1:V
-    X = zeros(T,T,V);
-    X(:,:,v) = 1;
-    X = X.*Y;
-    A = vertcat(A,X(:)');
-    b = vertcat(b,capacity);
+% for v = 1:V
+%     X = zeros(T,T,V);
+%     X(:,:,v) = 1;
+%     X = X.*Y;
+%     A = vertcat(A,X(:)');
+%     b = vertcat(b,capacity);
+% end
+
+if V > 1 % vehicle equality constraint
+    for v = 1:V
+        X = zeros(T,T,V);
+        X(:,:,v) = 1;
+        A = vertcat(A,X(:)');
+        b = vertcat(b,N/V+V-1);
+    end
 end
 
 % Equality Constraint
