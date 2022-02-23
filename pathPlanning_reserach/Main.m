@@ -105,6 +105,8 @@ for j = 2:cluNum
     intraCluIdxSet{j,1} = [I,1];
     intraCluNodeSet{1,j} = [1,nodeInCluIdx{j}(I)];
     intraCluNodeSet{j,1} = [nodeInCluIdx{j}(I),1];
+    C(1,nodeInCluIdx{j}(I)) = L(1,nodeInCluIdx{j}(I));
+    C(nodeInCluIdx{j}(I),1) = L(nodeInCluIdx{j}(I),1);
 end
 
 figure(4)
@@ -286,11 +288,12 @@ while true
             
             % fomulate data structure for ACO
             map = [];
-%             map.N = 
+            map.N = size(totSubProbNodeIdx,1);
+            map.C = C(totSubProbNodeIdx,totSubProbNodeIdx);
             
             % run ACO
 
-            
+
             % post processing result
 
         end
