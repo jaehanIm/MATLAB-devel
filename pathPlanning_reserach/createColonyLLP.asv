@@ -1,8 +1,10 @@
-function [ colony ] = createColonyVRP( graph, colony, antNo, tau, eta, alpha,  beta)
+function [ colony ] = createColonyLLP( graph, colony, antNo, tau, eta, alpha,  beta)
 
-global homeIdx vehNum debugTemp
+global debugTemp
 
 nodeNo = graph.n;
+homeIdx = graph.home;
+vehNum = graph.vehNum;
 
 for i = 1 : antNo
     
@@ -31,10 +33,6 @@ for i = 1 : antNo
             debugTemp.j = j;
             debugTemp.colony = colony;
             debugTemp.vehTourLen = vehTourLen;
-
-            if rand(1) < mutationRate
-               P(P~=0) = 1;
-            end
             
             nextNode = rouletteWheel(P);
             vehTourLen(j) = vehTourLen(j) +1;
@@ -46,7 +44,7 @@ for i = 1 : antNo
     
     colony.ant(i).vehTourLen = vehTourLen;
     
-    % complete the tour 
+    % complete the tour by linking end node
     for j = 1:vehNum
         colony.ant(i).tour(j,vehTourLen(j)+1) = homeIdx;
     end

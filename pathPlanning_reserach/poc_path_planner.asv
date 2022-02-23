@@ -1,10 +1,11 @@
+clear all
 % tic
 %% Parameter setting
 px = 6; % fov x length
 py = 4;
 ov_x = 0.1; % overlap length
 ov_y = 0.1;
-voxel_width = 0.05; % voxel distance
+voxel_width = 0.2; % voxel distance
 inpection_dist = 3; % Inspection distance
 
 eff_x = px - ov_x; % Effective fov size
@@ -25,14 +26,12 @@ areaPosY = voxelPosY;
 gridnum_x = ceil(area_xl/eff_x); % required grid size
 gridnum_y = ceil(area_yl/eff_y);
 
-gridPosX = []; gridPosY = []; gridValue = [];
-
 [gridPosX, gridPosY] = meshgrid(eff_x/2:eff_x:eff_x*gridnum_x-eff_x/2,eff_y/2:eff_y:eff_y*gridnum_y-eff_y/2); % grid coordinate
 gridEdgeX = [gridPosX(1,:)-eff_x/2,gridPosX(end)+eff_x/2];
 gridEdgeY = [gridPosY(:,1)'-eff_y/2,gridPosY(end)+eff_y/2];
 
 %% Curvature generation (Voxel Data Loading)
-voxelData = peaks(length(area))*1;
+voxelData = peaks(length(area))*3;
 % voxelData(:,:) = 0;
 voxelData = voxelData(1:size(area,1),1:size(area,2));
 % voxelData(200:300,300:430) = nan; % Simulating voxel fault
@@ -67,8 +66,6 @@ for i = 1:size(gridPosX,2)
 end
 
 %% Local RSM gen.
-gridNormVector = [];
-gridNormVector_lin = [];
 gridNormVector{size(gridValue,1),size(gridValue,2)} = [];
 gridNormVector_lin{size(gridValue,1),size(gridValue,2)} = [];
 
@@ -146,7 +143,7 @@ sectorY = sectorY(:);
 sectorX = sectorX(~isnan(sectorX));
 sectorY = sectorY(~isnan(sectorY));
 
-net = [sectorX,sectorY];
+net = [sectorX,sectorY]
 cost_Sweep = 0;
 for i = 2:length(net)
     cost_Sweep = cost_Sweep + euclideanDist(net(i,:),net(i-1,:));
@@ -163,13 +160,26 @@ end
 
 % Nearest Neighborhood Method
 tic
-map.node = net;
-map.N = size(net,1);
-map.L = costMatrix;
-[record,tempCost]=NNHeuristic(map);
+costMatrix(costMatrix == 0) = nan;
+
+record = zeros(size(net));
+record(1,:) = net(1,:);
+record(end,:) = net(end,:); %restricted
+cost_NNM = 0;
+curridx = 1;
+costMatrix_temp = costMatrix(:,1:end-1);
+costMatrix_temp(:,1) = nan;
+for i = 1:length(net)-2
+[~,j]=min(costMatrix_temp(curridx,:));
+record(i+1,:) = net(j,:);
+cost_NNM = cost_NNM + costMatrix_temp(curridx,j);
+curridx = j;
+costMatrix_temp(:,j) = nan;
+end
+cost_NNM = cost_NNM + costMatrix(curridx,end); %restricted
+record = vertcat(record,net(end,:)); %restricted
 toc
-
-
+% toc
 figure(44)
 plot(record(:,1),record(:,2))
 

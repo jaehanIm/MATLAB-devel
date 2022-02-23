@@ -1,14 +1,15 @@
+function LLP_solver(mapGraph,maxIter,antNo)
+% require N C vehNum homeIdx endIdx
 
-graph1 = load('graph_complete.mat');
-mapGraph = graph1.graph1;
+%% ACOVRP algorithm
 
-%% ACOVRP algorithm 
+mapGraph.n = mapGraph.N;
+mapGraph.edges = mapGraph.C;
+mapGraph.endIdx;
 
 %% Initial parameters of ACO 
-maxIter = 100;
-antNo = 50;
 
-tau0 = 10 * 1 / (  mapGraph.n * mean( mapGraph.edges(:)  )  );  % Initial phromone concentration
+tau0 = 10 * 1 / (  mapGraph.n * mean( mapGraph.edges(:)  )  );  % Initial pheromone concentration
 
 tau = tau0 * ones( mapGraph.n , mapGraph.n); % Phromone matirx 
 eta = 1./ mapGraph.edges;  % desirability of each edge 
@@ -17,11 +18,10 @@ rho = 0.02; % Evaporation rate
 alpha = 1;  % Phromone exponential parameters 
 beta = 1;  % Desirability exponetial paramter
 
-global homeIdx vehNum temp  mutationRate
-homeIdx = 3; %60 is the main
-vehNum = 2;
-mutationRate = 0.0;
-temp = [];
+global debugTemp
+homeIdx = mapGraph.homeIdx;
+vehNum = mapGraph.vehNum;
+debugTemp = [];
 
 %% Main loop of ACO 
 
@@ -30,14 +30,12 @@ bestTour = [];
 history = zeros(maxIter,1);
 for t = 1 : maxIter
     % Create Ants 
-    
     colony = [];
-    colony = createColonyVRP( mapGraph, colony , antNo, tau, eta, alpha,  beta);
-    
+    colony = createColonyLLP(mapGraph,colony,antNo,tau,eta,alpha,beta);
     
     % Calculate the fitness values of all ants 
     for i = 1 : antNo 
-        colony.ant(i).fitness = fitnessFunctionVRP(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph);
+        colony.ant(i).fitness = fitnessFunctionLLP(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph);
     end
     
     % Find the best ant (queen)
@@ -54,7 +52,7 @@ for t = 1 : maxIter
     colony.queen.vehTourLen = bestTourLen;
         
     % Update phromone matrix 
-    tau = updatePhromoneVRP(tau , colony);  
+    tau = updatePhromoneLLP(tau , colony, vehNum);  
     
     % Evaporation 
     tau  = ( 1 - rho ) .* tau;
@@ -65,6 +63,4 @@ for t = 1 : maxIter
     history(t,1) = colony.queen.fitness;
 end
 
-drawBestTourVRP( colony, mapGraph );
-
-
+end

@@ -1,29 +1,25 @@
-function []=ACOVRP()
+function LLP_solver(mapGraph,maxIter,antNo)
+%% ACOVRP algorithm
 
-% Create the graph 
-graph  = createGraph();
-
-
-%% ACOVRP algorithm 
+% mapGraph.n
+% mapGraph.node
+% mapGraph.edges
 
 %% Initial parameters of ACO 
-maxIter = 300;
-antNo = 100;
 
-tau0 = 10 * 1 / (  graph.n * mean( graph.edges(:)  )  );  % Initial phromone concentration
+tau0 = 10 * 1 / (  mapGraph.n * mean( mapGraph.edges(:)  )  );  % Initial phromone concentration
 
-tau = tau0 * ones( graph.n , graph.n); % Phromone matirx 
-eta = 1./ graph.edges;  % desirability of each edge 
+tau = tau0 * ones( mapGraph.n , mapGraph.n); % Phromone matirx 
+eta = 1./ mapGraph.edges;  % desirability of each edge 
 
 rho = 0.02; % Evaporation rate 
 alpha = 1;  % Phromone exponential parameters 
 beta = 1;  % Desirability exponetial paramter
 
-global homeIdx vehNum vehCapacity temp  mutationRate
-homeIdx = 16; %60 is the main
-vehNum = 4;
-vehCapacity = [100 100 100 100 100];
-mutationRate = 0.0;
+global debugTemp
+homeIdx = mapGraph.home;
+vehNum = mapGraph.vehNum;
+debugTemp = [];
 
 %% Main loop of ACO 
 
@@ -32,14 +28,12 @@ bestTour = [];
 history = zeros(maxIter,1);
 for t = 1 : maxIter
     % Create Ants 
-    
     colony = [];
-    colony = createColonyVRP( graph, colony , antNo, tau, eta, alpha,  beta);
-    
+    colony = createColonyLLP(mapGraph,colony,antNo,tau,eta,alpha,beta,homeIdx,vehNum);
     
     % Calculate the fitness values of all ants 
     for i = 1 : antNo 
-        colony.ant(i).fitness = fitnessFunctionVRP(colony.ant(i).tour, colony.ant(i).vehTourLen, graph);
+        colony.ant(i).fitness = fitnessFunctionLLP(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vehNum);
     end
     
     % Find the best ant (queen)
@@ -56,7 +50,7 @@ for t = 1 : maxIter
     colony.queen.vehTourLen = bestTourLen;
         
     % Update phromone matrix 
-    tau = updatePhromoneVRP(tau , colony);  
+    tau = updatePhromoneLLP(tau , colony, vehNum);  
     
     % Evaporation 
     tau  = ( 1 - rho ) .* tau;
@@ -66,8 +60,5 @@ for t = 1 : maxIter
     disp(outmsg)
     history(t,1) = colony.queen.fitness;
 end
-
-% drawBestTourVRP( colony, graph );
-
 
 end
