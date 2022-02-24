@@ -38,8 +38,8 @@ if V > 1 % vehicle demand equality constraint
         X = zeros(T,T,V);
         X(:,:,v) = ND;
         A = vertcat(A,X(:)');
-        loadConst = max(totLoad/V*0.7,max(map.ND))
-%         loadConst = 75;
+        loadConst = max(totLoad/V*1,max(map.ND))
+%         loadConst = 400;
         b = vertcat(b,loadConst);
     end
 end
@@ -87,7 +87,7 @@ tic
 while flag == 1
     iterationNum = iterationNum + 1;
     options = optimoptions('intlinprog','AbsoluteGapTolerance',0.1,'IntegerTolerance',1e-6);
-    [result,score] = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options);
+    [result,score] = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options)
     tempResult = reshape(result,[T,T,V]);
     tempResult = sum(tempResult,3);
     

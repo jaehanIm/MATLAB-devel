@@ -1,11 +1,18 @@
 
-graph1 = load('graph_complete.mat');
-mapGraph = graph1.graph1;
+% graph1 = load('graph_complete.mat');
+% mapGraph = graph1.graph1;
+
+mapGraph.graph1 = G;
+mapGraph.n = N;
+mapGraph.node.x = node(:,1);
+mapGraph.node.x = node(:,2);
+mapGraph.node.x = node(:,3);
+mapGraph.edges = L;
 
 %% ACOVRP algorithm 
 
 %% Initial parameters of ACO 
-maxIter = 100;
+maxIter = 150;
 antNo = 50;
 
 tau0 = 10 * 1 / (  mapGraph.n * mean( mapGraph.edges(:)  )  );  % Initial phromone concentration
@@ -19,7 +26,7 @@ beta = 1;  % Desirability exponetial paramter
 
 global homeIdx vehNum temp  mutationRate
 homeIdx = 3; %60 is the main
-vehNum = 2;
+vehNum = 3;
 mutationRate = 0.0;
 temp = [];
 

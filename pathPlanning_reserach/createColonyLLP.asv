@@ -1,4 +1,4 @@
-function [ colony ] = createColonyLLP( graph, colony, antNo, tau_tot, eta_tot, alpha,  beta)
+function [ colonyHistory ] = createColonyLLP( graph, colony, antNo, tau_tot, eta_tot, alpha,  beta)
 
 global debugTemp
 
@@ -11,19 +11,21 @@ for i = 1:cluNum
     subNodeNo(i) = size(graph.totSubProbNodeIdx{i},1);
 end
 colonyHistory = [];
+colonyCluster = [];
 
 for i = 1 : antNo
-    % prevEndNode = ??? for every ant.
-    colony.ant(i).tour(:,1) = ones(vehNum,1) * 1; % starts from first node
     for c = 1:cluNum
         % CAUTION : Local idx used. 
+        colony = [];
         unvisitedNum = subNodeNo(c);
-        unvisitedNum = unvisitedNum - 1;
-        vehStepLen = ones(vehNum,1);
         
         if c == 1
             prevEndNode = []; % else, it will be designated in the previous loop
+            unvisitedNum = unvisitedNum - 1;
         end
+
+        colony.tour(:,1) = ones(vehNum,1) * 1; % starts from first node
+        vehStepLen = ones(vehNum,1);
 
         currSubNodes = graph.totSubProbNodeIdx{c};
         currSubNodes = vertcat(prevEndNode,currSubNodes);
@@ -39,9 +41,9 @@ for i = 1 : antNo
                     break;
                 end
                 % i = antNo, j = vehNum
-                currentNode = colony.ant(i).tour(j,vehStepLen(j));
+                currentNode = colony.tour(j,vehStepLen(j));
                 P_allNodes = tau(currentNode,:).^alpha.*eta(currentNode,:).^beta;
-                P_allNodes(nonzeros(colony.ant(i).tour(:))) = 0;
+                P_allNodes(nonzeros(colony.tour(:))) = 0;
                 P = P_allNodes./sum(P_allNodes);
                 
                 % for debugging
@@ -57,15 +59,13 @@ for i = 1 : antNo
                 vehStepLen(j) = vehStepLen(j) +1;
                 unvisitedNum = unvisitedNum - 1;
                 
-                colony.ant(i).tour(j,vehStepLen(j)) = nextNode;
+                colony.tour(j,vehStepLen(j)) = nextNode;
             end
         end
-        
-        colony.ant(i).vehTourLen = vehStepLen;
 
         % complete the tour by linking end node
         for j = 1:vehNum
-            currentNode = colony.ant(i).tour(j,vehStepLen(j));
+            currentNode = colony.tour(j,vehStepLen(j));
             if ~ismember(currentNode,endIdx)
                 tau_end = tau([currentNode;endIdx],[currentNode;endIdx]);
                 eta_end = eta([currentNode;endIdx],[currentNode;endIdx]);
@@ -73,21 +73,27 @@ for i = 1 : antNo
                 P_allNodes(P_allNodes == inf) = 0;
                 P = P_allNodes./sum(P_allNodes);
                 finalNode = rouletteWheel(P);
-                colony.ant(i).tour(j,vehStepLen(j)+1) = endIdx(finalNode-1);
+                colony.tour(j,vehStepLen(j)+1) = endIdx(finalNode-1);
+                vehStepLen(j) = vehStepLen(j) + 1;
             end % end of tour edition
         end % end of vehicle 
+        colony.vehStepLen = vehStepLen;
+
+        % decipher and add to history
+        if c == 1
+            colonyCluster.tour = currSubNodes(colony.tour);
+            colonyCluster.vehStepLen = colony.vehStepLen;
+        else
+            colonyCluster.tour = vertcat(colonyCluster.tour, currSubNodes(colony.tour));
+            colonyCluster.vehStepLen = colonyCluster.vehStepLen + colony.vehStepLen;
+        end
+
+        prevEndNode = currSubNodes(colony.tour(end));
     end % end of cluster
     
-    % decipher and add
-    if c == 1
-        colonyHistory = colony;
-        for k = 1:antNo
-            colonyHistory.ant(k).tour = graph.totSubProbNodeIdx{c}(colony.ant(k).tour);
-        end
-    else
-        colonyHistory.ant(k).tour = vertcat(colonyHistory.ant(k).tour,map.totSubProbNodeIdx{c}(colony.ant(i).tour));
-    end
-
-end % end of iteration
+    % add depot node
+    colonyCluster
+    colonyHistory.ant(i) = colonyCluster;
+end % end of all ants
 
 end

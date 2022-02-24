@@ -4,8 +4,10 @@ px = 6; % fov x length
 py = 4;
 ov_x = 0.1; % overlap length
 ov_y = 0.1;
-voxel_width = 0.1; % voxel distance
+voxel_width = 0.15; % voxel distance
 inpection_dist = 3; % Inspection distance
+mapheight = 3;
+conThres = 10;
 
 eff_x = px - ov_x; % Effective fov size
 eff_y = py - ov_y;
@@ -32,7 +34,7 @@ gridEdgeX = [gridPosX(1,:)-eff_x/2,gridPosX(end)+eff_x/2];
 gridEdgeY = [gridPosY(:,1)'-eff_y/2,gridPosY(end)+eff_y/2];
 
 %% Curvature generation (Voxel Data Loading)
-voxelData = peaks(length(area))*1;
+voxelData = peaks(length(area))*mapheight;
 % voxelData(:,:) = 0;
 voxelData = voxelData(1:size(area,1),1:size(area,2));
 % voxelData(200:300,300:430) = nan; % Simulating voxel fault

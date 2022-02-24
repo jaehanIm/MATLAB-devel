@@ -2,7 +2,7 @@ function [] = drawBestTourVRP(colony , graph)
 
 global vehNum homeIdx
 
-figure(11)
+figure(111)
 clf
 queenTour = colony.queen.tour;
 queenTourLen = colony.queen.vehTourLen;

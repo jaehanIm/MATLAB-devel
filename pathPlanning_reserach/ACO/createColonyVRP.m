@@ -1,6 +1,6 @@
 function [ colony ] = createColonyVRP( graph, colony, antNo, tau, eta, alpha,  beta)
 
-global homeIdx vehNum debugTemp
+global homeIdx vehNum debugTemp mutationRate
 
 nodeNo = graph.n;
 

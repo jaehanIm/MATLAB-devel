@@ -1,15 +1,15 @@
 % function LLP_solver(map,maxIter,antNo)
 % require N C vehNum homeIdx totSubProbNodeIdx subProbEndNodeIdx
 
-%% ACOVRP algorithm
+%% Parameter Setting
 global debugTemp
 
 mapGraph.n = map.N; % Total number of subnodes
+mapGraph.edges = map.C;
 
 tau0 = 10 * 1 / (  mapGraph.n * mean( mapGraph.edges(:)  )  );  % Initial pheromone concentration
 tau = tau0 * ones( mapGraph.n , mapGraph.n); % Pheromone matrix
 eta = 1./ mapGraph.edges;  % desirability of each edge 
-cluNum = size(map.totSubProbNodeIdx,2);
 
 rho = 0.02; % Evaporation rate 
 alpha = 1;  % Pheromone exponential parameters 
@@ -18,51 +18,25 @@ homeIdx = 1;
 vehNum = 1;
 debugTemp = [];
 
-for t = 1 : 1 %maxIter
+bestFitness = inf;
+bestTour = [];
+history = zeros(maxIter,1);
+for t = 1 : maxIter
 %     colonyIter = [];
-
-    %% Initial parameters of ACO 
     mapGraph.totSubProbNodeIdx = map.totSubProbNodeIdx;
-    endNodes = map.subProbEndNodeIdx;
-
-    mapGraph.edges = map.C(currNodes,currNodes);
-    mapGraph.currNodes = currNodes;
-    mapGraph.endNodes = endNodes;   
+    mapGraph.subProbEndNodeIdx = map.subProbEndNodeIdx;
 
     %% ACO Main
-    bestFitness = inf;
-    bestTour = [];
-    history = zeros(maxIter,1);
-
-    % Create Ants 
+    % Create tours
     colony = [];
     colony = createColonyLLP(mapGraph,colony,antNo,tau,eta,alpha,beta); %result based on local idx.
-
-    % translate colony result
-    for i = 1:antNo
-        map.totSubProbNodeIdx{c}(colony.ant(i).tour);
-    end
-
-    % add colonyIter
-    if c ~= 1
-        for i = 1:antNo
-            colonyIter.ant(i).tour = vertcat(colonyIter.ant(i).tour,map.totSubProbNodeIdx{c}(colony.ant(i).tour));
-            colonyIter.ant(i).vehTourLen = colonyIter.ant(i).vehTourLen + colony.ant(i).vehTourLen;
-        end
-    else
-        colonyIter = colony;
-        for i = 1:antNo
-            colonyIter.ant(i).tour = map.totSubProbNodeIdx{c}(colony.ant(i).tour);
-        end
-    end
-end
-
+    
     % Calculate the fitness values of all ants 
-        for i = 1 : antNo 
-            colony.ant(i).fitness = fitnessFunctionLLP(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph);
-        end
-        
-        % Find the best ant (queen)
+    for i = 1 : antNo 
+        colony.ant(i).fitness = fitnessFunctionLLP(colony.ant(i).tour, colony.ant(i).vehStepLen, mapGraph);
+    end
+
+    % Find the best ant (queen)
         allAntsFitness = [ colony.ant(:).fitness ];
         [ minVal , minIndex ] = min( allAntsFitness );
         if minVal < bestFitness 
@@ -80,6 +54,9 @@ end
         
         % Evaporation 
         tau  = ( 1 - rho ) .* tau;
+end
+ 
+        
         
         % Display the results
         outmsg = [ 'Iteration #' , num2str(t) , ' Shortest length = ' , num2str(colony.queen.fitness)  ];

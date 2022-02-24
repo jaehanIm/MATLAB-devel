@@ -5,8 +5,9 @@ addpath('./ComDetTBv090/Algorithms/')
 addpath('./ComDetTBv090/Auxiliary/')
 
 %% Param setting
-vnum = 2;
-depotPos = [80 0 0];
+vnum = 3;
+depotPos = [30 -10 0];
+% depotPos = [10 -10 0];
 
 %% wp generator
 poc_path_planner
@@ -26,7 +27,6 @@ for i = 1:N
 end
 
 %% Build Network Graph
-conThres = 10;
 for i = 2:N % do not connect depot!
     for j = 2:N
         if i~=j
@@ -111,29 +111,11 @@ for j = 2:cluNum
     A(nodeInCluIdx{j}(I),1) = 1;
 end
 
-figure(4)
-clf
-grid on
-hold on
-for i = 1:size(G.Edges,1)
-    startIdx = G.Edges.EndNodes(i,1);
-    EndIdx = G.Edges.EndNodes(i,2);
-    startPos = node(startIdx,:);
-    EndPos = node(EndIdx,:);
-    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
-end
-for i = 1:cluNum
-    temp = node(nodeInCluIdx{i},:);
-    plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
-end
-mesh(voxelPosX,voxelPosY,voxelFilterData);
-axis equal
-
 figure(5)
 clf
 p = plot(graph(A),'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
 p.NodeCData = cluIdx;
-colormap hsv
+colormap jet
 colorbar
 
 %% SuperNet Construction
@@ -174,13 +156,6 @@ for i = 1:cluNum
     else
         superNet.pos(i,1:3) = mean(node(nodeInCluIdx{i},:));
     end
-end
-
-figure(4)
-plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
-hold on
-for i = 1:cluNum
-    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
 end
 
 superNet.C_temp = superNet.C;
@@ -281,6 +256,50 @@ end
 
 toc
 
+figure(4)
+clf
+grid on
+hold on
+for i = 1:size(G.Edges,1)
+    startIdx = G.Edges.EndNodes(i,1);
+    EndIdx = G.Edges.EndNodes(i,2);
+    startPos = node(startIdx,:);
+    EndPos = node(EndIdx,:);
+    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
+end
+for i = 1:cluNum
+    temp = node(nodeInCluIdx{i},:);
+    plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
+end
+mesh(voxelPosX,voxelPosY,voxelFilterData);
+plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
+for i = 1:cluNum
+    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
+end
+axis equal
+
+figure(44)
+clf
+grid on
+hold on
+for i = 1:size(G.Edges,1)
+    startIdx = G.Edges.EndNodes(i,1);
+    EndIdx = G.Edges.EndNodes(i,2);
+    startPos = node(startIdx,:);
+    EndPos = node(EndIdx,:);
+    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
+end
+for i = 1:cluNum
+    temp = node(nodeInCluIdx{i},:);
+    plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
+end
+mesh(voxelPosX,voxelPosY,voxelFilterData);
+plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
+for i = 1:cluNum
+    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
+end
+axis equal
+
 %% Solver
 while true
     if vnum >= cluNum
@@ -330,12 +349,12 @@ while true
         map.subProbEndNodeIdx = subProbEndNodeIdx;
             
         % run ACO
-        LLP_solver(map,100,50);
-
-        % post processing result
-
+        [tour,score]=LLP_solver(map,150,50);
+        
+        figure(4)
+        plot3(node(tour,1),node(tour,2),node(tour,3)+2,'r:','LineWidth',1.3)
+        axis equal
     end
-
     break;
     %% Check Termination Condition
 

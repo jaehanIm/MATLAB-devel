@@ -1,14 +1,12 @@
 function [ fitness ] = fitnessFunctionLLP (tour, tourLen, graph)
 
 fitness = 0;
-vehNum = graph.vehNum;
+vehNum = 1;
 
-for i = 1:vehNum
-    for j = 1:tourLen(i)
-        currentNode = tour(i,j);
-        nextNode = tour(i,j+1);
-        fitness = fitness + graph.edges(currentNode, nextNode);
-    end
+for i = 1:tourLen-1
+    currentNode = tour(i);
+    nextNode = tour(i+1);
+    fitness = fitness + graph.edges(currentNode, nextNode);
 end
 
 end
