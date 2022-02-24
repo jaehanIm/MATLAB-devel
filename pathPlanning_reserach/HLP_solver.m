@@ -38,7 +38,7 @@ if V > 1 % vehicle demand equality constraint
         X = zeros(T,T,V);
         X(:,:,v) = ND;
         A = vertcat(A,X(:)');
-        loadConst = max(totLoad/V*1.0,max(map.ND))
+        loadConst = max(totLoad/V*0.7,max(map.ND))
 %         loadConst = 75;
         b = vertcat(b,loadConst);
     end

@@ -107,6 +107,8 @@ for j = 2:cluNum
     intraCluNodeSet{j,1} = [nodeInCluIdx{j}(I),1];
     C(1,nodeInCluIdx{j}(I)) = L(1,nodeInCluIdx{j}(I));
     C(nodeInCluIdx{j}(I),1) = L(nodeInCluIdx{j}(I),1);
+    A(1,nodeInCluIdx{j}(I)) = 1;
+    A(nodeInCluIdx{j}(I),1) = 1;
 end
 
 figure(4)
@@ -195,7 +197,7 @@ superNet.ND(1) = 1; % depot is nan
 
 %% Local Network (LLP) Completefication
 tic
-% intra cluster complefication
+% inter-intra cluster complefication
 implicitRoute = [];
 for i = 1:cluNum-1
     localNodeIdx = nodeInCluIdx{i};
@@ -212,6 +214,37 @@ for i = 1:cluNum-1
                 for kj = ki+1:size(locTotNodIdx,1)
                     origIdxi = locTotNodIdx(ki);
                     origIdxj = locTotNodIdx(kj);
+                    if A(origIdxi,origIdxj) == 0
+                        [implRoute,d]=shortestpath(localG,ki,kj,'Method','positive');
+                        implicitRoute{origIdxi,origIdxj} = locTotNodIdx(implRoute);
+                        implicitRoute{origIdxj,origIdxi} = fliplr(locTotNodIdx(implRoute));
+                        C(origIdxi,origIdxj) = d;
+                        C(origIdxj,origIdxi) = d;
+                    end
+                end
+            end
+            % connection complete
+        end
+    end
+end
+
+implicitRoute = [];
+for i = fliplr(2:cluNum)
+    localNodeIdx = nodeInCluIdx{i};
+    localIntraNodeIdx = [];
+    for j = fliplr(1:i-1)
+        if ~isempty(intraCluNodeSet{i,j})
+            localIntraNodeIdx = intraCluNodeSet{i,j}(:,2);
+            localIntraNodeIdx = unique(localIntraNodeIdx);
+            locTotNodIdx = vertcat(localNodeIdx,localIntraNodeIdx);
+            % start connection
+            localC = C(locTotNodIdx,locTotNodIdx);
+            localG = graph(localC);
+            for ki = 1:size(locTotNodIdx,1)-1
+                for kj = ki+1:size(locTotNodIdx,1)
+                    origIdxi = locTotNodIdx(ki);
+                    origIdxj = locTotNodIdx(kj);
+
                     if A(origIdxi,origIdxj) == 0
                         [implRoute,d]=shortestpath(localG,ki,kj,'Method','positive');
                         implicitRoute{origIdxi,origIdxj} = locTotNodIdx(implRoute);
@@ -267,36 +300,40 @@ while true
 
     %% LLP
     for v = 1:vnum % for each vehicle (super route set)
+        totSubProbNodeIdx = [];
+        subProbEndNodeIdx = [];
         superRouteL = sum((superRoute(v,:)~=0));
-        for c = 2:superRouteL %for number of involved clusters
-            totSubProbNodeIdx = [];
+        for c = 2:superRouteL %for number of involved clusters            
             currClus = superRoute(v,c);
             prevClus = superRoute(v,c-1);
-            if c == 2
-                prevClusEndNodeIdx = 1;
-            else
-                prevClusEndNodeIdx = subProbEndNodeIdx(1);
-            end
             if c ~= superRouteL
                 nextClus = superRoute(v,c+1);
             else
                 nextClus = superRoute(v,1);
             end
-            totSubProbNodeIdx = nodeInCluIdx{currClus};
-            totSubProbNodeIdx = vertcat(prevClusEndNodeIdx,totSubProbNodeIdx)
-            subProbEndNodeIdx = intraCluNodeSet{currClus,nextClus}(:,1);
-            
-            % fomulate data structure for ACO
-            map = [];
-            map.N = size(totSubProbNodeIdx,1);
-            map.C = C(totSubProbNodeIdx,totSubProbNodeIdx);
-            
-            % run ACO
-
-
-            % post processing result
-
+            totSubProbNodeIdx{c-1} = nodeInCluIdx{currClus};
+            if c == 2
+                prevClusEndNodeIdx = 1;
+                totSubProbNodeIdx{c-1} = vertcat(prevClusEndNodeIdx,totSubProbNodeIdx{c-1});
+            end
+            subProbEndNodeIdx{c-1} = intraCluNodeSet{currClus,nextClus}(:,1);
+            subProbEndNodeIdx{c-1} = unique(subProbEndNodeIdx{c-1});
         end
+        totSubProbNodeIdx
+        subProbEndNodeIdx
+
+        % fomulate data structure for ACO
+        map = [];
+        map.N = N;
+        map.C = C;
+        map.totSubProbNodeIdx = totSubProbNodeIdx;
+        map.subProbEndNodeIdx = subProbEndNodeIdx;
+            
+        % run ACO
+        LLP_solver(map,100,50);
+
+        % post processing result
+
     end
 
     break;
