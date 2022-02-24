@@ -301,6 +301,7 @@ end
 axis equal
 
 %% Solver
+tic
 while true
     if vnum >= cluNum
         disp("[error] cannot solve VRP : too many vehicles!")
@@ -318,6 +319,7 @@ while true
     superRoute
 
     %% LLP
+    scoreRecord = [];
     for v = 1:vnum % for each vehicle (super route set)
         totSubProbNodeIdx = [];
         subProbEndNodeIdx = [];
@@ -350,11 +352,14 @@ while true
             
         % run ACO
         [tour,score]=LLP_solver(map,150,50);
+        scoreRecord(v) = score;
         
         figure(4)
         plot3(node(tour,1),node(tour,2),node(tour,3)+2,'r:','LineWidth',1.3)
         axis equal
     end
+    totalScore = sum(scoreRecord)
+toc
     break;
     %% Check Termination Condition
 
