@@ -76,7 +76,7 @@ graph1.edges = L;
 save('graph_complete.mat','graph1');
 
 %% Graph Clustering
-
+tic
 A_temp = A(2:end,2:end); %except home node
 
 cluIdx = GCModulMax1(A_temp);
@@ -110,6 +110,8 @@ for j = 2:cluNum
     A(1,nodeInCluIdx{j}(I)) = 1;
     A(nodeInCluIdx{j}(I),1) = 1;
 end
+
+clusteringTime = toc;
 
 figure(5)
 clf
@@ -234,6 +236,9 @@ for i = fliplr(2:cluNum)
     end
 end
 
+intralCompleteTime = toc;
+
+tic
 % superNet complefication
 superPosC = zeros(cluNum,cluNum);
 for i = 1:cluNum-1
@@ -254,7 +259,7 @@ for i = 1:cluNum-1
     end
 end
 
-toc
+interCompleteTime = toc;
 
 figure(4)
 clf
@@ -320,6 +325,7 @@ while true
 
     %% LLP
     scoreRecord = [];
+    tourRecord = [];
     for v = 1:vnum % for each vehicle (super route set)
         totSubProbNodeIdx = [];
         subProbEndNodeIdx = [];
@@ -353,13 +359,18 @@ while true
         % run ACO
         [tour,score]=LLP_solver(map,150,50);
         scoreRecord(v) = score;
+        tourRecord{v} = tour;
         
-        figure(4)
-        plot3(node(tour,1),node(tour,2),node(tour,3)+2,'r:','LineWidth',1.3)
-        axis equal
+        
     end
-    totalScore = sum(scoreRecord)
-toc
+    totalScore = sum(scoreRecord);
+solveTime = toc;
+    figure(4)
+    hold on
+    for v= 1:vnum
+        plot3(node(tourRecord{v},1),node(tourRecord{v},2),node(tourRecord{v},3)+2,'LineWidth',3)
+    end
+    axis equal
     break;
     %% Check Termination Condition
 
