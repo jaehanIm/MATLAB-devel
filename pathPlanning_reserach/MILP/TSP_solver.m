@@ -1,5 +1,6 @@
 function [routeResult,score]=TSP_solver(map)
 % Very Very Inefficient MILP solver
+% vnum, N(count depot), capacity, C, oblig
 
 %% Optimization param setting
 
@@ -38,16 +39,16 @@ for v = 1:V
     b = vertcat(b,capacity);
 end
 
-oblig = map.oblig; % obligation edge constraint
-for i = 1:size(oblig,1)
-    obg1 = oblig(i,1);
-    obg2 = oblig(i,2);
-    X = zeros(T,T,V);
-    X(obg1,obg2,:) = -1;
-    X(obg2,obg1,:) = -1;
-    A = vertcat(A,X(:)');
-    b = vertcat(b,-1);
-end
+% oblig = map.oblig; % obligation edge constraint
+% for i = 1:size(oblig,1)
+%     obg1 = oblig(i,1);
+%     obg2 = oblig(i,2);
+%     X = zeros(T,T,V);
+%     X(obg1,obg2,:) = -1;
+%     X(obg2,obg1,:) = -1;
+%     A = vertcat(A,X(:)');
+%     b = vertcat(b,-1);
+% end
 
 if V > 1 % vehicle equality constraint
     for v = 1:V

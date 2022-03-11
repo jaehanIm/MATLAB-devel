@@ -1,13 +1,14 @@
 % tic
 %% Parameter setting
-px = 6; % fov x length
-py = 4;
+fovFactor = 0.7;
+px = 6 * fovFactor; % fov x length
+py = 4 * fovFactor;
 ov_x = 0.1; % overlap length
 ov_y = 0.1;
-voxel_width = 0.2; % voxel distance
-inpection_dist = 3; % Inspection distance
-mapheight = 3;
-conThres = 10;
+voxel_width = 0.05; % voxel distance
+inpection_dist = 5; % Inspection distance
+mapheight = 1.0;
+conThres = 13;
 
 eff_x = px - ov_x; % Effective fov size
 eff_y = py - ov_y;
@@ -15,7 +16,7 @@ eff_y = py - ov_y;
 %% Load data (Inspection Area Loading)
 area = imread('area.png');
 area = area~=0;
-% area = ones(size(area));
+area = ones(size(area));
 
 area_xl = size(area,2)*voxel_width; % Acutal size[m] of area
 area_yl = size(area,1)*voxel_width;
@@ -198,7 +199,7 @@ plot(record(:,1),record(:,2))
 %     end
 % end
 
-figure(1)
+figure(1);
 clf
 hold on
 grid on
@@ -222,6 +223,8 @@ for i = 1:size(gridPosX,1)
        plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')
     end
 end
+
+mapfig = gca;
 
 % addpath('C:\Users\dlawo\Downloads\ACO_Code');
 % bestset = load('ACO_restricted');

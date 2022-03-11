@@ -236,10 +236,10 @@ for i = fliplr(2:cluNum)
     end
 end
 
-intralCompleteTime = toc;
+intraCompleteTime = toc;
 
 tic
-% superNet complefication
+% superNet complefication (initialization)
 superPosC = zeros(cluNum,cluNum);
 for i = 1:cluNum-1
     for j = i+1:cluNum
