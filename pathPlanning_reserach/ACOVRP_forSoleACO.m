@@ -82,7 +82,7 @@ for t = 1 : maxIter
             count = 0;
         end
     end
-    if count >= 200
+    if count >= 300
         disp('Solution stabilized. Terminating ACS!');
         break;
     end
