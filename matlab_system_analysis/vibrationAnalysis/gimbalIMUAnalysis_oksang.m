@@ -21,14 +21,14 @@ postShootCut = 0.34;
 % photoTimeTrim = seconds(1.179-0.626-0.1);
 
 % 220107 oksang - 20hz
-imuData = readtable('/home/jaehan/log/220107_152745_20hz/aSensorLog_220107_152745.csv');
-gdLog = readtable('/home/jaehan/log/220107_152745_20hz/gdLog_220107_152745.csv');
-photoXml = readtable('/home/jaehan/log/220107_152745_20hz/df_xmp.csv');
-withBlurEst = false;
+% imuData = readtable('/home/jaehan/log/220107_152745_20hz/aSensorLog_220107_152745.csv');
+% gdLog = readtable('/home/jaehan/log/220107_152745_20hz/gdLog_220107_152745.csv');
+% photoXml = readtable('/home/jaehan/log/220107_152745_20hz/df_xmp.csv');
+% withBlurEst = true;
 % opts = detectImportOptions('/home/jaehan/log/220107_152745_20hz/output_2.csv');
 % opts.DataLines = 2;
 % photoBlurEst = readtable('/home/jaehan/log/220107_152745_20hz/output_2.csv',opts);
-photoTimeTrim = seconds(1.179-0.626+0.366-0.1+0.082);
+% photoTimeTrim = seconds(1.179-0.626+0.366-0.1+0.082);
 % manPhotoFault1 = [014  015  016  017  018 022  023  024  027  028 029  031  032  033  034 036  038  040  065  069 076  080  083  084  086 087  089  090  091  092 093  094  096  097  099 100  132  135  161  165 169  177  180  189  191 193  196  199]- 3;
 % manPhotoFault2 = [13 15 16 17 18 22 23 24 27 28 29 30 32 33 34 36 38 40 48 65 66 69 72 76 80 83 84 86 87 89 90 91 92 93 94 96 97 99 100 103 112 116 132 133 135 136 142 161 164 165 169 177 180 189 191 193 195 196 199]- 3;
 % manPhotoFault3 = [14, 15, 16, 17, 18, 22, 23, 24, 27, 28, 29, 31, 32, 33, 34, 38, 66, 69, 76, 80, 83, 84, 86, 87, 89, 90, 91, 92, 93, 94, 96, 97, 99, 100, 132, 135, 161, 165, 169, 177, 180, 189, 191, 193, 196, 199]- 3;
@@ -47,29 +47,30 @@ photoTimeTrim = seconds(1.179-0.626+0.366-0.1+0.082);
 % end
 
 % 220107 oksang - 10hz
-% imuData = readtable('/home/jaehan/log/220107_150302_10hz/aSensorLog_220107_150302.csv');
-% gdLog = readtable('/home/jaehan/log/220107_150302_10hz/gdLog_220107_150302.csv');
-% photoXml = readtable('/home/jaehan/log/220107_150302_10hz/df_xmp.csv');
-% opts = detectImportOptions('/home/jaehan/log/220107_150302_10hz/output_1.csv');
-% opts.DataLines = 2;
-% photoBlurEst = readtable('/home/jaehan/log/220107_150302_10hz/output_1.csv');
-% photoTimeTrim = seconds(1.179-0.626+0.39);
-% manPhotoFault1 = [003  009  014  015  016 018  020  021  026  027 029  032  037  042  043 050  057  071  072  073 075  079  082  083  085 090  093  095  096  097 101  149  155  157  159 164  170  176  184]- 2;
-% manPhotoFault2 = [3 9 10 11 14 15 16 18 20 21 23 27 29 32 33 35 37 42 43 50 57 70 71 72 73 75 77 80 83 85 90 93 95 96 101 106 109 155 157 164 170 173 180 186 197]- 2;
-% manPhotoFault3 = [3 9 14 15 16 20 21 26 27 29 32 42 43 59 63 71 72 73 75 77 79 83 85 90 93 95 97 101 149 155 159 164 170 173 184 196]- 2;
-% manPhotoFaultTotal = union(union(manPhotoFault1,manPhotoFault2),manPhotoFault3);
-% singleFault = []; doubleFault = []; tripleFault = [];
-% for i = 1:length(manPhotoFaultTotal)
-%     candidate = manPhotoFaultTotal(i);
-%     detectNum = sum([ismember(candidate,manPhotoFault1),ismember(candidate,manPhotoFault2),ismember(candidate,manPhotoFault3)]);
-%     if detectNum == 1
-%         singleFault = horzcat(singleFault,candidate);
-%     elseif detectNum == 2
-%         doubleFault = horzcat(doubleFault,candidate);
-%     else
-%         tripleFault = horzcat(tripleFault,candidate);
-%     end
-% end
+imuData = readtable('/home/jaehan/log/220107_150302_10hz/aSensorLog_220107_150302.csv');
+gdLog = readtable('/home/jaehan/log/220107_150302_10hz/gdLog_220107_150302.csv');
+photoXml = readtable('/home/jaehan/log/220107_150302_10hz/df_xmp.csv');
+opts = detectImportOptions('/home/jaehan/log/220107_150302_10hz/output_1.csv');
+withBlurEst = true;
+opts.DataLines = 2;
+photoBlurEst = readtable('/home/jaehan/log/220107_150302_10hz/output_1.csv');
+photoTimeTrim = seconds(1.179-0.626+0.39);
+manPhotoFault1 = [003  009  014  015  016 018  020  021  026  027 029  032  037  042  043 050  057  071  072  073 075  079  082  083  085 090  093  095  096  097 101  149  155  157  159 164  170  176  184]- 2;
+manPhotoFault2 = [3 9 10 11 14 15 16 18 20 21 23 27 29 32 33 35 37 42 43 50 57 70 71 72 73 75 77 80 83 85 90 93 95 96 101 106 109 155 157 164 170 173 180 186 197]- 2;
+manPhotoFault3 = [3 9 14 15 16 20 21 26 27 29 32 42 43 59 63 71 72 73 75 77 79 83 85 90 93 95 97 101 149 155 159 164 170 173 184 196]- 2;
+manPhotoFaultTotal = union(union(manPhotoFault1,manPhotoFault2),manPhotoFault3);
+singleFault = []; doubleFault = []; tripleFault = [];
+for i = 1:length(manPhotoFaultTotal)
+    candidate = manPhotoFaultTotal(i);
+    detectNum = sum([ismember(candidate,manPhotoFault1),ismember(candidate,manPhotoFault2),ismember(candidate,manPhotoFault3)]);
+    if detectNum == 1
+        singleFault = horzcat(singleFault,candidate);
+    elseif detectNum == 2
+        doubleFault = horzcat(doubleFault,candidate);
+    else
+        tripleFault = horzcat(tripleFault,candidate);
+    end
+end
 
 % 220208 _ oksang
 % sortie1
@@ -1013,7 +1014,7 @@ clf
 hold on
 grid on
 plot(normalize(shootAvgTotVal,'range')*100,photoScoreMax,'*','MarkerSize',10,'LineWidth',3)
-% plot(shootAvgTotVal,photoScoreMax,'*','MarkerSize',10,'LineWidth',3)
+plot(shootAvgTotVal,photoScoreMax,'*','MarkerSize',10,'LineWidth',3)
 plot(partialFault_sync,photoScoreMax,'*','MarkerSize',10,'LineWidth',3)
 plot(partialFault_dirac,photoScoreMax,'*','MarkerSize',10,'LineWidth',3)
 legend('average tot val','sync fault','dirac fault')
@@ -1112,9 +1113,9 @@ scoreTemp(photoJobCategory{5}) = [];
 minTemp(photoJobCategory{5}) = [];
 meanTemp(photoJobCategory{5}) = [];
 maxTemp(photoJobCategory{5}) = [];
-% plot(shootAvgTotVal,photoScoreMin,'*','MarkerSize',10,'LineWidth',3)
-% plot(shootAvgTotVal,photoScoreMean,'*','MarkerSize',10,'LineWidth',3)
-% plot(shootAvgTotVal,photoScoreMax,'*','MarkerSize',10,'LineWidth',3)
+plot(shootAvgTotVal,photoScoreMin,'*','MarkerSize',10,'LineWidth',3)
+plot(shootAvgTotVal,photoScoreMean,'*','MarkerSize',10,'LineWidth',3)
+plot(shootAvgTotVal,photoScoreMax,'*','MarkerSize',10,'LineWidth',3)
 plot(scoreTemp, minTemp,'*','MarkerSize',10,'LineWidth',3)
 plot(scoreTemp, meanTemp,'*','MarkerSize',10,'LineWidth',3)
 plot(scoreTemp, maxTemp,'*','MarkerSize',10,'LineWidth',3)
@@ -1156,10 +1157,6 @@ disp('partial corrcoef')
 for i = 1:length(jobName)
     corrcoef(shootAvgTotVal(photoJobCategory{i}),photoScoreMax(photoJobCategory{i}))
 end
-
-% disp('for back')
-% interest = [photoJobCategory{2};photoJobCategory{3};photoJobCategory{4};photoJobCategory{6};photoJobCategory{7}];
-% maxCorr = corrcoef([partialFault_sync(interest)',photoScoreMax(interest)])
 
 
 figure(16)

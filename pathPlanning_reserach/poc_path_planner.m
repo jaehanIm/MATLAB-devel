@@ -5,7 +5,7 @@ px = 6 * fovFactor; % fov x length
 py = 4 * fovFactor;
 ov_x = 0.1; % overlap length
 ov_y = 0.1;
-voxel_width = 0.05; % voxel distance
+voxel_width = 0.2; % voxel distance
 inpection_dist = 5; % Inspection distance
 mapheight = 1.0;
 conThres = 13;
@@ -16,7 +16,7 @@ eff_y = py - ov_y;
 %% Load data (Inspection Area Loading)
 area = imread('area.png');
 area = area~=0;
-area = ones(size(area));
+% area = ones(size(area));
 
 area_xl = size(area,2)*voxel_width; % Acutal size[m] of area
 area_yl = size(area,1)*voxel_width;

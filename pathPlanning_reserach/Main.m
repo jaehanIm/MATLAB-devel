@@ -238,7 +238,7 @@ end
 
 intraCompleteTime = toc;
 
-tic
+
 % superNet complefication (initialization)
 superPosC = zeros(cluNum,cluNum);
 for i = 1:cluNum-1
@@ -247,14 +247,36 @@ for i = 1:cluNum-1
         superPosC(j,i) = superPosC(i,j);
     end
 end
+
+tic
+% version 1
+% for i = 1:cluNum-1
+%     for j = i+1:cluNum
+%         if isempty(intraCluNodeSet{i,j})
+%             disp("[Warning] disconnected cluster detected");
+%             superG = graph(superPosC);
+%             [~,d] = shortestpath(superG,i,j,'Method','Positive');
+%             superNet.C(i,j) = d;
+%             superNet.C(j,i) = d;
+%         end
+%     end
+% end
+
+% version 2
 for i = 1:cluNum-1
     for j = i+1:cluNum
-        if isempty(intraCluNodeSet{i,j})
-            disp("[Warning] disconnected cluster detected");
-            superG = graph(superPosC);
-            [~,d] = shortestpath(superG,i,j,'Method','Positive');
+        if superNet.A(i,j) == 0
+            disp("[Warning] disconnected cluster detected");           
+            distInterest = L(nodeInCluIdx{i},nodeInCluIdx{j});
+            [val,I] = min(distInterest,[],'all');
+            [idxx,idxy] = ind2sub(size(distInterest),I);
+            [implRoute_temp,d] = shortestpath(G,nodeInCluIdx{i}(idxx),nodeInCluIdx{j}(idxy),'Method','positive');
             superNet.C(i,j) = d;
             superNet.C(j,i) = d;
+            implicitRoute{nodeInCluIdx{i}(idxx),nodeInCluIdx{j}(idxy)} = implRoute_temp;
+            implicitRoute{nodeInCluIdx{j}(idxy),nodeInCluIdx{i}(idxx)} = fliplr(implRoute_temp);
+            intraCluNodeSet{i,j} = [nodeInCluIdx{i}(idxx),nodeInCluIdx{j}(idxy)];
+            intraCluNodeSet{j,i} = [nodeInCluIdx{j}(idxy),nodeInCluIdx{i}(idxx)];
         end
     end
 end

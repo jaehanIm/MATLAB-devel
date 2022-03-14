@@ -92,3 +92,29 @@ save('graph_complete.mat','graph1');
 
 %% solve
 ACOVRP_forSoleACO
+
+IPt = [0.02,0.69,5.71,21.6,197.24,1825.75];
+ACOt = [3.78,5.67,7.83,7.4,10.99,28.91,58.2,58.13,150.26,201.57];
+IPs = [91.08,131.7,180.83,127.44,170.93,157.73];
+ACOs = [91.08,131.7,180.89,127.44,173.81,163.50,206.07,304.03,345.25,458.35];
+OptGap = (ACOs(1:6)-IPs)./IPs * 100;
+IPlab = [6 9 12 12 15 20];
+ACOlab = [6 9 12 12 15 20 30 63 88 130];
+figure(1)
+clf
+yyaxis left
+loglog(IPlab,IPt,'bo-','LineWidth',2.5)
+hold on
+grid on
+loglog(ACOlab,ACOt,'ro-','LineWidth',2.5)
+xlabel('Node Number (log scale)')
+ylabel('Computation Time [s]')
+title('Node Number to Computation Time & Optimality Gap')
+yyaxis right
+loglog(IPlab,OptGap,'kx-','LineWidth',2.5,'MarkerSize',10)
+ylabel('optimality gap [%]')
+ylim([0 10])
+left_color = [0 0 0];
+right_color = [0 0 0];
+set(figure(1),'defaultAxesColorOrder',[left_color; right_color]);
+legend('Exact','ACS','Optimality Gap')
