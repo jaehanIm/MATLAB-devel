@@ -13,6 +13,8 @@ end
 colonyHistory = [];
 colonyCluster = [];
 
+bridgeCost = zeros(cluNum,1);
+
 for i = 1 : antNo
     for c = 1:cluNum
         % CAUTION : Local idx used. 
@@ -89,11 +91,14 @@ for i = 1 : antNo
         end
 
         prevEndNode = currSubNodes(colony.tour(end));
+        bridgeCost(c) = graph.edges(currSubNodes(colony.tour(1)),currSubNodes(colony.tour(2)));
+
     end % end of cluster
     
     % add depot node
     colonyCluster.tour(end+1) = 1;
     colonyCluster.vehStepLen = colonyCluster.vehStepLen + 1;
+    colonyCluster.bridgeCost = bridgeCost;
     colonyHistory.ant(i) = colonyCluster;
 end % end of all ants
 

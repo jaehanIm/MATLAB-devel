@@ -263,10 +263,13 @@ tic
 % end
 
 % version 2
+disconCluList = []; disconCount = 1;
 for i = 1:cluNum-1
     for j = i+1:cluNum
         if superNet.A(i,j) == 0
-            disp("[Warning] disconnected cluster detected");           
+            disconCluList(disconCount,:) = [i,j];
+            disconCount = disconCount + 1;
+            disp("[Warning] disconnected cluster detected");  
             distInterest = L(nodeInCluIdx{i},nodeInCluIdx{j});
             [val,I] = min(distInterest,[],'all');
             [idxx,idxy] = ind2sub(size(distInterest),I);
@@ -275,11 +278,31 @@ for i = 1:cluNum-1
             superNet.C(j,i) = d;
             implicitRoute{nodeInCluIdx{i}(idxx),nodeInCluIdx{j}(idxy)} = implRoute_temp;
             implicitRoute{nodeInCluIdx{j}(idxy),nodeInCluIdx{i}(idxx)} = fliplr(implRoute_temp);
+            intraCluNodeSet{i,j} = [nodeInCluIdx{i}(idxx),nodeInCluIdx{j}(idxy)];
+            intraCluNodeSet{j,i} = [nodeInCluIdx{j}(idxy),nodeInCluIdx{i}(idxx)];
         end
     end
 end
 
 interCompleteTime = toc;
+
+% post superNet complefication intra complefication
+for listn = 1:size(disconCluList,1)
+    firstClu = disconCluList(listn,1);
+    secondClu = disconCluList(listn,2);
+    firstNode = intraCluNodeSet{firstClu,secondClu}(1);
+    secondNode = intraCluNodeSet{firstClu,secondClu}(2);
+
+    % firstClu~secondNode connection
+    localNodeIdx = nodeInCluIdx{firstClu};
+    locTotNodIdx = vertcat(localNodeIdx,secondNode);
+    localC = C(locTotNodIdx,locTotNodIdx);
+    localG = graph(localC);
+    for i = 1:size(localNodeIdx,1)
+        [implRoute,d]=shortestpath(localG,locTotNodIdx(i),secondNode);
+        
+    end
+end
 
 figure(4)
 clf

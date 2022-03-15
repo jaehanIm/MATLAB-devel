@@ -173,6 +173,56 @@ end
 superNet.ND(1) = 1; % depot is nan
 
 %% Local Network (LLP) Completefication
+
+% superNet complefication (initialization)
+superPosC = zeros(cluNum,cluNum);
+for i = 1:cluNum-1
+    for j = i+1:cluNum
+        superPosC(i,j) = norm(superNet.pos(i,:)-superNet.pos(j,:));
+        superPosC(j,i) = superPosC(i,j);
+    end
+end
+
+tic
+% version 1
+% for i = 1:cluNum-1
+%     for j = i+1:cluNum
+%         if isempty(intraCluNodeSet{i,j})
+%             disp("[Warning] disconnected cluster detected");
+%             superG = graph(superPosC);
+%             [~,d] = shortestpath(superG,i,j,'Method','Positive');
+%             superNet.C(i,j) = d;
+%             superNet.C(j,i) = d;
+%         end
+%     end
+% end
+
+% version 2
+disconCluList = []; disconCount = 1;
+for i = 1:cluNum-1
+    for j = i+1:cluNum
+        if superNet.A(i,j) == 0
+            disconCluList(disconCount,:) = [i,j];
+            disconCount = disconCount + 1;
+            disp("[Warning] disconnected cluster detected");  
+            distInterest = L(nodeInCluIdx{i},nodeInCluIdx{j});
+            [val,I] = min(distInterest,[],'all');
+            [idxx,idxy] = ind2sub(size(distInterest),I);
+            [implRoute_temp,d] = shortestpath(G,nodeInCluIdx{i}(idxx),nodeInCluIdx{j}(idxy),'Method','positive');
+            superNet.C(i,j) = d;
+            superNet.C(j,i) = d;
+            implicitRoute{nodeInCluIdx{i}(idxx),nodeInCluIdx{j}(idxy)} = implRoute_temp;
+            implicitRoute{nodeInCluIdx{j}(idxy),nodeInCluIdx{i}(idxx)} = fliplr(implRoute_temp);
+            intraCluNodeSet{i,j} = [nodeInCluIdx{i}(idxx),nodeInCluIdx{j}(idxy)];
+            intraCluNodeSet{j,i} = [nodeInCluIdx{j}(idxy),nodeInCluIdx{i}(idxx)];
+            C(nodeInCluIdx{i}(idxx),nodeInCluIdx{j}(idxy)) = d;
+            C(nodeInCluIdx{j}(idxy),nodeInCluIdx{i}(idxx)) = d;
+        end
+    end
+end
+
+interCompleteTime = toc;
+
 tic
 % inter-intra cluster complefication
 implicitRoute = [];
@@ -239,49 +289,41 @@ end
 intraCompleteTime = toc;
 
 
-% superNet complefication (initialization)
-superPosC = zeros(cluNum,cluNum);
-for i = 1:cluNum-1
-    for j = i+1:cluNum
-        superPosC(i,j) = norm(superNet.pos(i,:)-superNet.pos(j,:));
-        superPosC(j,i) = superPosC(i,j);
-    end
-end
 
-tic
-% version 1
-% for i = 1:cluNum-1
-%     for j = i+1:cluNum
-%         if isempty(intraCluNodeSet{i,j})
-%             disp("[Warning] disconnected cluster detected");
-%             superG = graph(superPosC);
-%             [~,d] = shortestpath(superG,i,j,'Method','Positive');
-%             superNet.C(i,j) = d;
-%             superNet.C(j,i) = d;
-%         end
+
+% post superNet complefication intra complefication
+% for listn = 1:size(disconCluList,1)
+%     firstClu = disconCluList(listn,1);
+%     secondClu = disconCluList(listn,2);
+%     firstNode = intraCluNodeSet{firstClu,secondClu}(1);
+%     secondNode = intraCluNodeSet{firstClu,secondClu}(2);
+% 
+%     % firstClu~secondNode connection
+%     localNodeIdx = nodeInCluIdx{firstClu};
+%     locTotNodIdx = vertcat(localNodeIdx,secondNode);
+%     localC = C(locTotNodIdx,locTotNodIdx);
+%     localG = graph(localC);
+%     for i = 1:size(localNodeIdx,1)
+%         [implRoute,d]=shortestpath(localG,locTotNodIdx(i),secondNode);
+%         implicitRoute{localNodeIdx(i),secondNode} = locTotNodIdx(implRoute);
+%         implicitRoute{secondNode,localNodeIdx(i)} = locTotNodIdx(fliplr(implRoute));
+%         C(localNodeIdx(i),secondNode) = d;
+%         C(secondNode,localNodeIdx(i)) = d;
+%     end
+% 
+%     % secondClu~firstNode connection
+%     localNodeIdx = nodeInCluIdx{secondClu};
+%     locTotNodIdx = vertcat(localNodeIdx,firstNode);
+%     localC = C(locTotNodIdx,locTotNodIdx);
+%     localG = graph(localC);
+%     for i = 1:size(localNodeIdx,1)
+%         [implRoute,d]=shortestpath(localG,locTotNodIdx(i),firstNode);
+%         implicitRoute{localNodeIdx(i),firstNode} = locTotNodIdx(implRoute);
+%         implicitRoute{firstNode,localNodeIdx(i)} = locTotNodIdx(fliplr(implRoute));
+%         C(localNodeIdx(i),firstNode) = d;
+%         C(firstNode,localNodeIdx(i)) = d;
 %     end
 % end
-
-% version 2
-for i = 1:cluNum-1
-    for j = i+1:cluNum
-        if superNet.A(i,j) == 0
-            disp("[Warning] disconnected cluster detected");           
-            distInterest = L(nodeInCluIdx{i},nodeInCluIdx{j});
-            [val,I] = min(distInterest,[],'all');
-            [idxx,idxy] = ind2sub(size(distInterest),I);
-            [implRoute_temp,d] = shortestpath(G,nodeInCluIdx{i}(idxx),nodeInCluIdx{j}(idxy),'Method','positive');
-            superNet.C(i,j) = d;
-            superNet.C(j,i) = d;
-            implicitRoute{nodeInCluIdx{i}(idxx),nodeInCluIdx{j}(idxy)} = implRoute_temp;
-            implicitRoute{nodeInCluIdx{j}(idxy),nodeInCluIdx{i}(idxx)} = fliplr(implRoute_temp);
-            intraCluNodeSet{i,j} = [nodeInCluIdx{i}(idxx),nodeInCluIdx{j}(idxy)];
-            intraCluNodeSet{j,i} = [nodeInCluIdx{j}(idxy),nodeInCluIdx{i}(idxx)];
-        end
-    end
-end
-
-interCompleteTime = toc;
 
 figure(4)
 clf
@@ -368,8 +410,8 @@ while true
             subProbEndNodeIdx{c-1} = intraCluNodeSet{currClus,nextClus}(:,1);
             subProbEndNodeIdx{c-1} = unique(subProbEndNodeIdx{c-1});
         end
-        totSubProbNodeIdx
-        subProbEndNodeIdx
+%         totSubProbNodeIdx
+%         subProbEndNodeIdx
 
         % fomulate data structure for ACO
         map = [];
@@ -379,14 +421,14 @@ while true
         map.subProbEndNodeIdx = subProbEndNodeIdx;
             
         % run ACO
-        [tour,score]=LLP_solver(map,150,50);
+        [tour,score,clusterCost,bridgeCost]=LLP_solver(map,50,30)
         scoreRecord(v) = score;
         tourRecord{v} = tour;
         
         
     end
     totalScore = sum(scoreRecord);
-solveTime = toc;
+    solveTime = toc;
     figure(4)
     hold on
     for v= 1:vnum
