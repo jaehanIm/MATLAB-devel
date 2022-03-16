@@ -184,20 +184,6 @@ for i = 1:cluNum-1
 end
 
 tic
-% version 1
-% for i = 1:cluNum-1
-%     for j = i+1:cluNum
-%         if isempty(intraCluNodeSet{i,j})
-%             disp("[Warning] disconnected cluster detected");
-%             superG = graph(superPosC);
-%             [~,d] = shortestpath(superG,i,j,'Method','Positive');
-%             superNet.C(i,j) = d;
-%             superNet.C(j,i) = d;
-%         end
-%     end
-% end
-
-% version 2
 disconCluList = []; disconCount = 1;
 for i = 1:cluNum-1
     for j = i+1:cluNum
@@ -288,65 +274,6 @@ end
 
 intraCompleteTime = toc;
 
-
-
-
-% post superNet complefication intra complefication
-% for listn = 1:size(disconCluList,1)
-%     firstClu = disconCluList(listn,1);
-%     secondClu = disconCluList(listn,2);
-%     firstNode = intraCluNodeSet{firstClu,secondClu}(1);
-%     secondNode = intraCluNodeSet{firstClu,secondClu}(2);
-% 
-%     % firstClu~secondNode connection
-%     localNodeIdx = nodeInCluIdx{firstClu};
-%     locTotNodIdx = vertcat(localNodeIdx,secondNode);
-%     localC = C(locTotNodIdx,locTotNodIdx);
-%     localG = graph(localC);
-%     for i = 1:size(localNodeIdx,1)
-%         [implRoute,d]=shortestpath(localG,locTotNodIdx(i),secondNode);
-%         implicitRoute{localNodeIdx(i),secondNode} = locTotNodIdx(implRoute);
-%         implicitRoute{secondNode,localNodeIdx(i)} = locTotNodIdx(fliplr(implRoute));
-%         C(localNodeIdx(i),secondNode) = d;
-%         C(secondNode,localNodeIdx(i)) = d;
-%     end
-% 
-%     % secondClu~firstNode connection
-%     localNodeIdx = nodeInCluIdx{secondClu};
-%     locTotNodIdx = vertcat(localNodeIdx,firstNode);
-%     localC = C(locTotNodIdx,locTotNodIdx);
-%     localG = graph(localC);
-%     for i = 1:size(localNodeIdx,1)
-%         [implRoute,d]=shortestpath(localG,locTotNodIdx(i),firstNode);
-%         implicitRoute{localNodeIdx(i),firstNode} = locTotNodIdx(implRoute);
-%         implicitRoute{firstNode,localNodeIdx(i)} = locTotNodIdx(fliplr(implRoute));
-%         C(localNodeIdx(i),firstNode) = d;
-%         C(firstNode,localNodeIdx(i)) = d;
-%     end
-% end
-
-figure(4)
-clf
-grid on
-hold on
-for i = 1:size(G.Edges,1)
-    startIdx = G.Edges.EndNodes(i,1);
-    EndIdx = G.Edges.EndNodes(i,2);
-    startPos = node(startIdx,:);
-    EndPos = node(EndIdx,:);
-    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
-end
-for i = 1:cluNum
-    temp = node(nodeInCluIdx{i},:);
-    plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
-end
-mesh(voxelPosX,voxelPosY,voxelFilterData);
-plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
-for i = 1:cluNum
-    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
-end
-axis equal
-
 figure(44)
 clf
 grid on
@@ -371,11 +298,20 @@ axis equal
 
 %% Solver
 tic
+firstTry = true;
+prevSuperRoute = [];
+superRoute = zeros(vnum,cluNum-vnum+1);
+trialNum = 1;
+totalScoreHistory = [];
+totalTourHistory = [];
 while true
+    disp(["==== Trial Num : "+num2str(trialNum)+" ===="]);
+
     if vnum >= cluNum
         disp("[error] cannot solve VRP : too many vehicles!")
         break;
     end
+    
     %% HLP
     map = [];
     map.A = superNet.A;
@@ -383,9 +319,22 @@ while true
     map.ND = superNet.ND;
     map.vnum = vnum;
     map.N = cluNum;
-    map.totLoad = sum(superNet.C_temp,'all')/2 + sum(superNet.ND);
+    map.totLoad = mean(superNet.C(2:end,2:end),'all')*(cluNum/vnum-1) + mean(superNet.ND(2:end))*cluNum/vnum + mean(superNet.C(1,2:end))*2;
     [superRoute,superScore]=HLP_solver(map);
+
     superRoute
+
+    %% Check Termination Condition
+    if ~firstTry
+        %Check termination condition
+        if size(superRoute) == size(prevSuperRoute)
+            if superRoute == prevSuperRoute
+                disp("Identical HLP solution derived.");
+                disp("Termination condition met. Finishing the solver!");
+                break;
+            end
+        end
+    end
 
     %% LLP
     scoreRecord = [];
@@ -396,7 +345,7 @@ while true
         superRouteL = sum((superRoute(v,:)~=0));
         for c = 2:superRouteL %for number of involved clusters            
             currClus = superRoute(v,c);
-            prevClus = superRoute(v,c-1);
+%             prevClus = superRoute(v,c-1);
             if c ~= superRouteL
                 nextClus = superRoute(v,c+1);
             else
@@ -421,26 +370,100 @@ while true
         map.subProbEndNodeIdx = subProbEndNodeIdx;
             
         % run ACO
-        [tour,score,clusterCost,bridgeCost]=LLP_solver(map,50,30)
+        [tour,score,clusterCost,bridgeCost,residueCost]=LLP_solver(map,100,100);
         scoreRecord(v) = score;
         tourRecord{v} = tour;
-        
-        
+        costRecord(v).clusterCost = clusterCost;
+        costRecord(v).bridgeCost = bridgeCost;
+        costRecord(v).residueCost = residueCost;
+
+        % update super network
     end
     totalScore = sum(scoreRecord);
     solveTime = toc;
-    figure(4)
-    hold on
-    for v= 1:vnum
-        plot3(node(tourRecord{v},1),node(tourRecord{v},2),node(tourRecord{v},3)+2,'LineWidth',3)
-    end
-    axis equal
-    break;
-    %% Check Termination Condition
 
     %% Update Super Network
+    for v = 1:vnum
+        superRouteL = sum((superRoute(v,:)~=0));
+        
+        % initRoute update
+        initClu = superRoute(v,2);
+        superNet.C(1,initClu) = costRecord(v).residueCost(1); % initCost
+        superNet.C(initClu,1) = superNet.C(1,initClu);
 
+        % cluster ND update
+        for i = 1:superRouteL-1
+            superNet.ND(superRoute(v,i+1)) = costRecord(v).clusterCost(i);
+        end
+
+        % bridge update
+        if ~isempty(costRecord(v).bridgeCost)
+            for i = 1:superRouteL-2
+                firstClu = superRoute(v,i+1);
+                secondClu = superRoute(v,i+2);
+                superNet.C(firstClu,secondClu) = costRecord(v).bridgeCost(i);
+                superNet.C(secondClu,firstClu) = superNet.C(firstClu,secondClu);
+            end
+        end
+
+        % endRoute update
+        endClu = superRoute(v,superRouteL);
+        superNet.C(end,endClu) = costRecord(v).residueCost(2);
+        superNet.C(endClu,end) = superNet.C(end,endClu);
+    end
+
+    totalScoreHistory  = vertcat(totalScoreHistory, totalScore);
+    totalTourHistory{trialNum} = tourRecord;
+    
+    if ~firstTry
+        if totalScoreHistory(end-1) > totalScore
+            disp("Solution deteriorated.")
+            disp("Termination condition met. Finishing the solver!");
+            break;
+        end
+    end
+
+    firstTry = false;
+    trialNum = trialNum + 1;
 end
+    
 
+%% plot
+
+finalTourRecord = totalTourHistory{end-1};
+figure(4)
+clf
+grid on
+hold on
+for i = 1:size(G.Edges,1)
+    startIdx = G.Edges.EndNodes(i,1);
+    EndIdx = G.Edges.EndNodes(i,2);
+    startPos = node(startIdx,:);
+    EndPos = node(EndIdx,:);
+    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
+end
+for i = 1:cluNum
+    temp = node(nodeInCluIdx{i},:);
+    plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
+end
+mesh(voxelPosX,voxelPosY,voxelFilterData);
+plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
+for i = 1:cluNum
+    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
+end
+hold on
+for v= 1:vnum
+    plot3(node(finalTourRecord{v},1),node(finalTourRecord{v},2),node(finalTourRecord{v},3)+2,'LineWidth',3)
+end
+axis equal
+
+figure(5)
+clf
+hold on
+grid on
+plot(totalScoreHistory,'o-');
+xlabel('trialNim');
+ylabel('Score');
+title('total score history')
 %% post processing
 % 2-opt

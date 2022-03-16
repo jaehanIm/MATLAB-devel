@@ -1,6 +1,6 @@
 % tic
 %% Parameter setting
-fovFactor = 1;
+fovFactor = 1.5;
 px = 6 * fovFactor; % fov x length
 py = 4 * fovFactor;
 ov_x = 0.1; % overlap length

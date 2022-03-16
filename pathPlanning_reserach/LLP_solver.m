@@ -1,4 +1,4 @@
-function [tour,score, clusterCost, bridgeCost] = LLP_solver(map,antNo,termCond)
+function [tour,score, clusterCost, bridgeCost, residueCost] = LLP_solver(map,antNo,termCond)
 % require N C vehNum homeIdx totSubProbNodeIdx subProbEndNodeIdx
 
 %% Parameter Setting
@@ -24,6 +24,7 @@ count = 1;
 maxIter = 1e4;
 history = zeros(maxIter,1);
 
+disp('Initiating ACS!');
 for t = 1 : maxIter
 %     colonyIter = [];
     mapGraph.totSubProbNodeIdx = map.totSubProbNodeIdx;
@@ -47,12 +48,14 @@ for t = 1 : maxIter
         bestTour = colony.ant(minIndex).tour;
         bestTourLen = colony.ant(minIndex).vehStepLen;
         bestBridgeCost = colony.ant(minIndex).bridgeCost;
+        bestClusterCost = colony.ant(minIndex).clusterCost;
     end
     
     colony.queen.tour = bestTour;
     colony.queen.fitness = bestFitness;
     colony.queen.vehStepLen = bestTourLen;
     colony.queen.bridgeCost = bestBridgeCost;
+    colony.queen.clusterCost = bestClusterCost;
         
     % Update phromone matrix 
     tau = updatePhromoneLLP(tau , colony);  
@@ -61,7 +64,7 @@ for t = 1 : maxIter
     tau  = ( 1 - rho ) .* tau;
 
     % Display the results
-    if mod(t,10) == 0
+    if mod(t,50) == 0
         outmsg = [ 'Iteration #' , num2str(t) , ' Shortest length = ' , num2str(colony.queen.fitness)  ];
         disp(outmsg)
     end
@@ -78,6 +81,7 @@ for t = 1 : maxIter
     end
     if count >= termCond
         disp('Solution stabilized. Terminating ACS!');
+        disp('=====================================');
         break;
     end
 
@@ -90,12 +94,11 @@ tour = colony.queen.tour;
 
 initCost = map.C(tour(1),tour(2));
 returnCost = map.C(tour(end-1),tour(end));
-
-clusterCost = colony.queen.fitness - initCost - returnCost;
-
 colony.queen.bridgeCost(1) = [];
 
-score = [colony.queen.fitness,];
+score = [colony.queen.fitness];
 bridgeCost = colony.queen.bridgeCost;
+clusterCost = colony.queen.clusterCost;
+residueCost = [initCost,returnCost];
 
 end

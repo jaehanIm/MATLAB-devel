@@ -38,8 +38,8 @@ if V > 1 % vehicle demand equality constraint
         X = zeros(T,T,V);
         X(:,:,v) = ND;
         A = vertcat(A,X(:)');
-        loadConst = max(totLoad/V*1,max(map.ND))
-%         loadConst = 400;
+        loadConst = max(totLoad,max(map.ND));
+        loadConst = totLoad
         b = vertcat(b,loadConst);
     end
 end
@@ -84,10 +84,11 @@ ub = ones(intL,1);
 flag = 1;
 iterationNum = 0;
 tic
+disp('initiating IP process!');
 while flag == 1
     iterationNum = iterationNum + 1;
-    options = optimoptions('intlinprog','AbsoluteGapTolerance',0.1,'IntegerTolerance',1e-6);
-    [result,score] = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options)
+    options = optimoptions('intlinprog','AbsoluteGapTolerance',0.1,'IntegerTolerance',1e-6,'Display','none');
+    [result,score] = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options);
     tempResult = reshape(result,[T,T,V]);
     tempResult = sum(tempResult,3);
     
@@ -118,6 +119,7 @@ while flag == 1
     TEXT = ["Iteration Number : ",iterationNum];
     disp(TEXT);
 end
+disp('IP process complete!');
 toc
 
 % Linker

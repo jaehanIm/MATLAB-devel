@@ -36,6 +36,7 @@ for i = 1 : antNo
 
         tau = tau_tot(currSubNodes,currSubNodes);
         eta = eta_tot(currSubNodes,currSubNodes);
+        C = graph.edges(currSubNodes,currSubNodes);
 
         while unvisitedNum ~= 0
             for j = 1:vehNum
@@ -92,6 +93,7 @@ for i = 1 : antNo
 
         prevEndNode = currSubNodes(colony.tour(end));
         bridgeCost(c) = graph.edges(currSubNodes(colony.tour(1)),currSubNodes(colony.tour(2)));
+        clusterCost(c) = fitnessFunctionLLP(currSubNodes(colony.tour(2:end)),colony.vehStepLen-1,graph);
 
     end % end of cluster
     
@@ -99,6 +101,7 @@ for i = 1 : antNo
     colonyCluster.tour(end+1) = 1;
     colonyCluster.vehStepLen = colonyCluster.vehStepLen + 1;
     colonyCluster.bridgeCost = bridgeCost;
+    colonyCluster.clusterCost = clusterCost;
     colonyHistory.ant(i) = colonyCluster;
 end % end of all ants
 
