@@ -11,10 +11,11 @@ vnum = 2;
 depotPos = [60 60 60];
 % depotPos = [10 -10 0];
 
-fovFactor = 0.4;
+fovFactor = 1;
 inpection_dist = 6; % Inspection distance
 mapheight = 5.0;
-conThres = 7;
+% conThres = 14;
+conThres = 100;
 
 %% wp generator
 poc_path_planner
@@ -186,13 +187,13 @@ figure(4)
 clf
 grid on
 hold on
-for i = 1:size(G.Edges,1)
-    startIdx = G.Edges.EndNodes(i,1);
-    EndIdx = G.Edges.EndNodes(i,2);
-    startPos = node(startIdx,:);
-    EndPos = node(EndIdx,:);
-    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
-end
+% for i = 1:size(G.Edges,1)
+%     startIdx = G.Edges.EndNodes(i,1);
+%     EndIdx = G.Edges.EndNodes(i,2);
+%     startPos = node(startIdx,:);
+%     EndPos = node(EndIdx,:);
+%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
+% end
 for i = 1:cluNum
     temp = node(nodeInCluIdx{i},:);
     plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
@@ -322,13 +323,13 @@ figure(44)
 clf
 grid on
 hold on
-for i = 1:size(G.Edges,1)
-    startIdx = G.Edges.EndNodes(i,1);
-    EndIdx = G.Edges.EndNodes(i,2);
-    startPos = node(startIdx,:);
-    EndPos = node(EndIdx,:);
-    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
-end
+% for i = 1:size(G.Edges,1)
+%     startIdx = G.Edges.EndNodes(i,1);
+%     EndIdx = G.Edges.EndNodes(i,2);
+%     startPos = node(startIdx,:);
+%     EndPos = node(EndIdx,:);
+%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
+% end
 for i = 1:cluNum
     temp = node(nodeInCluIdx{i},:);
     plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
@@ -534,13 +535,13 @@ figure(4)
 clf
 grid on
 hold on
-for i = 1:size(G.Edges,1)
-    startIdx = G.Edges.EndNodes(i,1);
-    EndIdx = G.Edges.EndNodes(i,2);
-    startPos = node(startIdx,:);
-    EndPos = node(EndIdx,:);
-    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
-end
+% for i = 1:size(G.Edges,1)
+%     startIdx = G.Edges.EndNodes(i,1);
+%     EndIdx = G.Edges.EndNodes(i,2);
+%     startPos = node(startIdx,:);
+%     EndPos = node(EndIdx,:);
+%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
+% end
 for i = 1:cluNum
     temp = node(nodeInCluIdx{i},:);
     plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
