@@ -161,16 +161,26 @@ for i = 1:N
 end
 
 %% Solve!
+vnum = 4;
+
 map.N = N;
-map.capacity = 1e6;
+map.capacity = bladeL * 12 / vnum;
 map.C = C;
-map.vnum = 3;
+map.vnum = vnum;
 map.oblig = ...
     [4,8;3,7;2,6;5,9;...
     12,16;11,15;10,14;13,17;...
     20,24;21,25;18,22;19,23];
+solve_complete = false;
 tic
-[routeResult,score] = TSP_solver(map);
+while ~solve_complete
+    [routeResult,score] = TSP_solver(map);
+    if score == -1
+        map.capacity = map.capacity * 1.1;
+    else
+        solve_complete = true;
+    end
+end
 toc
 
 % Home edition

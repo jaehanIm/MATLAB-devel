@@ -38,8 +38,7 @@ if V > 1 % vehicle demand equality constraint
         X = zeros(T,T,V);
         X(:,:,v) = ND;
         A = vertcat(A,X(:)');
-        loadConst = max(totLoad,max(map.ND));
-        loadConst = totLoad
+        loadConst = totLoad;
         b = vertcat(b,loadConst);
     end
 end
@@ -81,14 +80,23 @@ ub = ones(intL,1);
 %% Run solver
 
 % Solver
+Error = false;
 flag = 1;
 iterationNum = 0;
-tic
+
 disp('initiating IP process!');
 while flag == 1
     iterationNum = iterationNum + 1;
     options = optimoptions('intlinprog','AbsoluteGapTolerance',0.1,'IntegerTolerance',1e-6,'Display','none');
-    [result,score] = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options);
+    [result,score,exitFlag] = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options);
+
+    if exitFlag == -2
+        disp("[HLP solver] ERROR : Unable to solve IP. No feasible solution existing");
+        disp("ErrorVal : "+num2str(loadConst));
+        Error = true;
+        break;
+    end
+
     tempResult = reshape(result,[T,T,V]);
     tempResult = sum(tempResult,3);
     
@@ -120,9 +128,14 @@ while flag == 1
     disp(TEXT);
 end
 disp('IP process complete!');
-toc
+disp("loadConstVal : "+num2str(loadConst));
 
-% Linker
-routeResult = detectRoutes(pathResult);
+if Error
+    routeResult = -1;
+    score = -1;
+else
+    % Linker
+    routeResult = detectRoutes(pathResult);
+end
 
 end

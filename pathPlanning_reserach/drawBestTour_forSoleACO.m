@@ -42,9 +42,9 @@ end
 title('Route Result')
 box('on');
 grid on
-xlim([0 28.1])
+% xlim([0 28.1])
 % ylim([0 24.6])
-ylim([-inf inf])
+% ylim([-inf inf])
 
 %
 

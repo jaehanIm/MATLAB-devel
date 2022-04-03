@@ -1,7 +1,7 @@
 function [routeResult,score]=TSP_solver(map)
 % Very Very Inefficient MILP solver
 % vnum, N(count depot), capacity, C, oblig
-
+global debugTemp
 %% Optimization param setting
 
 % Parameter setting
@@ -31,7 +31,7 @@ intL = length(f);
 A = [];
 b = [];
 
-for v = 1:V
+for v = 1:V % capacity constraint
     X = zeros(T,T,V);
     X(:,:,v) = 1;
     X = X.*Y;
@@ -39,25 +39,25 @@ for v = 1:V
     b = vertcat(b,capacity);
 end
 
-% oblig = map.oblig; % obligation edge constraint
-% for i = 1:size(oblig,1)
-%     obg1 = oblig(i,1);
-%     obg2 = oblig(i,2);
-%     X = zeros(T,T,V);
-%     X(obg1,obg2,:) = -1;
-%     X(obg2,obg1,:) = -1;
-%     A = vertcat(A,X(:)');
-%     b = vertcat(b,-1);
-% end
-
-if V > 1 % vehicle equality constraint
-    for v = 1:V
-        X = zeros(T,T,V);
-        X(:,:,v) = 1;
-        A = vertcat(A,X(:)');
-        b = vertcat(b,N/V+V-1);
-    end
+oblig = map.oblig; % obligation edge constraint
+for i = 1:size(oblig,1)
+    obg1 = oblig(i,1);
+    obg2 = oblig(i,2);
+    X = zeros(T,T,V);
+    X(obg1,obg2,:) = -1;
+    X(obg2,obg1,:) = -1;
+    A = vertcat(A,X(:)');
+    b = vertcat(b,-1);
 end
+
+% if V > 1 % vehicle equality constraint
+%     for v = 1:V
+%         X = zeros(T,T,V);
+%         X(:,:,v) = 1;
+%         A = vertcat(A,X(:)');
+%         b = vertcat(b,N/V+V-1);
+%     end
+% end
 
 % Equality Constraint
 Aeq = [];
@@ -98,10 +98,19 @@ ub = ones(intL,1);
 % Solver
 flag = 1;
 iterationNum = 0;
+Error = false;
 while flag == 1
     iterationNum = iterationNum + 1;
-    options = optimoptions('intlinprog','AbsoluteGapTolerance',0.1,'IntegerTolerance',1e-6,'MaxTime',43200);
-    [result,score] = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options);
+    options = optimoptions('intlinprog','AbsoluteGapTolerance',0.1,'IntegerTolerance',1e-6,'Display','none');
+    [result,score,exitFlag] = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options);
+
+    if exitFlag == -2
+        disp("[HLP solver] ERROR : Unable to solve IP. No feasible solution existing");
+        disp("ErrorVal : "+num2str(capacity));
+        Error = true;
+        break;
+    end
+    
     tempResult = reshape(result,[T,T,V]);
     tempResult = sum(tempResult,3);
     
@@ -109,6 +118,7 @@ while flag == 1
     tempResult(tempResult<0.1) = 0;
     
     % Detect subtours
+    debugTemp.tempResult = tempResult;
     subtour = detectSubtours(tempResult);
     flag = ~isempty(subtour); % check if there is any subtours generated
     
@@ -133,7 +143,12 @@ while flag == 1
     disp(TEXT);
 end
 
-% Linker
-routeResult = detectRoutes(pathResult);
+if Error
+    routeResult = -1;
+    score = -1;
+else
+    % Linker
+    routeResult = detectRoutes(pathResult);
+end
 
 end

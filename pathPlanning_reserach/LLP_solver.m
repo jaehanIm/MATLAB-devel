@@ -7,13 +7,13 @@ global debugTemp
 mapGraph.n = map.N; % Total number of subnodes
 mapGraph.edges = map.C;
 
-tau0 = 10 * 1 / (  mapGraph.n * mean( mapGraph.edges(:)  )  );  % Initial pheromone concentration
+tau0 = 1 * 1 / (  mapGraph.n * mean( mapGraph.edges(:)  )  );  % Initial pheromone concentration
 tau = tau0 * ones( mapGraph.n , mapGraph.n); % Pheromone matrix
 eta = 1./ mapGraph.edges;  % desirability of each edge 
 
 rho = 0.02; % Evaporation rate 
 alpha = 1;  % Pheromone exponential parameters 
-beta = 1;  % Desirability exponetial paramter
+beta = 2;  % Desirability exponetial paramter
 homeIdx = 1;
 vehNum = 1;
 debugTemp = [];

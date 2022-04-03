@@ -13,7 +13,6 @@ mapGraph = graph1.graph1;
 
 %% Initial parameters of ACO 
 maxIter = 10000;
-antNo = 200;
 
 tau0 = 10 * 1 / (  mapGraph.n * mean( mapGraph.edges(:)  )  );  % Initial phromone concentration
 
@@ -69,7 +68,7 @@ for t = 1 : maxIter
     tau  = ( 1 - rho ) .* tau;
     
     % Display the results
-    if mod(t,10) == 0
+    if mod(t,50) == 0
         outmsg = [ 'Iteration #' , num2str(t) , ' Shortest length = ' , num2str(colony.queen.fitness)  ];
         disp(outmsg)
     end
@@ -82,11 +81,14 @@ for t = 1 : maxIter
             count = 0;
         end
     end
-    if count >= 300
+    if count >= stopThres
         disp('Solution stabilized. Terminating ACS!');
         break;
     end
 end
-toc
+soleACO_time = toc;
+soleACO_result = colony.queen.fitness;
+historyACO = history;
+historyACO(historyACO==0) = [];
 drawBestTour_forSoleACO( colony, mapGraph );
 

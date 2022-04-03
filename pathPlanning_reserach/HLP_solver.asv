@@ -1,13 +1,16 @@
 function [routeResult,score]=HLP_solver(map)
-%% Optimization param setting
+% require A C N ND vnum totLoad
 
 % Parameter setting
 V = map.vnum;
 N = map.N-1; % number of superNodes
-capacity = map.capacity;
 T = N + 1;
-NN = map.NN; % number of total subNodes
+totLoad = map.totLoad;
 ND = map.ND; % Super node demand matrix
+ND_unit = ND;
+for i = 1:T-1
+    ND = horzcat(ND,ND_unit);
+end
 
 X = zeros(T,T,V); % selector
 % Obg = map.obgSet; % obligatory edge pass constraint
@@ -30,20 +33,13 @@ intL = length(f);
 A = [];
 b = [];
 
-for v = 1:V
-    X = zeros(T,T,V);
-    X(:,:,v) = 1;
-    X = X.*Y;
-    A = vertcat(A,X(:)');
-    b = vertcat(b,capacity);
-end
-
 if V > 1 % vehicle demand equality constraint
     for v = 1:V
         X = zeros(T,T,V);
         X(:,:,v) = ND;
         A = vertcat(A,X(:)');
-        b = vertcat(b,max(NN/V,max(map.ND,'all')));
+        loadConst = totLoad;
+        b = vertcat(b,loadConst);
     end
 end
 
@@ -84,12 +80,23 @@ ub = ones(intL,1);
 %% Run solver
 
 % Solver
+Error = false;
 flag = 1;
 iterationNum = 0;
+
+disp('initiating IP process!');
 while flag == 1
     iterationNum = iterationNum + 1;
-    options = optimoptions('intlinprog','AbsoluteGapTolerance',0.1,'IntegerTolerance',1e-6);
-    [result,score] = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options);
+    options = optimoptions('intlinprog','AbsoluteGapTolerance',0.1,'IntegerTolerance',1e-6,'Display','none');
+    [result,score,exitFlag] = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options);
+
+    if exitFlag == -2
+        disp("[HLP solver] ERROR : Unable to solve IP. No feasible solution existing");
+        disp("ErrorVal : "+num2str(loadConst));
+        Error = true;
+        break;
+    end
+
     tempResult = reshape(result,[T,T,V]);
     tempResult = sum(tempResult,3);
     
@@ -120,8 +127,15 @@ while flag == 1
     TEXT = ["Iteration Number : ",iterationNum];
     disp(TEXT);
 end
+disp('IP process complete!');
+disp("loadConstVal : "+num2str(loadConst));
 
-% Linker
-routeResult = detectRoutes(pathResult);
+if Error
+    routeResult = -1;
+    score = -1;
+else
+    % Linker
+    routeResult = detectRoutes(pathResult);
+end
 
 end

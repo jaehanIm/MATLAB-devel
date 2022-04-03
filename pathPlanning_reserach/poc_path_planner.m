@@ -1,22 +1,19 @@
 % tic
 %% Parameter setting
-fovFactor = 1.5;
+
 px = 6 * fovFactor; % fov x length
 py = 4 * fovFactor;
 ov_x = 0.1; % overlap length
 ov_y = 0.1;
 voxel_width = 0.2; % voxel distance
-inpection_dist = 5; % Inspection distance
-mapheight = 1.0;
-conThres = 13;
 
 eff_x = px - ov_x; % Effective fov size
 eff_y = py - ov_y;
 
 %% Load data (Inspection Area Loading)
 area = imread('area.png');
-area = area~=0;
-% area = ones(size(area));
+% area = area~=0;
+area = ones(size(area));
 
 area_xl = size(area,2)*voxel_width; % Acutal size[m] of area
 area_yl = size(area,1)*voxel_width;
@@ -112,69 +109,69 @@ end
 
 %% Path Planner (Sweep Algorithm)
 % Sweeping algorithm
-tic
-[short_l,short_axis]= min(size(airPosX));
-init_direction = -1; % 1 is up, 0 is down
-sweep_dir = ones(short_l,1);
-sweep_dir(1) = init_direction;
-% short_axis = 1;
-% short_l = 7;
-for i = 2:short_l
-    sweep_dir(i) = -sweep_dir(i-1);
-end
-sectorX = airPosX;
-sectorY = airPosY;
-
-if short_axis == 1
-    sectorX = sectorX';
-    sectorY = sectorY';
-    for i = 1:short_l
-        if sweep_dir(i) == -1
-            sectorX(:,i) = flipud(sectorX(:,i));
-            sectorY(:,i) = flipud(sectorY(:,i));
-        end
-    end
-elseif short_axis == 2
-    for i = 1:short_l
-        if sweep_dir(i) == -1
-            sectorX(:,i) = flipud(sectorX(:,i));
-            sectorY(:,i) = flipud(sectorY(:,i));
-        end
-    end
-end
-toc
-% waypoint alignment
-sectorX = sectorX(:);
-sectorY = sectorY(:);
-sectorX = sectorX(~isnan(sectorX));
-sectorY = sectorY(~isnan(sectorY));
-
-net = [sectorX,sectorY];
-cost_Sweep = 0;
-for i = 2:length(net)
-    cost_Sweep = cost_Sweep + euclideanDist(net(i,:),net(i-1,:));
-end
-
-% Cost Matrix gen.
-dim = size(net,1);
-costMatrix = zeros(dim,dim);
-for i = 1:dim
-    for j = 1:dim
-        costMatrix(i,j) = euclideanDist(net(i,:),net(j,:)); % by distance
-    end
-end
+% tic
+% [short_l,short_axis]= min(size(airPosX));
+% init_direction = -1; % 1 is up, 0 is down
+% sweep_dir = ones(short_l,1);
+% sweep_dir(1) = init_direction;
+% % short_axis = 1;
+% % short_l = 7;
+% for i = 2:short_l
+%     sweep_dir(i) = -sweep_dir(i-1);
+% end
+% sectorX = airPosX;
+% sectorY = airPosY;
+% 
+% if short_axis == 1
+%     sectorX = sectorX';
+%     sectorY = sectorY';
+%     for i = 1:short_l
+%         if sweep_dir(i) == -1
+%             sectorX(:,i) = flipud(sectorX(:,i));
+%             sectorY(:,i) = flipud(sectorY(:,i));
+%         end
+%     end
+% elseif short_axis == 2
+%     for i = 1:short_l
+%         if sweep_dir(i) == -1
+%             sectorX(:,i) = flipud(sectorX(:,i));
+%             sectorY(:,i) = flipud(sectorY(:,i));
+%         end
+%     end
+% end
+% toc
+% % waypoint alignment
+% sectorX = sectorX(:);
+% sectorY = sectorY(:);
+% sectorX = sectorX(~isnan(sectorX));
+% sectorY = sectorY(~isnan(sectorY));
+% 
+% net = [sectorX,sectorY];
+% cost_Sweep = 0;
+% for i = 2:length(net)
+%     cost_Sweep = cost_Sweep + euclideanDist(net(i,:),net(i-1,:));
+% end
+% 
+% % Cost Matrix gen.
+% dim = size(net,1);
+% costMatrix = zeros(dim,dim);
+% for i = 1:dim
+%     for j = 1:dim
+%         costMatrix(i,j) = euclideanDist(net(i,:),net(j,:)); % by distance
+%     end
+% end
 
 % Nearest Neighborhood Method
-tic
-map.node = net;
-map.N = size(net,1);
-map.L = costMatrix;
-[record,tempCost]=NNHeuristic(map);
-toc
+% tic
+% map.node = net;
+% map.N = size(net,1);
+% map.L = costMatrix;
+% [record,tempCost]=NNHeuristic(map);
+% toc
 
 
-figure(44)
-plot(record(:,1),record(:,2))
+% figure(44)
+% plot(record(:,1),record(:,2))
 
 %% Plot
 % figure(1)
@@ -258,7 +255,7 @@ mapfig = gca;
 %        plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')
 %     end
 % end
-% 
+
 function out = euclideanDist(pos1,pos2)
 out = sqrt((pos2(2)-pos1(2))^2+(pos2(1)-pos1(1))^2);
 end
