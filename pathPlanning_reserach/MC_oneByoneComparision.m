@@ -13,6 +13,7 @@ completeTime_soleACO
 soleACO_time
 soleACO_result
 
+%%
 nodeNumX = [154 154 108 476 973 3234 475];
 dconnX = [0.05 0.14 0.06 0.02 0.01 0.0061 0.4698];
 connTACO = [0.36 0.45 0.15 8.86 69.65 2975.9 9.8581];
@@ -45,8 +46,17 @@ grid on
 
 figure(3333)
 clf
-grid on
 semilogy(dconnX,resACO./resTME,'o','LineWidth',2)
 title('solution ratio')
+xlabel('connectivity')
+grid on
+
+figure(4444)
+clf
+semilogx(dconnX,solveTACO,'o','LineWidth',2)
+hold on
+grid on
+semilogx(dconnX,solveTME,'o','LineWidth',2)
+title('solution time')
 xlabel('connectivity')
 grid on

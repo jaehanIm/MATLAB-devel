@@ -25,11 +25,11 @@ for i = 1:vehNum
         X = [x1 , x2];
         Y = [y1, y2];
         Z = [z1, z2];
-        plot3(X, Y, Z+1,'Color',color,'LineWidth',3);
+        plot3(X, Y, Z,'Color',color,'LineWidth',3);
     end
 end
 
-plot3(graph.node.x(homeIdx),graph.node.y(homeIdx),graph.node.z(homeIdx)+1,'ok', 'markerSize' , 10 , 'MarkerEdgeColor' , 'r' , 'MarkerFaceColor', 'g');
+plot3(graph.node.x(homeIdx),graph.node.y(homeIdx),graph.node.z(homeIdx),'ok', 'markerSize' , 10 , 'MarkerEdgeColor' , 'r' , 'MarkerFaceColor', 'g');
 for i = 2 : graph.n
     
     X = [graph.node.x(i)];

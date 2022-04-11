@@ -5,7 +5,6 @@ addpath('./MILP')
 addpath('./ComDetTBv090/')
 addpath('./ComDetTBv090/Algorithms/')
 addpath('./ComDetTBv090/Auxiliary/')
-addpath('../patch_normal/')
 
 %% Param setting
 vnum = 3;
@@ -15,23 +14,20 @@ depotPos = [10 -5 0];
 fovFactor = 1.8;
 inpection_dist = 7; % Inspection distance
 mapheight = 5.0;
-conThres = 5;
+conThres = 3;
+stlAddr = '/home/jaehan/Desktop/generic.stl';
 
 %% wp generator
 
-node = load('tree.mat'); node = node.objNode;
-% node(64,:) = [];
-
-% node(node(:,3) < 5,:) = [];
+node = loadStl(stlAddr);
 N = size(node,1);
 
-
-node_temp = zeros(floor(N/10),3);
-for i = 1:floor(size(node_temp,1))
-    node_temp(i,:) = node(i*10-5,:);
-end
-node = node_temp;
-node(find(isnan(node(:,1))),:) = [];
+% node_temp = zeros(floor(N/2),3);
+% for i = 1:floor(size(node_temp,1))
+%     node_temp(i,:) = node(i*2-1,:);
+% end
+% node = node_temp;
+% node(find(isnan(node(:,1))),:) = [];
 
 node = vertcat(depotPos,node); % add depot
 N = size(node,1);
@@ -47,32 +43,15 @@ end
 
 
 %% Build Network Graph
-% for i = 2:N % do not connect depot!
-%     for j = 2:N
-%         if i~=j
-%             if L(i,j) < conThres
-%                 A(i,j) = 1;
-%                 C(i,j) = L(i,j);
-%             end
-%         else
-%             A(i,j) = 0;
-%         end
-%     end
-% end
-
-for i = 2:N-1 % do not connect depot!
-    sorted = sort(L(i,:));
-    if size(sorted,2) > 150
-        limitThres = sorted(20);
-    else
-        limitThres = 0;
-    end
-    for j = i+1:N
-        if L(i,j) < conThres && L(i,j) < limitThres
-            A(i,j) = 1;
-            A(j,i) = A(i,j);
-            C(i,j) = L(i,j);
-            C(j,i) = C(i,j);
+for i = 2:N % do not connect depot!
+    for j = 2:N
+        if i~=j
+            if L(i,j) < conThres
+                A(i,j) = 1;
+                C(i,j) = L(i,j);
+            end
+        else
+            A(i,j) = 0;
         end
     end
 end
@@ -107,6 +86,9 @@ plot(normalize(eigenvector, 'range'))
 legend('degree','close','betweenness','pagerank','eigen')
 ylim([0 1.5])
 
+averageDegree = sum(A,'all')/2/N
+degreeConnectivity = averageDegree/(N-1)
+
 %% Save Network
 graph1.n = N;
 graph1.node.x = node(:,1);
@@ -120,7 +102,7 @@ save('graph_complete.mat','graph1');
 tic
 A = A_orig;
 A_temp = A(2:end,2:end); %except home node
-
+disp("Clustering start.")
 cluIdx = GCModulMax2(A_temp);
 % cluIdx = GCSpectralClust1(A_temp,3); cluIdx = cluIdx(:,end);
 % cluIdx = GCReichardt(A_temp,[2:-0.5:0.1]); cluIdx = cluIdx(:,end);
@@ -165,6 +147,7 @@ for j = 2:cluNum
 end
 
 clusteringTime = toc;
+disp("Clustering complete.")
 
 
 %% SuperNet Construction
@@ -247,6 +230,7 @@ superNet.ND(1) = 1; % depot is nan
 %% Local Network (LLP) Completefication
 
 % superNet complefication (initialization)
+disp("SuperNet complefication.")
 superPosC = zeros(cluNum,cluNum);
 for i = 1:cluNum-1
     for j = i+1:cluNum
@@ -280,8 +264,10 @@ for i = 1:cluNum-1
 end
 
 interCompleteTime = toc;
+disp("SuperNet complefication complete")
 
 tic
+disp("inter-intra completfication")
 % inter-intra cluster complefication
 implicitRoute = [];
 for i = 1:cluNum-1
@@ -329,13 +315,14 @@ for i = fliplr(2:cluNum)
                 for kj = ki+1:size(locTotNodIdx,1)
                     origIdxi = locTotNodIdx(ki);
                     origIdxj = locTotNodIdx(kj);
-
                     if A(origIdxi,origIdxj) == 0
                         [implRoute,d]=shortestpath(localG,ki,kj,'Method','positive');
                         implicitRoute{origIdxi,origIdxj} = locTotNodIdx(implRoute);
                         implicitRoute{origIdxj,origIdxi} = fliplr(locTotNodIdx(implRoute));
                         C(origIdxi,origIdxj) = d;
                         C(origIdxj,origIdxi) = d;
+                        A(origIdxi,origIdxj) = 1;
+                        A(origIdxj,origIdxi) = 1;
                     end
                 end
             end
@@ -343,6 +330,8 @@ for i = fliplr(2:cluNum)
         end
     end
 end
+disp("inter-intra completfication complete")
+
 
 intraCompleteTime = toc;
 
@@ -532,6 +521,9 @@ while true
         end
     end
 
+    terminationType = "SOLDET";
+    break;
+
 
     firstTry = false;
     trialNum = trialNum + 1;
@@ -541,42 +533,20 @@ solveTime = toc;
 
 %% plot
 
-if terminationType == "SOLDET"
-    finalTourRecord = totalTourHistory{end-1};
-elseif terminationType == "HLPCONV"
-    finalTourRecord = totalTourHistory{end};
-end
+% if terminationType == "SOLDET"
+%     finalTourRecord = totalTourHistory{end-1};
+% elseif terminationType == "HLPCONV"
+%     finalTourRecord = totalTourHistory{end};
+% end
 
-finalTourRecord = totalTourHistory{2};
+finalTourRecord = totalTourHistory{1};
 
 figure(4)
 clf
 grid on
 
-dcmI2N = angle2dcm(270*pi/180,0,0,'XYZ');
-% dcmI2N = angle2dcm(pi,0,0,'XYZ');
-% dmcI2N = angle2dcm(0,0,0,'XYZ'); % A380
-fv = stlread('/home/jaehan/Downloads/tree.stl');
-FV.faces = fv.ConnectivityList;
-FV.vertices = fv.Points;
-FV.vertices = dcmI2N' * FV.vertices';
-FV.vertices = FV.vertices';
-patch(FV,'FaceColor',       [0.8 0.8 1.0], ...
-'EdgeColor',       'none',        ...
-'FaceLighting',    'gouraud',     ...
-'AmbientStrength', 0.15);
-camlight('headlight');
-material('dull');
-axis('image');
-alpha(0.7)
+drawStl(stlAddr,4);
 hold on
-%n = patchnormals(FV);
-%temp = zeros(size(n,1),3);
-%for i = 1:size(n,1)
-%p1 = FV.vertices(i,:); p2 = FV.vertices(i,:)+4*n(i,:);
-%temp(i,:) = p2;
-%plot3([p1(1) p2(1)],[p1(2) p2(2)],[p1(3) p2(3)],'g-');
-%end
 for i = 1:cluNum
     temp = node(nodeInCluIdx{i},:);
     plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
@@ -585,7 +555,6 @@ plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10
 for i = 1:cluNum
     text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3)+1,num2str(i));
 end
-hold on
 for v= 1:vnum
     plot3(node(finalTourRecord{v},1),node(finalTourRecord{v},2),node(finalTourRecord{v},3),'LineWidth',3)
 end

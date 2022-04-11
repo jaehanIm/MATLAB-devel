@@ -161,7 +161,7 @@ for i = 1:N
 end
 
 %% Solve!
-vnum = 4;
+vnum = 3;
 
 map.N = N;
 map.capacity = bladeL * 12 / vnum;
