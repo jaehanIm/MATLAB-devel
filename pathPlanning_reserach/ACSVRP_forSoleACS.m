@@ -11,41 +11,43 @@ mapGraph = graph1.graph1;
 
 %% ACOVRP algorithm 
 
+global homeIdx temp tau0
 %% Initial parameters of ACO 
 maxIter = 100000;
 
-tau0 = 10 * 1 / (  mapGraph.n * mean( mapGraph.edges(:)  )  );  % Initial phromone concentration
+tau0 = 1 / (mapGraph.n * mean( mapGraph.edges(:)) * N);  % Initial phromone concentration
 
 tau = tau0 * ones( mapGraph.n , mapGraph.n); % Phromone matirx 
 eta = 1./ mapGraph.edges;  % desirability of each edge 
 
-rho = 0.02; % Evaporation rate 
+rho = 0.1; % Evaporation rate
 alpha = 1;  % Phromone exponential parameters 
-beta = 1;  % Desirability exponetial paramter
+beta = 2;   % Desirability exponetial paramter
+psi = 0.1;    % local pheromone evaporation rate
+q = 0.9;    % Exploration Exploitation parameter
 
-global homeIdx vehNum temp  mutationRate
 homeIdx = 1; %60 is the main
-vehNum = vnum;
-mutationRate = 0.0;
 temp = [];
 
-%% Main loop of ACO 
+%% Main loop of ACS
 
 bestFitness = inf;
 bestTour = [];
 history = zeros(maxIter,1);
 tic
 count = 0;
+disp('Initiating ACS!');
+
 for t = 1 : maxIter
     % Create Ants 
     
     colony = [];
-    colony = createColonyVRP( mapGraph, colony , antNo, tau, eta, alpha,  beta);
+    colony = createColonyACSVRP( mapGraph, colony , antNo, tau, eta, alpha,  beta, q, psi, vnum);
     
     
     % Calculate the fitness values of all ants 
     for i = 1 : antNo 
-        colony.ant(i).fitness = fitnessFunctionVRP(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vehNum);
+        colony.ant(i).fitness = fitnessFunctionVRP(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum);
     end
     
     % Find the best ant (queen)
@@ -62,10 +64,7 @@ for t = 1 : maxIter
     colony.queen.vehTourLen = bestTourLen;
         
     % Update phromone matrix 
-    tau = updatePhromoneVRP(tau , colony);  
-    
-    % Evaporation 
-    tau  = ( 1 - rho ) .* tau;
+    tau = updatePhromoneACSVRP(tau , colony, rho, minIndex, vnum);  
     
     % Display the results
     if mod(t,50) == 0

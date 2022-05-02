@@ -5,13 +5,22 @@ addpath('./ComDetTBv090/Algorithms/')
 addpath('./ComDetTBv090/Auxiliary/')
 
 %% Param setting
-vnum = 3;
+vnum = 4;
+depotPos = [60 60 60];
 capacity = 40;
+antNo = 20;
+stopThres = 400;
 
 %% wp generator
 poc_path_planner
-
 node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
+node = vertcat(depotPos,node); % add depot
+
+
+% node = readtable('/home/jaehan/Desktop/TSP_test.csv');
+% node = node.Variables;
+% node(:,1:2) = node(:,2:3);
+% node(:,3) = 0;
 
 N = size(node,1);
 A = zeros(N,N); % connectivity matrix
@@ -38,31 +47,16 @@ for i = 1:N % do not connect depot!
     end
 end
 
+[A,C]=graphSparseConnection(node,A,C,L);
+A(1,:) = 0; A(:,1) = 0;
 
 G = graph(C);
-degree = centrality(G,'degree');
-closeness = centrality(G,'closeness');
-betweenness = centrality(G,'betweenness');
-pagerank = centrality(G,'pagerank');
-eigenvector = centrality(G,'eigenvector');
+A_orig = A;
+C_orig = C;
 
-figure(2)
-p = plot(G,'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
-p.NodeCData = betweenness;
-colormap jet
-colorbar
-
-figure(3)
-clf
-grid on
-hold on
-plot(normalize(degree, 'range'))
-plot(normalize(closeness, 'range'))
-plot(normalize(betweenness, 'range'))
-plot(normalize(pagerank, 'range'))
-plot(normalize(eigenvector, 'range'))
-legend('degree','close','betweenness','pagerank','eigen')
-ylim([0 1.5])
+totalDegree = sum(A(2:end,2:end),'all')/2
+completeDegree = nchoosek(N-1,2)
+degreeConnectivity = totalDegree / completeDegree
 
 %% Completefication
 tic
@@ -91,9 +85,8 @@ graph1.edges = C;
 save('graph_complete.mat','graph1');
 
 %% solve
-antNo = 50;
-stopThres = 200;
-ACOVRP_forSoleACO
+% ACOVRP_forSoleACO
+ACSVRP_forSoleACS
 
 % IPt = [0.02,0.69,5.71,21.6,197.24,1825.75];
 % ACOt = [3.78,5.67,7.83,7.4,10.99,28.91,58.2,58.13,150.26,201.57];
@@ -120,6 +113,7 @@ ACOVRP_forSoleACO
 % right_color = [0 0 0];
 % set(figure(1),'defaultAxesColorOrder',[left_color; right_color]);
 % legend('Exact','ACS','Optimality Gap')
+drawBestTour_forSoleACO( colony, mapGraph, vnum);
 
 disp('Time')
 completeTime_soleACO

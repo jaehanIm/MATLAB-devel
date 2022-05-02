@@ -1,8 +1,8 @@
-function [tour,score, clusterCost, bridgeCost, residueCost] = LLP_solver(map,antNo,termCond)
+function [tour,score, clusterCost, bridgeCost, residueCost] = LLP_solver_ACS(map,antNo,termCond)
 % require N C vehNum homeIdx totSubProbNodeIdx subProbEndNodeIdx
 
 %% Parameter Setting
-global debugTemp
+global debugTemp tau0
 
 mapGraph.n = map.N; % Total number of subnodes
 mapGraph.edges = map.C;
@@ -11,11 +11,13 @@ tau0 = 1 * 1 / (  mapGraph.n * mean( mapGraph.edges(:)  )  );  % Initial pheromo
 tau = tau0 * ones( mapGraph.n , mapGraph.n); % Pheromone matrix
 eta = 1./ mapGraph.edges;  % desirability of each edge 
 
-rho = 0.02; % Evaporation rate 
-alpha = 1;  % Pheromone exponential parameters 
-beta = 2;  % Desirability exponetial paramter
+rho = 0.1; % Evaporation rate
+alpha = 1;  % Phromone exponential parameters 
+beta = 2;   % Desirability exponetial paramter
+psi = 0.1;    % local pheromone evaporation rate
+q = 0.9;    % Exploration Exploitation parameter
 homeIdx = 1;
-vehNum = 1;
+vnum = 1;
 debugTemp = [];
 
 bestFitness = inf;
@@ -24,7 +26,7 @@ count = 1;
 maxIter = 1e4;
 history = zeros(maxIter,1);
 
-disp('Initiating ACO!');
+disp('Initiating ACS!');
 for t = 1 : maxIter
 %     colonyIter = [];
     mapGraph.totSubProbNodeIdx = map.totSubProbNodeIdx;
@@ -33,7 +35,7 @@ for t = 1 : maxIter
     %% ACO Main
     % Create tours
     colony = [];
-    colony = createColonyLLP(mapGraph,colony,antNo,tau,eta,alpha,beta); %result based on local idx.
+    colony = createColonyACSLLP(mapGraph,colony,antNo,tau,eta,alpha,beta,q,psi); %result based on local idx.
     
     % Calculate the fitness values of all ants 
     for i = 1 : antNo 
@@ -58,7 +60,7 @@ for t = 1 : maxIter
     colony.queen.clusterCost = bestClusterCost;
         
     % Update phromone matrix 
-    tau = updatePhromoneLLP(tau , colony);  
+    tau = updatePhromoneACSLLP(tau , colony, rho, minIndex);  
     
     % Evaporation 
     tau  = ( 1 - rho ) .* tau;

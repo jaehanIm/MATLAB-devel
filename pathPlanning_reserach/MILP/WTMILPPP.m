@@ -6,13 +6,16 @@ r2d = 1/d2r;
 % NED coord.
 wtPos = [0 0 0]';
 wtDir = 0; %deg (Looking into the blade)
-wtHeight = 60;
-bladeL = 30;
-noseL = 10;
+wtHeight = 562;
+bladeL = 255;
+noseL = 50;
 homePos = [-30 10 0]';
 wtRot = 0;
-inspectionDist = 3;
-rootDist = 5;
+inspectionDist = 20;
+rootDist = 30;
+vnum = 1;
+
+stlAddr = '/home/jaehan/Desktop/WT.stl';
 
 %% Inspection point generation 
 
@@ -65,7 +68,7 @@ end
 end
 
 plot3(wtCore(2),wtCore(1),-wtCore(3),'rx')
-plot3(nosePos(2),nosePos(1),-nosePos(3),'o')
+plot3(nosePos(2),nosePos(1),-nosePos(3),'o','LineWidth',3)
 plot3(homePos(2),homePos(1),homePos(3),'o','MarkerSize',5,'LineWidth',3)
 view(35,40)
 axis equal
@@ -161,10 +164,9 @@ for i = 1:N
 end
 
 %% Solve!
-vnum = 3;
-
 map.N = N;
 map.capacity = bladeL * 12 / vnum;
+% map.capacity = 1e10;
 map.C = C;
 map.vnum = vnum;
 map.oblig = ...

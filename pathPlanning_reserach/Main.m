@@ -5,23 +5,30 @@ addpath('./MILP')
 addpath('./ComDetTBv090/')
 addpath('./ComDetTBv090/Algorithms/')
 addpath('./ComDetTBv090/Auxiliary/')
+addpath('./ComDetTBv090/Graphs/')
 
 %% Param setting
-vnum = 2;
+vnum = 4;
 depotPos = [60 60 60];
 % depotPos = [10 -10 0];
 
 fovFactor = 1;
-inpection_dist = 6; % Inspection distance
+inpection_dist = 7; % Inspection distance
 mapheight = 5.0;
-% conThres = 14;
-conThres = 100;
+conThres = 10;
+% conThres = 20;
+% conThres = 1e10;
 
 %% wp generator
 poc_path_planner
 
 node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
 node = vertcat(depotPos,node); % add depot
+
+% node = readtable('/home/jaehan/Desktop/TSP_test.csv');
+% node = node.Variables;
+% node(:,1:2) = node(:,2:3);
+% node(:,3) = 0;
 
 N = size(node,1);
 A = zeros(N,N); % connectivity matrix
@@ -49,38 +56,17 @@ for i = 2:N % do not connect depot!
     end
 end
 
+[A,C]=graphSparseConnection(node,A,C,L);
+A(1,:) = 0; A(:,1) = 0;
+
+G = graph(C);
 A_orig = A;
 C_orig = C;
 
+totalDegree = sum(A(2:end,2:end),'all')/2
+completeDegree = nchoosek(N-1,2)
+degreeConnectivity = totalDegree / completeDegree
 
-G = graph(C);
-degree = centrality(G,'degree');
-closeness = centrality(G,'closeness');
-betweenness = centrality(G,'betweenness');
-pagerank = centrality(G,'pagerank');
-eigenvector = centrality(G,'eigenvector');
-avgdegree = mean(degree);
-
-figure(2)
-p = plot(G,'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
-p.NodeCData = betweenness;
-colormap jet
-colorbar
-
-figure(3)
-clf
-grid on
-hold on
-plot(normalize(degree, 'range'))
-plot(normalize(closeness, 'range'))
-plot(normalize(betweenness, 'range'))
-plot(normalize(pagerank, 'range'))
-plot(normalize(eigenvector, 'range'))
-legend('degree','close','betweenness','pagerank','eigen')
-ylim([0 1.5])
-
-averageDegree = sum(A,'all')/2/N
-degreeConnectivity = averageDegree/(N-1)
 
 %% Save Network
 graph1.n = N;
@@ -95,8 +81,12 @@ save('graph_complete.mat','graph1');
 tic
 A = A_orig;
 A_temp = A(2:end,2:end); %except home node
+C_temp = C(2:end,2:end);
 
-cluIdx = GCModulMax2(A_temp);
+
+cluIdx = GCModulMax2(A_temp); % DO NOT USE GCModulMax1 -> erroneous algorithm
+% cluIdx = GCSpectralClust1(C_temp,vnum*1.5); cluIdx = cluIdx(:,end);
+
 cluIdx = vertcat(1,cluIdx+1);
 cluNum = max(cluIdx);
 
@@ -276,6 +266,9 @@ for i = 1:cluNum-1
                         [implRoute,d]=shortestpath(localG,ki,kj,'Method','positive');
                         implicitRoute{origIdxi,origIdxj} = locTotNodIdx(implRoute);
                         implicitRoute{origIdxj,origIdxi} = fliplr(locTotNodIdx(implRoute));
+                        if d == inf
+                            disp("[CRITICAL] FAULTY CLUSTERING ALGORITHM - STOP IMMEDIATELY")
+                        end
                         C(origIdxi,origIdxj) = d;
                         C(origIdxj,origIdxi) = d;
                     end
@@ -339,6 +332,9 @@ plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10
 for i = 1:cluNum
     text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
 end
+for i = 1:N
+    text(node(i,1),node(i,2),node(i,3),num2str(i));
+end
 axis equal
 drawnow
 
@@ -362,28 +358,42 @@ while true
     end
     
     %% HLP
-    HLP_complete = false;
-    map_H.A = superNet.A;
-    map_H.C = superNet.C;
+%     HLP_complete = false;
+%     map_H.A = superNet.A;
+%     map_H.C = superNet.C;
+%     map_H.ND = superNet.ND;
+%     map_H.vnum = vnum;
+%     map_H.N = cluNum; 
+%     if ~firstTry
+%         map_H.totLoad = totalScore/vnum*0.2;
+%     else
+%         map_H.totLoad = mean(superNet.C(2:end,2:end),'all')*(cluNum/vnum-1) + mean(superNet.ND(2:end))*cluNum/vnum;
+%         map_H.totLoad = map_H.totLoad * 0.5;
+%     end
+% 
+%     while ~HLP_complete
+%         [superRoute,superScore]=HLP_solver(map_H);
+%         if superScore == -1
+%             map_H.totLoad = map_H.totLoad * 1.1;
+%         else
+%             HLP_complete = true;
+%             break;
+%         end
+%     end
+
+%     [superRoute,superScore]=HLP_solver(map_H);
+%     map_H = [];
+%     map_H.N = N;
+%     map_H.C = C;
+%     map_H.totSubProbNodeIdx = totSubProbNodeIdx;
+%     map_H.subProbEndNodeIdx = subProbEndNodeIdx;
+%     [tour] = ACOVRP_forSoleACO(map,antNo,termCond)
+%     [tour,score,clusterCost,bridgeCost,residueCost]=LLP_solver_ACS(map,20,400);
+    map_H.n = cluNum;
+    map_H.edges = superNet.C;
     map_H.ND = superNet.ND;
     map_H.vnum = vnum;
-    map_H.N = cluNum; 
-    if ~firstTry
-        map_H.totLoad = totalScore/vnum*0.2;
-    else
-        map_H.totLoad = mean(superNet.C(2:end,2:end),'all')*(cluNum/vnum-1) + mean(superNet.ND(2:end))*cluNum/vnum;
-        map_H.totLoad = map_H.totLoad * 0.5;
-    end
-
-    while ~HLP_complete
-        [superRoute,superScore]=HLP_solver(map_H);
-        if superScore == -1
-            map_H.totLoad = map_H.totLoad * 1.1;
-        else
-            HLP_complete = true;
-            break;
-        end
-    end
+    superRoute = HLP_solver_ACS(map_H, 20, 400);
 
     superRoute
 
@@ -392,14 +402,16 @@ while true
         %Check termination condition
         HLPSolIdentCheck = 0;
         if size(superRoute) == size(prevSuperRoute)
-            curRouteGroup = [];
+            curRouteGroup = zeros(vnum,size(superRoute,2));
+%             curRouteGroup = [];
             for v = 1:vnum
-                curRouteGroup(v,:) = unique(superRoute(v,:));
+                uniqueSuperRouteLen = length(unique(superRoute(v,:)));
+                curRouteGroup(v,1:uniqueSuperRouteLen) = unique(superRoute(v,:));
             end
             for v = 1:vnum
                 for vj = 1:vnum
                     prevRouteGroup = unique(prevSuperRoute(vj,:));
-                    if curRouteGroup(v,:)==prevRouteGroup
+                    if ismember(curRouteGroup(v,:),prevRouteGroup)
                         HLPSolIdentCheck = HLPSolIdentCheck+1;
                         break;
                     end
@@ -448,7 +460,8 @@ while true
         map.subProbEndNodeIdx = subProbEndNodeIdx;
             
         % run ACO
-        [tour,score,clusterCost,bridgeCost,residueCost]=LLP_solver(map,50,200);
+%         [tour,score,clusterCost,bridgeCost,residueCost]=LLP_solver(map,20,400);
+        [tour,score,clusterCost,bridgeCost,residueCost]=LLP_solver_ACS(map,20,400);
         scoreRecord(v) = score;
         tourRecord{v} = tour;
         costRecord(v).clusterCost = clusterCost;
@@ -457,7 +470,8 @@ while true
 
         % update super network
     end
-    totalScore = sum(scoreRecord);
+%     totalScore = sum(scoreRecord);
+    totalScore = max(scoreRecord);
     vehScore = scoreRecord;
     solveTime(trialNum) = toc;
 
@@ -496,7 +510,7 @@ while true
     superRouteHistory{trialNum} = superRoute;
     vehScoreHistory{trialNum} = vehScore;
     
-    if ~firstTry && trialNum ~= 2
+    if ~firstTry %&& trialNum ~= 2
         if totalScoreHistory(end-1) < totalScore
             disp("Solution deteriorated.")
             disp("Termination condition met. Finishing the solver!");
@@ -505,10 +519,10 @@ while true
         end
     end
 
-    if 1
-        terminationType = "HLPCONV";
-        break;
-    end
+%     if 1
+%         terminationType = "HLPCONV";
+%         break;
+%     end
 
 
     firstTry = false;
@@ -523,25 +537,22 @@ totalScoreHistory
 
 %% plot
 
-if terminationType == "SOLDET"
-    finalTourRecord = totalTourHistory{end-1};
-elseif terminationType == "HLPCONV"
-    finalTourRecord = totalTourHistory{end};
-end
 
-finalTourRecord = totalTourHistory{1};
+[~,I] = min(totalScoreHistory);
+finalTourRecord = totalTourHistory{I};
 
 figure(4)
 clf
 grid on
 hold on
-% for i = 1:size(G.Edges,1)
-%     startIdx = G.Edges.EndNodes(i,1);
-%     EndIdx = G.Edges.EndNodes(i,2);
-%     startPos = node(startIdx,:);
-%     EndPos = node(EndIdx,:);
-%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
-% end
+for i = 1:size(G.Edges,1)
+    startIdx = G.Edges.EndNodes(i,1);
+    EndIdx = G.Edges.EndNodes(i,2);
+    startPos = node(startIdx,:);
+    EndPos = node(EndIdx,:);
+    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
+end
+alpha = 0.1;
 for i = 1:cluNum
     temp = node(nodeInCluIdx{i},:);
     plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
@@ -551,6 +562,9 @@ plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10
 for i = 1:cluNum
     text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
 end
+% for i = 1:N
+%     text(node(i,1),node(i,2),0,num2str(i));
+% end
 hold on
 for v= 1:vnum
     plot3(node(finalTourRecord{v},1),node(finalTourRecord{v},2),node(finalTourRecord{v},3)+2,'LineWidth',3)

@@ -7,7 +7,7 @@ global debugTemp
 % Parameter setting
 V = map.vnum;
 N = map.N-1;
-capacity = map.capacity;
+capacity = map.capacity
 T = N + 1;
 
 X = zeros(T,T,V); % selector

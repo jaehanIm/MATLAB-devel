@@ -4,14 +4,15 @@ vnum = 3;
 depotPos = [10 -5 0];
 
 fovFactor = 1.8;
-inpection_dist = 7; % Inspection distance
+inpection_dist = 1; % Inspection distance
 mapheight = 5.0;
 conThres = 3;
 stlAddr = '/home/jaehan/Desktop/generic.stl';
+% stlAddr = '/home/jaehan/Downloads/generic_edited.stl';
 
 %% wp generator
 
-node = loadStl(stlAddr);
+node = loadStl(stlAddr,inpection_dist);
 N = size(node,1);
 
 % node_temp = zeros(floor(N/2),3);
@@ -20,6 +21,16 @@ N = size(node,1);
 % end
 % node = node_temp;
 % node(find(isnan(node(:,1))),:) = [];
+
+% node reduction
+N = size(node,1);
+factor = 2;
+node_temp = zeros(floor(N/factor),3);
+for i = 1:floor(size(node_temp,1))
+    node_temp(i,:) = node(i*factor-1,:);
+end
+node = node_temp;
+node(find(isnan(node(:,1))),:) = [];
 
 node = vertcat(depotPos,node); % add depot
 N = size(node,1);
@@ -99,9 +110,10 @@ disp("complefication complete")
 completeTime_soleACO = toc
 
 %% solve
-antNo = 50;
-stopThres = 200;
-ACOVRP_forSoleACO
+antNo = 20;
+stopThres = 400;
+% ACOVRP_forSoleACO
+ACSVRP_forSoleACS
 
 % IPt = [0.02,0.69,5.71,21.6,197.24,1825.75];
 % ACOt = [3.78,5.67,7.83,7.4,10.99,28.91,58.2,58.13,150.26,201.57];
@@ -134,4 +146,6 @@ completeTime_soleACO
 soleACO_time
 soleACO_result
 
+drawBestTour_forSoleACO( colony, mapGraph, vnum);
 drawStl(stlAddr,1)
+

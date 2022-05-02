@@ -12,23 +12,56 @@ vnum = 3;
 depotPos = [10 -5 0];
 
 fovFactor = 1.8;
-inpection_dist = 7; % Inspection distance
+inpection_dist = 1; % Inspection distance
 mapheight = 5.0;
 conThres = 3;
 stlAddr = '/home/jaehan/Desktop/generic.stl';
+% stlAddr = '/home/jaehan/Desktop/WT.stl';
+% stlAddr = '/home/jaehan/Downloads/generic_edited.stl';
+
 
 %% wp generator
 
-node = loadStl(stlAddr);
-N = size(node,1);
+node = loadStl(stlAddr,inpection_dist);
 
-% node_temp = zeros(floor(N/2),3);
-% for i = 1:floor(size(node_temp,1))
-%     node_temp(i,:) = node(i*2-1,:);
+% node filtering
+% xcut1 = [10 50];
+% ycut1 = [30 130];
+% zcut1 = [690 715];
+% xcutIdx1 = node(:,1)>xcut1(1) & node(:,1)<xcut1(2);
+% ycutIdx1 = node(:,2)>ycut1(1) & node(:,2)<ycut1(2);
+% zcutIdx1 = node(:,3)>zcut1(1) & node(:,3)<zcut1(2);
+% regionIdx1 = find(xcutIdx1 & ycutIdx1 & zcutIdx1);
+% node(regionIdx1,:) = [];
+% xcut2 = [0 60];
+% ycut2 = [-31 22];
+% zcut2 = [700 760];
+% xcutIdx2 = node(:,1)>xcut2(1) & node(:,1)<xcut2(2);
+% ycutIdx2 = node(:,2)>ycut2(1) & node(:,2)<ycut2(2);
+% zcutIdx2 = node(:,3)>zcut2(1) & node(:,3)<zcut2(2);
+% regionIdx2 = find(xcutIdx2 & ycutIdx2 & zcutIdx2);
+% factor = 100;
+% targetNum = floor(size(regionIdx2,1)/factor);
+% targetProb = targetNum / size(regionIdx2,1);
+% tempIdx = ones(size(regionIdx2,1),1);
+% for i = 1:size(regionIdx2,1)
+%     if rand()<=targetProb
+%         tempIdx(i) = 0;
+%     end
 % end
-% node = node_temp;
-% node(find(isnan(node(:,1))),:) = [];
+% node(regionIdx2(find(tempIdx)),:) = [];
 
+% node reduction
+N = size(node,1);
+factor = 2;
+node_temp = zeros(floor(N/factor),3);
+for i = 1:floor(size(node_temp,1))
+    node_temp(i,:) = node(i*factor-1,:);
+end
+node = node_temp;
+node(find(isnan(node(:,1))),:) = [];
+
+% formulation
 node = vertcat(depotPos,node); % add depot
 N = size(node,1);
 A = zeros(N,N); % connectivity matrix
@@ -40,6 +73,14 @@ for i = 1:N
         L(i,j) = distance(node(i,:), node(j,:));
     end
 end
+
+figure(98)
+clf
+drawStl(stlAddr,98)
+hold on
+plot3(node(:,1),node(:,2),node(:,3),'.')
+
+disp("STL preprocessing complete");
 
 
 %% Build Network Graph
@@ -61,33 +102,34 @@ C_orig = C;
 
 
 G = graph(C);
-degree = centrality(G,'degree');
-closeness = centrality(G,'closeness');
-betweenness = centrality(G,'betweenness');
-pagerank = centrality(G,'pagerank');
-eigenvector = centrality(G,'eigenvector');
-avgdegree = mean(degree);
+% degree = centrality(G,'degree');
+% closeness = centrality(G,'closeness');
+% betweenness = centrality(G,'betweenness');
+% pagerank = centrality(G,'pagerank');
+% eigenvector = centrality(G,'eigenvector');
+% avgdegree = mean(degree);
+% 
+% figure(2)
+% p = plot(G,'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
+% p.NodeCData = betweenness;
+% colormap jet
+% colorbar
+% 
+% figure(3)
+% clf
+% grid on
+% hold on
+% plot(normalize(degree, 'range'))
+% plot(normalize(closeness, 'range'))
+% plot(normalize(betweenness, 'range'))
+% plot(normalize(pagerank, 'range'))
+% plot(normalize(eigenvector, 'range'))
+% legend('degree','close','betweenness','pagerank','eigen')
+% ylim([0 1.5])
 
-figure(2)
-p = plot(G,'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
-p.NodeCData = betweenness;
-colormap jet
-colorbar
-
-figure(3)
-clf
-grid on
-hold on
-plot(normalize(degree, 'range'))
-plot(normalize(closeness, 'range'))
-plot(normalize(betweenness, 'range'))
-plot(normalize(pagerank, 'range'))
-plot(normalize(eigenvector, 'range'))
-legend('degree','close','betweenness','pagerank','eigen')
-ylim([0 1.5])
-
-averageDegree = sum(A,'all')/2/N
-degreeConnectivity = averageDegree/(N-1)
+totalDegree = sum(A(2:end,2:end),'all')/2
+completeDegree = nchoosek(N-1,2)
+degreeConnectivity = totalDegree / completeDegree
 
 %% Save Network
 graph1.n = N;
@@ -115,7 +157,6 @@ p = plot(graph(A),'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
 p.NodeCData = cluIdx;
 colormap jet
 colorbar
-drawnow
 
 nodeInCluIdx = [];
 for i = 1:cluNum
@@ -377,28 +418,34 @@ while true
     end
     
     %% HLP
-    HLP_complete = false;
-    map_H.A = superNet.A;
-    map_H.C = superNet.C;
+%     HLP_complete = false;
+%     map_H.A = superNet.A;
+%     map_H.C = superNet.C;
+%     map_H.ND = superNet.ND;
+%     map_H.vnum = vnum;
+%     map_H.N = cluNum; 
+%     if ~firstTry
+%         map_H.totLoad = totalScore/vnum*0.2;
+%     else
+%         map_H.totLoad = mean(superNet.C(2:end,2:end),'all')*(cluNum/vnum-1) + mean(superNet.ND(2:end))*cluNum/vnum;
+%         map_H.totLoad = map_H.totLoad * 0.5;
+%     end
+% 
+%     while ~HLP_complete
+%         [superRoute,superScore]=HLP_solver(map_H);
+%         if superScore == -1
+%             map_H.totLoad = map_H.totLoad * 1.1;
+%         else
+%             HLP_complete = true;
+%             break;
+%         end
+%     end
+
+    map_H.n = cluNum;
+    map_H.edges = superNet.C;
     map_H.ND = superNet.ND;
     map_H.vnum = vnum;
-    map_H.N = cluNum; 
-    if ~firstTry
-        map_H.totLoad = totalScore/vnum*0.2;
-    else
-        map_H.totLoad = mean(superNet.C(2:end,2:end),'all')*(cluNum/vnum-1) + mean(superNet.ND(2:end))*cluNum/vnum;
-        map_H.totLoad = map_H.totLoad * 0.5;
-    end
-
-    while ~HLP_complete
-        [superRoute,superScore]=HLP_solver(map_H);
-        if superScore == -1
-            map_H.totLoad = map_H.totLoad * 1.1;
-        else
-            HLP_complete = true;
-            break;
-        end
-    end
+    superRoute = HLP_solver_ACS(map_H, 20, 400);
 
     superRoute
 
@@ -465,7 +512,8 @@ while true
         map.subProbEndNodeIdx = subProbEndNodeIdx;
             
         % run ACO
-        [tour,score,clusterCost,bridgeCost,residueCost]=LLP_solver(map,50,200);
+%         [tour,score,clusterCost,bridgeCost,residueCost]=LLP_solver(map,50,200);
+        [tour,score,clusterCost,bridgeCost,residueCost]=LLP_solver_ACS(map,20,400);
         scoreRecord(v) = score;
         tourRecord{v} = tour;
         costRecord(v).clusterCost = clusterCost;
@@ -512,7 +560,7 @@ while true
     superRouteHistory{trialNum} = superRoute;
     vehScoreHistory{trialNum} = vehScore;
     
-    if ~firstTry && trialNum ~= 2
+    if ~firstTry
         if totalScoreHistory(end-1) < totalScore
             disp("Solution deteriorated.")
             disp("Termination condition met. Finishing the solver!");
@@ -522,7 +570,7 @@ while true
     end
 
     terminationType = "SOLDET";
-    break;
+%     break;
 
 
     firstTry = false;
@@ -539,7 +587,10 @@ solveTime = toc;
 %     finalTourRecord = totalTourHistory{end};
 % end
 
-finalTourRecord = totalTourHistory{1};
+
+[~,I] = min(totalScoreHistory);
+finalTourRecord = totalTourHistory{I};
+
 
 figure(4)
 clf

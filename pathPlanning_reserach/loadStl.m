@@ -1,4 +1,4 @@
-function wpList = loadStl(addr)
+function wpList = loadStl(addr,ispDist)
 
 % tmp = stlread('/home/jaehan/Desktop/F18.stl');
 tmp = stlread('/home/jaehan/Downloads/beluga.stl');
@@ -19,11 +19,11 @@ patch(FV,'FaceColor',       [0.8 0.8 1.0], ...
 camlight('headlight');
 material('shiny')
 axis('image');
-% alpha(0.7)
+alpha(0.5)
 hold on
 wpList = zeros(size(n,1),3);
 for i = 1:size(n,1)
-    p1 = FV.vertices(i,:); p2 = FV.vertices(i,:)+1*n(i,:);
+    p1 = FV.vertices(i,:); p2 = FV.vertices(i,:)+ispDist*n(i,:);
 %     plot3([p1(1) p2(1)],[p1(2) p2(2)],[p1(3) p2(3)],'g-');
     wpList(i,:) = p2;
 end

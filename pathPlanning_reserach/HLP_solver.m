@@ -33,6 +33,7 @@ intL = length(f);
 A = [];
 b = [];
 
+loadConst = totLoad;
 if V > 1 % vehicle demand equality constraint
     for v = 1:V
         X = zeros(T,T,V);
@@ -58,6 +59,7 @@ end
 for v = 1:V % home depot constraint
     X = zeros(T,T,V);
     X(2:T,1,v) = 1;
+%     X(1,2:T,v) = 1;
     Aeq = vertcat(Aeq,X(:)');
     beq = vertcat(beq,1);
 end
@@ -76,6 +78,7 @@ end
 % Bound
 lb = zeros(intL,1);
 ub = ones(intL,1);
+
 
 %% Run solver
 
@@ -99,7 +102,7 @@ while flag == 1
 
     tempResult = reshape(result,[T,T,V]);
     tempResult = sum(tempResult,3);
-    
+
     % Stagnation error compensation
     tempResult(tempResult<0.1) = 0;
     
@@ -121,6 +124,7 @@ while flag == 1
             b = vertcat(b,size(curSubtour,2)-1);
         end
     else
+        tempResult = tempResult - diag(diag(tempResult)); %와 이거 찾느라 한세월 신발 
         pathResult = tempResult;
         break;
     end

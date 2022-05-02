@@ -1,10 +1,9 @@
-function [] = drawBestTour_forSoleACO(colony , graph, vehNum)
+function [] = drawBestTourVRP(colony , graph)
 
-global homeIdx
+global vehNum homeIdx
 
-figure(1)
+figure(111)
 clf
-hold on
 queenTour = colony.queen.tour;
 queenTourLen = colony.queen.vehTourLen;
 hold on
@@ -40,15 +39,11 @@ for i = 2 : graph.n
     plot3(X, Y, Z, 'ok', 'markerSize' , 3 , 'MarkerEdgeColor' , 'r' , 'MarkerFaceColor', [1, 0.6, 0.6]);
 end
 
-title('Route Result')
+title('Best tour (the queen)')
 box('on');
 grid on
-% xlim([0 28.1])
-% ylim([0 24.6])
-% ylim([-inf inf])
 
 %
-axis equal
 
 
 

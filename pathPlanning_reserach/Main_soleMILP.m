@@ -5,8 +5,8 @@ addpath('./ComDetTBv090/Algorithms/')
 addpath('./ComDetTBv090/Auxiliary/')
 
 %% Param setting
-vnum = 3;
-capacity = 1e10;
+vnum = 1;
+capacity = 350;
 
 %% wp generator
 poc_path_planner
@@ -102,7 +102,13 @@ tic
 [routeResult,score]=TSP_solver(map);
 toc
 
-fig2 = figure(11);
-fig3 = copyobj(mapfig,fig2);
+figure(4)
 hold on
-plot()
+for j = 1:3
+for i = 1:size(routeResult,2) - sum(routeResult(j,:)==0)-1
+    startIdx = routeResult(j,i);
+    endIdx = routeResult(j,i+1);
+    plot3([node(startIdx,1) node(endIdx,1)],[node(startIdx,2)  node(endIdx,2)],[node(startIdx,3)  node(endIdx,3)],'b')
+end
+end
+
