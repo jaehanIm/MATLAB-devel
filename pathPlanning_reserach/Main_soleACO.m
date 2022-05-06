@@ -7,7 +7,6 @@ addpath('./ComDetTBv090/Auxiliary/')
 %% Param setting
 vnum = 4;
 depotPos = [60 60 60];
-capacity = 40;
 antNo = 20;
 stopThres = 400;
 

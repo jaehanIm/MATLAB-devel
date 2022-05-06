@@ -196,32 +196,33 @@ end
 %     end
 % end
 
-figure(1);
-clf
-hold on
-grid on
-mesh(voxelPosX,voxelPosY,voxelFilterData);
-contour3(voxelPosX,voxelPosY,voxelFilterData);
-plot3(gridPosX(:),gridPosY(:),gridValue(:),'ko')
-plot3(airPosX(:),airPosY(:),airPosZ(:),'kx')
-plot3(airPosX_lin(:),airPosY_lin(:),airPosZ_lin(:),'mo')
-% plot3(vg(3,7).filterX,vg(3,7).filterY,vg(3,7).filterData,'.','MarkerSize',0.1) % Inspection area(voxel)
-
-% view(-45,45)
-line([],[],'Color','k')
-xlim([gridEdgeX(1) gridEdgeX(end)])
-ylim([gridEdgeY(1) gridEdgeY(end)])
-% zlim([-7 11])
-
-
-for i = 1:size(gridPosX,1)
-    for j= 1:size(gridPosX,2)
-       plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],'r--')
-       plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')
-    end
-end
-
-mapfig = gca;
+% Turn this thing on
+% figure(1);
+% clf
+% hold on
+% grid on
+% mesh(voxelPosX,voxelPosY,voxelFilterData);
+% contour3(voxelPosX,voxelPosY,voxelFilterData);
+% plot3(gridPosX(:),gridPosY(:),gridValue(:),'ko')
+% plot3(airPosX(:),airPosY(:),airPosZ(:),'kx')
+% plot3(airPosX_lin(:),airPosY_lin(:),airPosZ_lin(:),'mo')
+% % plot3(vg(3,7).filterX,vg(3,7).filterY,vg(3,7).filterData,'.','MarkerSize',0.1) % Inspection area(voxel)
+% 
+% % view(-45,45)
+% line([],[],'Color','k')
+% xlim([gridEdgeX(1) gridEdgeX(end)])
+% ylim([gridEdgeY(1) gridEdgeY(end)])
+% % zlim([-7 11])
+% 
+% 
+% for i = 1:size(gridPosX,1)
+%     for j= 1:size(gridPosX,2)
+%        plot3([gridPosX(i,j) airPosX(i,j)],[gridPosY(i,j) airPosY(i,j)],[gridValue(i,j) airPosZ(i,j)],'r--')
+%        plot3([gridPosX(i,j) airPosX_lin(i,j)],[gridPosY(i,j) airPosY_lin(i,j)],[gridValue(i,j) airPosZ_lin(i,j)],'m:')
+%     end
+% end
+% 
+% mapfig = gca;
 
 % addpath('C:\Users\dlawo\Downloads\ACO_Code');
 % bestset = load('ACO_restricted');

@@ -31,7 +31,7 @@ bestTour = [];
 history = zeros(maxIter,1);
 tic
 count = 0;
-disp('Initiating HLP ACS!');
+% disp('Initiating HLP ACS!');
 
 for t = 1 : maxIter
     % Create Ants 
@@ -63,20 +63,20 @@ for t = 1 : maxIter
     
     % Display the results
     if mod(t,50) == 0
-        outmsg = [ 'Iteration #' , num2str(t) , ' Shortest length = ' , num2str(colony.queen.fitness)  ];
-        disp(outmsg)
+%         outmsg = [ 'Iteration #' , num2str(t) , ' Shortest length = ' , num2str(colony.queen.fitness)  ];
+%         disp(outmsg)
     end
     history(t) = colony.queen.fitness;
     if t ~= 1
         if colony.queen.fitness == history(t-1)
             count = count + 1;
         else
-            disp('solution update detected!');
+%             disp('solution update detected!');
             count = 0;
         end
     end
     if count >= termCond
-        disp('Solution stabilized. Terminating HLP ACS!');
+%         disp('Solution stabilized. Terminating HLP ACS!');
         break;
     end
 end

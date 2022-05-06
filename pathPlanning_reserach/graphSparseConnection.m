@@ -6,7 +6,7 @@ discon = conncomp(G);
 disconNum = max(conncomp(G));
 centerPos = [];
 if disconNum > 1
-    disp("Disconnection Detected!")
+%     disp("Disconnection Detected!")
     % CG
     for i = 1:disconNum
         centerPos(i,:) = mean(node(find(discon==i),:),1);
