@@ -42,7 +42,7 @@ for t = 1 : maxIter
     
     % Calculate the fitness values of all ants 
     for i = 1 : antNo 
-        colony.ant(i).fitness = fitnessFunctionVRP_ND(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum, map.ND);
+        [colony.ant(i).fitness, colony.ant(i).fitnessL] = fitnessFunctionVRP_ND(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum, map.ND);
     end
     
     % Find the best ant (queen)
@@ -52,6 +52,7 @@ for t = 1 : maxIter
         bestFitness = colony.ant(minIndex).fitness;
         bestTour = colony.ant(minIndex).tour;
         bestTourLen = colony.ant(minIndex).vehTourLen;
+        colony.queen.fitnessL = colony.ant(minIndex).fitnessL;
     end
     
     colony.queen.tour = bestTour;

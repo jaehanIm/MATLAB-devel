@@ -9,15 +9,15 @@ addpath('./ComDetTBv090/Algorithms/')
 addpath('./ComDetTBv090/Auxiliary/')
 addpath('./ComDetTBv090/Graphs/')
 
-vnum = 4;
+vnum = 3;
 depotPos = [60 60 60];
 fovFactor = 3;
 inpection_dist = 7; % Inspection distance
 mapheight = 4.0;
 conThres = 10;
 antNo = 20;
-stopThres = 400;
-trialNums = 2;
+stopThres = 200;
+trialNums = 5;
 
 
 MCData = [];
@@ -26,7 +26,7 @@ fovC = 1;
 totC = 1;
 
 fovFactorSet = 3:-0.5:0.5;
-conThresSet = 5:5:30;
+conThresSet = 5:5:50;
 totalTestNum = length(fovFactorSet) * length(conThresSet);
 
 for fovFactor = fovFactorSet
@@ -49,10 +49,14 @@ for fovFactor = fovFactorSet
             temp.TestInterCompleteTime = interCompleteTime;
             temp.TestSolveTime = solveTime;
             temp.TestScoreHist = totalScoreHistory;
+            temp.TestScoreHistL = totalScoreHistoryL;
+            temp.TestSCoreHistPerV = vehScore;
     
             temp.CompCompleteTime = completeTime_soleACO;
             temp.CompSolveTime = soleACO_time;
             temp.CompScore = soleACO_result;
+            temp.CompScoreL = soleACO_resultL;
+            temp.CompScorePer = soleACO_resultPerV;
     
             temp.degreeConnectivity = degreeConnectivity;
             temp.N = N;

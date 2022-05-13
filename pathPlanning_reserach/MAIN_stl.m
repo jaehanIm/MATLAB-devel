@@ -14,7 +14,7 @@ depotPos = [10 -5 0];
 fovFactor = 1.8;
 inpection_dist = 1; % Inspection distance
 mapheight = 5.0;
-conThres = 3;
+conThres = 1.5;
 stlAddr = '/home/jaehan/Desktop/generic.stl';
 % stlAddr = '/home/jaehan/Desktop/WT.stl';
 % stlAddr = '/home/jaehan/Downloads/generic_edited.stl';
@@ -97,35 +97,13 @@ for i = 2:N % do not connect depot!
     end
 end
 
+% [A,C]=graphSparseConnection(node,A,C,L);
+% A(1,:) = 0; A(:,1) = 0;
+
 A_orig = A;
 C_orig = C;
 
-
 G = graph(C);
-% degree = centrality(G,'degree');
-% closeness = centrality(G,'closeness');
-% betweenness = centrality(G,'betweenness');
-% pagerank = centrality(G,'pagerank');
-% eigenvector = centrality(G,'eigenvector');
-% avgdegree = mean(degree);
-% 
-% figure(2)
-% p = plot(G,'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
-% p.NodeCData = betweenness;
-% colormap jet
-% colorbar
-% 
-% figure(3)
-% clf
-% grid on
-% hold on
-% plot(normalize(degree, 'range'))
-% plot(normalize(closeness, 'range'))
-% plot(normalize(betweenness, 'range'))
-% plot(normalize(pagerank, 'range'))
-% plot(normalize(eigenvector, 'range'))
-% legend('degree','close','betweenness','pagerank','eigen')
-% ylim([0 1.5])
 
 totalDegree = sum(A(2:end,2:end),'all')/2
 completeDegree = nchoosek(N-1,2)

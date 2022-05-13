@@ -59,7 +59,7 @@ graph1.node.y = node(:,2);
 graph1.node.z = node(:,3);
 graph1.edges = C;
 
-save('graph_complete.mat','graph1');
+% save('graph_complete.mat','graph1');
 
 %% solve
 ACSVRP_forSoleACS

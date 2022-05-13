@@ -13,9 +13,9 @@ depotPos = [60 60 60];
 fovFactor = 1.5;
 inpection_dist = 7; % Inspection distance
 mapheight = 5.0;
-conThres = 8;
+conThres = 5;
 antNo = 20;
-stopThres = 400;
+stopThres = 200;
 
 %% wp generator
 poc_path_planner
@@ -56,8 +56,8 @@ G = graph(C);
 A_orig = A;
 C_orig = C;
 
-totalDegree = sum(A(2:end,2:end),'all')/2
-completeDegree = nchoosek(N-1,2)
+totalDegree = sum(A(2:end,2:end),'all')/2;
+completeDegree = nchoosek(N-1,2);
 degreeConnectivity = totalDegree / completeDegree
 
 
@@ -77,8 +77,10 @@ A_temp = A(2:end,2:end); %except home node
 C_temp = C(2:end,2:end);
 
 
-cluIdx = GCModulMax2(A_temp); % DO NOT USE GCModulMax1 -> erroneous algorithm
-% cluIdx = GCSpectralClust1(C_temp,vnum*1.5); cluIdx = cluIdx(:,end);
+% cluIdx = GCModulMax2(A_temp); % DO NOT USE GCModulMax1 -> erroneous algorithm
+% cluIdx = GCSpectralClust1(C_temp,vnum*5); cluIdx = cluIdx(:,end);
+cluIdx = GCModulMax3(C_temp);
+% cluIdx = spectralcluster(A_temp,vnum*2,'LaplacianNormalization','symmetric');
 
 cluIdx = vertcat(1,cluIdx+1);
 cluNum = max(cluIdx);
@@ -149,6 +151,15 @@ for i = 2:cluNum
     superNet.C(1,i) = norm(depotPos - mean(node(nodeInCluIdx{i},:)));
     superNet.C(i,1) = superNet.C(1,i);
 end
+
+% for i = 2:cluNum
+%     tempL = [];
+%     for j = 1:size(nodeInCluIdx{i},1)
+%         tempL(j) = norm(depotPos - node(nodeInCluIdx{i},:));
+%     end
+%     superNet.C(1,i) = min(tempL);
+%     superNet.C(i,1) = superNet.C(1,i);
+% end
 
 superNet.ND(1) = 1;
 for i = 2:cluNum
@@ -338,6 +349,7 @@ prevSuperRoute = [];
 superRoute = zeros(vnum,cluNum-vnum+1);
 trialNum = 1;
 totalScoreHistory = [];
+totalScoreHistoryL = [];
 totalTourHistory = [];
 terminationType = [];
 superRouteHistory = [];
@@ -455,7 +467,7 @@ while true
         % run ACO
 %         [tour,score,clusterCost,bridgeCost,residueCost]=LLP_solver(map,antNo,stopThres);
         [tour,score,clusterCost,bridgeCost,residueCost]=LLP_solver_ACS(map,antNo,stopThres);
-        scoreRecord(v) = score;
+        scoreRecord(v) = score;       
         tourRecord{v} = tour;
         costRecord(v).clusterCost = clusterCost;
         costRecord(v).bridgeCost = bridgeCost;
@@ -463,7 +475,7 @@ while true
 
         % update super network
     end
-%     totalScore = sum(scoreRecord);
+    totalScoreL = sum(scoreRecord);
     totalScore = max(scoreRecord);
     vehScore = scoreRecord;
     solveTime(trialNum) = toc;
@@ -499,6 +511,7 @@ while true
     end
 
     totalScoreHistory  = vertcat(totalScoreHistory, totalScore);
+    totalScoreHistoryL = vertcat(totalScoreHistoryL, totalScoreL);
     totalTourHistory{trialNum} = tourRecord;
     superRouteHistory{trialNum} = superRoute;
     vehScoreHistory{trialNum} = vehScore;
@@ -512,10 +525,10 @@ while true
         end
     end
 
-%     if 1
-%         terminationType = "HLPCONV";
-%         break;
-%     end
+    if 1
+        terminationType = "HLPCONV";
+        break;
+    end
 
 
     firstTry = false;
@@ -527,6 +540,8 @@ clusteringTime
 interCompleteTime + intraCompleteTime
 solveTime
 totalScoreHistory
+totalScoreHistoryL
+vehScore
 
 %% plot
 
@@ -538,13 +553,13 @@ figure(4)
 clf
 grid on
 hold on
-for i = 1:size(G.Edges,1)
-    startIdx = G.Edges.EndNodes(i,1);
-    EndIdx = G.Edges.EndNodes(i,2);
-    startPos = node(startIdx,:);
-    EndPos = node(EndIdx,:);
-    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
-end
+% for i = 1:size(G.Edges,1)
+%     startIdx = G.Edges.EndNodes(i,1);
+%     EndIdx = G.Edges.EndNodes(i,2);
+%     startPos = node(startIdx,:);
+%     EndPos = node(EndIdx,:);
+%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
+% end
 alpha = 0.1;
 for i = 1:cluNum
     temp = node(nodeInCluIdx{i},:);

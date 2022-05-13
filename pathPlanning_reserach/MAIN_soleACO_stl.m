@@ -107,7 +107,7 @@ for i = 1:N-1
     end
 end
 disp("complefication complete")
-completeTime_soleACO = toc
+completeTime_soleACO = toc;
 
 %% solve
 antNo = 20;

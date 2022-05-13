@@ -98,7 +98,7 @@ initCost = map.C(tour(1),tour(2));
 returnCost = map.C(tour(end-1),tour(end));
 colony.queen.bridgeCost(1) = [];
 
-score = [colony.queen.fitness];
+score = colony.queen.fitness;
 bridgeCost = colony.queen.bridgeCost;
 clusterCost = colony.queen.clusterCost;
 residueCost = [initCost,returnCost];

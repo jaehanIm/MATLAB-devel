@@ -23,8 +23,8 @@ cost_NNM = cost_NNM + costMatrix_temp(curridx,j);
 curridx = j;
 costMatrix_temp(:,j) = nan;
 end
-cost_NNM = cost_NNM + costMatrix(curridx,end); %restricted
-record = vertcat(record,net(end,:)); %restricted
+% cost_NNM = cost_NNM + costMatrix(curridx,end); %restricted
+% record = vertcat(record,net(end,:)); %restricted
 
 route = record;
 routeL = cost_NNM;

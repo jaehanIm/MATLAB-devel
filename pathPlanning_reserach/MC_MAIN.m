@@ -260,6 +260,7 @@ prevSuperRoute = [];
 superRoute = zeros(vnum,cluNum-vnum+1);
 trialNum = 1;
 totalScoreHistory = [];
+totalScoreHistoryL = [];
 totalTourHistory = [];
 terminationType = [];
 superRouteHistory = [];
@@ -349,7 +350,7 @@ while true
 
         % update super network
     end
-%     totalScore = sum(scoreRecord);
+    totalScoreL = sum(scoreRecord);
     totalScore = max(scoreRecord);
     vehScore = scoreRecord;
     solveTime(trialNum) = toc;
@@ -385,6 +386,7 @@ while true
     end
 
     totalScoreHistory  = vertcat(totalScoreHistory, totalScore);
+    totalScoreHistoryL = vertcat(totalScoreHistoryL, totalScoreL);
     totalTourHistory{trialNum} = tourRecord;
     superRouteHistory{trialNum} = superRoute;
     vehScoreHistory{trialNum} = vehScore;
@@ -398,10 +400,10 @@ while true
         end
     end
 
-%     if 1
-%         terminationType = "HLPCONV";
-%         break;
-%     end
+    if 1
+        terminationType = "HLPCONV";
+        break;
+    end
 
 
     firstTry = false;

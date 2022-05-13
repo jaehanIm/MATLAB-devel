@@ -5,13 +5,13 @@ addpath('./ComDetTBv090/Algorithms/')
 addpath('./ComDetTBv090/Auxiliary/')
 
 %% Param setting
-vnum = 4;
-depotPos = [60 60 60];
-antNo = 20;
-stopThres = 400;
+% vnum = 4;
+% depotPos = [60 60 60];
+% antNo = 20;
+% stopThres = 400;
 
 %% wp generator
-poc_path_planner
+% poc_path_planner
 node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
 node = vertcat(depotPos,node); % add depot
 
@@ -118,3 +118,5 @@ disp('Time')
 completeTime_soleACO
 soleACO_time
 soleACO_result
+soleACO_resultL
+soleACO_resultPerV

@@ -1,6 +1,6 @@
 
-graph1 = load('graph_complete.mat');
-mapGraph = graph1.graph1;
+% graph1 = load('graph_complete.mat');
+mapGraph = graph1;
 
 %% ACOVRP algorithm 
 
@@ -40,7 +40,7 @@ for t = 1 : maxIter
     
     % Calculate the fitness values of all ants 
     for i = 1 : antNo 
-        colony.ant(i).fitness = fitnessFunctionVRP(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum);
+        [colony.ant(i).fitness, colony.ant(i).fitnessL, colony.ant(i).fitnessPer] = fitnessFunctionVRP(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum);       
     end
     
     % Find the best ant (queen)
@@ -50,11 +50,15 @@ for t = 1 : maxIter
         bestFitness = colony.ant(minIndex).fitness;
         bestTour = colony.ant(minIndex).tour;
         bestTourLen = colony.ant(minIndex).vehTourLen;
+        bestFitnessL = colony.ant(minIndex).fitnessL;        
+        bestFitnessPer = colony.ant(minIndex).fitnessPer;        
     end
     
     colony.queen.tour = bestTour;
     colony.queen.fitness = bestFitness;
     colony.queen.vehTourLen = bestTourLen;
+    colony.queen.fitnessL = bestFitnessL;
+    colony.queen.fitnessPer = bestFitnessPer;   
         
     % Update phromone matrix 
     tau = updatePhromoneACSVRP(tau , colony, rho, minIndex, vnum);  
@@ -80,6 +84,8 @@ for t = 1 : maxIter
 end
 soleACO_time = toc;
 soleACO_result = colony.queen.fitness;
+soleACO_resultL = colony.queen.fitnessL;
+soleACO_resultPerV = colony.queen.fitnessPer;
 historyACO = history;
 historyACO(historyACO==0) = [];
 
