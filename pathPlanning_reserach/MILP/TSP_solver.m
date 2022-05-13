@@ -7,7 +7,7 @@ global debugTemp
 % Parameter setting
 V = map.vnum;
 N = map.N-1;
-capacity = map.capacity
+capacity = map.capacity;
 T = N + 1;
 
 X = zeros(T,T,V); % selector
@@ -139,8 +139,8 @@ while flag == 1
         pathResult = tempResult;
         break;
     end
-    TEXT = ["Iteration Number : ",iterationNum];
-    disp(TEXT);
+%     TEXT = ["Iteration Number : ",iterationNum];
+%     disp(TEXT);
 end
 
 if Error
@@ -149,6 +149,7 @@ if Error
 else
     % Linker
     routeResult = detectRoutes(pathResult);
+    routeResult = fliplr(routeResult);
 end
 
 end

@@ -6,13 +6,13 @@ r2d = 1/d2r;
 % NED coord.
 wtPos = [0 0 0]';
 wtDir = 0; %deg (Looking into the blade)
-wtHeight = 562;
-bladeL = 255;
-noseL = 50;
+wtHeight = 100;
+bladeL = 60;
+noseL = 15;
 homePos = [-30 10 0]';
 wtRot = 0;
-inspectionDist = 20;
-rootDist = 30;
+inspectionDist = 9;
+rootDist = 9;
 vnum = 1;
 
 stlAddr = '/home/jaehan/Desktop/WT.stl';
@@ -80,6 +80,8 @@ axis equal
 N = 24 + 1; % add nose
 A = zeros(N,N);
 C = zeros(N,N);
+C_dist = zeros(N,N);
+C_time = zeros(N,N);
 IMR = [];
 
 % root to tip connector
@@ -122,7 +124,42 @@ A(1,:) = temp;
 A(:,1) = temp';
 
 %% Cost matrix formulation
-% trivial ones
+
+% % Velocity profile generation
+% vFast = 1.5;
+% vSlow = 1;
+% Vel = zeros(N,N);
+% for i = 1:N
+%     for j = 1:N
+%         if i~=j
+%             Vel(i,j) = vFast;
+%         end
+%     end
+% end
+% 
+% % Slow speed region
+% slowRegion = [14 10];
+% for i = size(slowRegion,1)
+%     Vel(slowRegion(i,1),slowRegion(i,2)) = vSlow;
+% end
+velocity = 1.5;
+Vel = ones(N,N) * velocity;
+
+% nonDirectonal penalty region
+penaltyRegion = [12,20;12,4;4,20;1,12;1,20;1,4];
+penaltyVal = [3,3,3,1.5,1.5,1.5]';
+penaltyRegion = vertcat(penaltyRegion,fliplr(penaltyRegion));
+penaltyVal = [penaltyVal;penaltyVal];
+
+% Directional penalty region
+penaltyRegion_direc = [25,21;7,3;15,11;14,10;7,13;16,12];
+penaltyVal_direc = [100,100,1.5,1.5,1.5,1.5]'; % strong soft constraint : nearly hard constraint
+
+% Sum penalty region
+penaltyRegion = vertcat(penaltyRegion, penaltyRegion_direc);
+penaltyVal = vertcat(penaltyVal,penaltyVal_direc);
+
+% C_dist and C_time calc.
 for i = 1:N
     for j = 1:N
         if A(i,j) == 1 && i~=j
@@ -138,16 +175,63 @@ for i = 1:N
             else
                 endNodePos = reshape(totalWp(targNod.rt,targNod.blNum,targNod.fixNum,:),3,1);
             end
-            C(i,j) = norm(endNodePos - startNodePos);
+            if initNod.rt == targNod.rt && initNod.blNum == targNod.blNum
+                C_dist(i,j) = norm(endNodePos - startNodePos) * pi/2/sqrt(2);
+            else
+                C_dist(i,j) = norm(endNodePos - startNodePos);
+            end
+            % distance to time
+            C_time(i,j) = C_dist(i,j) / Vel(i,j);
         end
     end
 end
 
-wtGraph = graph(C);
+% C calc. with penalty
+C = C_time;
+for i = 1:size(penaltyRegion,1)
+    startIdx = penaltyRegion(i,1);
+    endIdx = penaltyRegion(i,2);
+    C(startIdx,endIdx) = C(startIdx,endIdx) * penaltyVal(i);
+end
+
+% Man input (of time)
+manInputRegion = [];
+manInputVal = [];
+for i = 1:size(manInputRegion,1)
+    startIdx = manInputRegion(i,1);
+    endIdx = manInputRegion(i,2);
+    C(startIdx,endIdx) = manInputVal(i);
+end
+
+wtGraph = digraph(C);
+wtGraph_time = digraph(C_time);
+wtGraph_dist = digraph(C_dist);
+
+nPos = zeros(N,1); ePos = zeros(N,1); dPos = zeros(N,1);
+for i = 1:N
+    Nod = nodeInterpreter(i);
+    if Nod.home == 1
+        nPos(i) = homePos(1);
+        ePos(i) = homePos(2);
+        dPos(i) = homePos(3);
+    else
+        NodPos = reshape(totalWp(Nod.rt,Nod.blNum,Nod.fixNum,:),3,1);
+        nPos(i) = NodPos(1);
+        ePos(i) = NodPos(2);
+        dPos(i) = NodPos(3);
+    end
+end
+xPos = ePos; yPos = nPos; zPos = -dPos;
+
+figure(2)
+clf
+plot(wtGraph,'XData',xPos,'YData',yPos,'ZData',zPos,'Edgelabel',wtGraph.Edges.Weight,'NodeLabel',[],'EdgeFontSize',10)
+axis equal
+title('Cost Network (time * penalty)')
 
 figure(3)
 clf
-plot(wtGraph)
+plot(wtGraph,'Layout','force','Edgelabe',wtGraph.Edges.Weight)
 
 % complet-ification
 implicitRoute = [];
@@ -173,6 +257,7 @@ map.oblig = ...
     [4,8;3,7;2,6;5,9;...
     12,16;11,15;10,14;13,17;...
     20,24;21,25;18,22;19,23];
+
 solve_complete = false;
 tic
 while ~solve_complete
@@ -197,7 +282,7 @@ for i = 1:size(routeResult,1)
         homeAddNode(i) = 0;
     end
 end
-routeResult = horzcat(routeResult,homeAddNode');
+routeResult = horzcat(homeAddNode',routeResult);
 
 % Route extraction
 Nr = size(routeResult,2);
@@ -250,6 +335,61 @@ for v = 1:map.vnum
     end
 end
 
+% Evaluate route
+travelDistance = 0;
+travelTime = 0;
+for i = 1:length(routeResultDec{1})-2
+    initNod = routeResultDec{1}(i);
+    endNod = routeResultDec{1}(i+1);
+    travelDistance = travelDistance + C_dist(initNod,endNod);
+    travelTime = travelTime + C_time(initNod,endNod);
+end
+totalScore = score
+travelDistance
+travelTime
+
+% Route explanation
+surfaceName = [];
+surfaceName{1} = ["TE","DNSS","LE","UPSS"];
+surfaceName{2} = ["TE","RTSS","LE","LTSS"];
+surfaceName{3} = ["TE","UPSS","LE","DNSS"];
+verbalRoute = [];
+for i = 1:length(routeResultDec{1})-1
+    initNod = routeResultDec{1}(i);
+    endNod = routeResultDec{1}(i+1);
+    initNod = nodeInterpreter(initNod);
+    endNod = nodeInterpreter(endNod);
+    if initNod.home == 1
+        verbalRoute = vertcat(verbalRoute,"PP(NoseToRoot) Nose TO Root @ blade #" + num2str(endNod.blNum-1));
+    elseif endNod.home == 1
+        verbalRoute = vertcat(verbalRoute,"MissionComplete");
+    else
+        if initNod.rt == 1
+            if endNod.rt == 1
+                verbalRoute = vertcat(verbalRoute,"PP(RootToRoot) - " + "#" + num2str(initNod.blNum-1) + " "...
+                    + surfaceName{initNod.blNum}(initNod.fixNum) + " root TO #" + num2str(endNod.blNum-1) + " "...
+                    + surfaceName{endNod.blNum}(endNod.fixNum) + " root");
+            else
+                verbalRoute = vertcat(verbalRoute,"BF(RootToTip) - #" + num2str(initNod.blNum-1) + " " + surfaceName{initNod.blNum}(initNod.fixNum));
+            end
+        elseif initNod.rt == 2
+            if endNod.rt == 2
+                verbalRoute = vertcat(verbalRoute,"PP(TipToTip) - #" + num2str(initNod.blNum-1) + " " + surfaceName{initNod.blNum}(initNod.fixNum)...
+                    + " TO " + surfaceName{endNod.blNum}(endNod.fixNum));
+            else
+                verbalRoute = vertcat(verbalRoute,"BF(TipToRoot) - #" + num2str(initNod.blNum-1) + " " + surfaceName{initNod.blNum}(initNod.fixNum));
+            end
+        else
+            verbalRoute = vertcat(verbalRoute,"ERROR");
+        end
+    end
+end
+for i = 1:length(verbalRoute)
+    verbalRoute(i) = "Job #" + num2str(i) + " : " + verbalRoute(i);
+end
+verbalRoute
+
+
 %% Plot
 figure(11)
 clf
@@ -274,7 +414,15 @@ axis equal
 for v = 1:map.vnum
     plot3(reshape(routePos(v,2,:),1,Nr),reshape(routePos(v,1,:),1,Nr),-reshape(routePos(v,3,:),1,Nr),'*--','LineWidth',1)
 end
+for i = 1:N
+    Nod = nodeInterpreter(i);
+    if Nod.home ~= 1
+        NodPos = reshape(totalWp(Nod.rt,Nod.blNum,Nod.fixNum,:),3,1);
+        text(NodPos(2),NodPos(1),-NodPos(3),num2str(i))
+    end
+end
 title('Raw route result')
+
 
 figure(12)
 clf
@@ -298,4 +446,5 @@ axis equal
 for v = 1:map.vnum
     plot3(routePosDec{v}(2,:),routePosDec{v}(1,:),-routePosDec{v}(3,:),'*--','LineWidth',1)
 end
-title('Final result')
+% title('Final result')
+% drawStl(stlAddr,12)
