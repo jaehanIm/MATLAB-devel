@@ -1,5 +1,8 @@
 
-% graph1 = load('graph_complete.mat');
+benchTime = solveTime;
+benchScore = totalScoreHistory;
+benchScoreL = totalScoreHistoryL;
+
 mapGraph = graph1;
 
 %% ACOVRP algorithm 
@@ -23,6 +26,9 @@ homeIdx = 1; %60 is the main
 temp = [];
 
 %% Main loop of ACS
+oncePassed1 = 0;
+oncePassed2 = 0;
+oncePassed3 = 0;
 
 bestFitness = inf;
 bestTour = [];
@@ -40,7 +46,7 @@ for t = 1 : maxIter
     
     % Calculate the fitness values of all ants 
     for i = 1 : antNo 
-        [colony.ant(i).fitness, colony.ant(i).fitnessL, colony.ant(i).fitnessPer] = fitnessFunctionVRP(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum);       
+        [colony.ant(i).fitness, colony.ant(i).fitnessL, colony.ant(i).fitnessPer, colony.ant(i).fitnessM] = fitnessFunctionVRP(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum);       
     end
     
     % Find the best ant (queen)
@@ -51,14 +57,14 @@ for t = 1 : maxIter
         bestTour = colony.ant(minIndex).tour;
         bestTourLen = colony.ant(minIndex).vehTourLen;
         bestFitnessL = colony.ant(minIndex).fitnessL;        
-        bestFitnessPer = colony.ant(minIndex).fitnessPer;        
+        bestFitnessPer = colony.ant(minIndex).fitnessPer;
     end
     
     colony.queen.tour = bestTour;
     colony.queen.fitness = bestFitness;
     colony.queen.vehTourLen = bestTourLen;
     colony.queen.fitnessL = bestFitnessL;
-    colony.queen.fitnessPer = bestFitnessPer;   
+    colony.queen.fitnessPer = bestFitnessPer;
         
     % Update phromone matrix 
     tau = updatePhromoneACSVRP(tau , colony, rho, minIndex, vnum);  
@@ -77,6 +83,22 @@ for t = 1 : maxIter
             count = 0;
         end
     end
+
+    if bestFitness < benchScore && oncePassed1 == 0
+        equiPerformanceTime = toc;
+        oncePassed1 = 1;
+    end
+
+    if bestFitnessL < benchScoreL && oncePassed2 == 0
+        equiPerformanceTimeL = toc;
+        oncePassed2 = 1;
+    end
+
+    if benchTime <= toc && oncePassed3 == 0
+        equiTimePerformance = bestFitness;
+        oncePassed3 = 1;
+    end
+
     if count >= stopThres
 %         disp('Solution stabilized. Terminating ACS!');
         break;
@@ -86,6 +108,8 @@ soleACO_time = toc;
 soleACO_result = colony.queen.fitness;
 soleACO_resultL = colony.queen.fitnessL;
 soleACO_resultPerV = colony.queen.fitnessPer;
+
+history(t+1,:) = [];
 historyACO = history;
 historyACO(historyACO==0) = [];
 

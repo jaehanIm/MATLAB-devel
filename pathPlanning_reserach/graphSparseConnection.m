@@ -12,7 +12,7 @@ if disconNum > 1
         centerPos(i,:) = mean(node(find(discon==i),:),1);
     end
 
-    disconBridgeLen = zeros(disconNum,disconNum);
+    disconBridgeLen = sparse(disconNum,disconNum);
     for i = 1:disconNum
         for j = 1:disconNum
             disconBridgeLen(i,j) = norm(centerPos(i,:) - centerPos(j,:));

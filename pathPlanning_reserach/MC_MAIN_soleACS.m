@@ -4,9 +4,9 @@ node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(a
 node = vertcat(depotPos,node); % add depot
 
 N = size(node,1);
-A = zeros(N,N); % connectivity matrix
-C = zeros(N,N); % cost matrix
-L = zeros(N,N); % linear distance matrix
+A = sparse(N,N); % connectivity matrix
+C = sparse(N,N); % cost matrix
+L = sparse(N,N); % linear distance matrix
 
 for i = 1:N
     for j = 1:N
@@ -52,14 +52,10 @@ for i = 1:N-1
 end
 completeTime_soleACO = toc;
 
-%% Save Network
 graph1.n = N;
 graph1.node.x = node(:,1);
 graph1.node.y = node(:,2);
 graph1.node.z = node(:,3);
 graph1.edges = C;
 
-% save('graph_complete.mat','graph1');
-
 %% solve
-ACSVRP_forSoleACS

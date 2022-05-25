@@ -1,7 +1,4 @@
 
-%% wp generator
-poc_path_planner
-
 node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
 node = vertcat(depotPos,node); % add depot
 
@@ -41,15 +38,6 @@ C_orig = C;
 totalDegree = sum(A(2:end,2:end),'all')/2;
 completeDegree = nchoosek(N-1,2);
 degreeConnectivity = totalDegree / completeDegree;
-
-%% Save Network
-graph1.n = N;
-graph1.node.x = node(:,1);
-graph1.node.y = node(:,2);
-graph1.node.z = node(:,3);
-graph1.edges = L;
-
-save('graph_complete.mat','graph1');
 
 %% Graph Clustering
 tic

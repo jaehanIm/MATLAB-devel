@@ -249,7 +249,7 @@ end
 
 %% Solve!
 map.N = N;
-map.capacity = bladeL * 12 / vnum;
+map.capacity = bladeL * 12 / vnum * 1.1;
 % map.capacity = 1e10;
 map.C = C;
 map.vnum = vnum;
@@ -261,7 +261,7 @@ map.oblig = ...
 solve_complete = false;
 tic
 while ~solve_complete
-    [routeResult,score] = TSP_solver(map);
+    [routeResult,score] = TSP_solver_GA(map);
     if score == -1
         map.capacity = map.capacity * 1.1;
     else
@@ -282,7 +282,7 @@ for i = 1:size(routeResult,1)
         homeAddNode(i) = 0;
     end
 end
-routeResult = horzcat(homeAddNode',routeResult);
+routeResult = horzcat(routeResult,homeAddNode');
 
 % Route extraction
 Nr = size(routeResult,2);

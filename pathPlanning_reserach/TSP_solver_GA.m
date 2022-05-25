@@ -1,4 +1,4 @@
-function [routeResult,score]=TSP_solver(map)
+% function [routeResult,score]=TSP_solver_GA(map)
 % Very Very Inefficient MILP solver
 % vnum, N(count depot), capacity, C, oblig
 global debugTemp
@@ -22,6 +22,8 @@ f = funit;
 for i = 1:V-1
     f = vertcat(f,funit);
 end
+
+fun = @(x) sum(f'.*x);
 
 % Integer Constraint
 intcon = 1:length(f);
@@ -102,8 +104,8 @@ iterationNum = 0;
 Error = false;
 while flag == 1
     iterationNum = iterationNum + 1;
-    options = optimoptions('intlinprog','AbsoluteGapTolerance',0.1,'IntegerTolerance',1e-6,'Display','none');
-    [result,score,exitFlag] = intlinprog(f,intcon,A,b,Aeq,beq,lb,ub,options);
+    options = optimoptions('ga','UseParallel',true,'ConstraintTolerance',1e-1,'FunctionTolerance',1e-10);
+    [result,score,exitFlag,output] = ga(fun,intL,A,b,Aeq,beq,lb,ub,[],1:intL,options);
 
     if exitFlag == -2
         disp("[HLP solver] ERROR : Unable to solve IP. No feasible solution existing");
@@ -114,6 +116,8 @@ while flag == 1
     
     tempResult = reshape(result,[T,T,V]);
     tempResult = sum(tempResult,3);
+
+    tempResult = round(tempResult);
     
     % Stagnation error compensation
     tempResult(tempResult<0.1) = 0;
@@ -152,4 +156,9 @@ else
     routeResult = detectRoutes(pathResult);
 end
 
+function [c, ceq] = intConstFunc(x)
+c = [];
+ceq = x.*(1-x);
 end
+
+% end

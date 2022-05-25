@@ -1,36 +1,15 @@
-clear all
-
-addpath('./ACO')
-addpath('./MILP')
-addpath('./ComDetTBv090/')
-addpath('./ComDetTBv090/Algorithms/')
-addpath('./ComDetTBv090/Auxiliary/')
-addpath('./ComDetTBv090/Graphs/')
-
-%% Param setting
-vnum = 4;
-depotPos = [60 60 60];
-fovFactor = 0.2;
-inpection_dist = 7; % Inspection distance
-mapheight = 5.0;
-conThres = 5;
-antNo = 20;
-stopThres = 20;
-
-%% wp generator
-poc_path_planner
 
 node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
 node = vertcat(depotPos,node); % add depot
 
 N = size(node,1);
-A = sparse(N,N); % connectivity matrix
-C = sparse(N,N); % cost matrix
-L = sparse(N,N); % linear distance matrix
+A = zeros(N,N); % connectivity matrix
+C = zeros(N,N); % cost matrix
+L = zeros(N,N); % linear distance matrix
 
 for i = 1:N
     for j = 1:N
-        L(i,j) = norm(node(i,:)-node(j,:));
+        L(i,j) = distance(node(i,:), node(j,:));
     end
 end
 
@@ -58,17 +37,7 @@ C_orig = C;
 
 totalDegree = sum(A(2:end,2:end),'all')/2;
 completeDegree = nchoosek(N-1,2);
-degreeConnectivity = totalDegree / completeDegree
-
-
-%% Save Network
-graph1.n = N;
-graph1.node.x = node(:,1);
-graph1.node.y = node(:,2);
-graph1.node.z = node(:,3);
-graph1.edges = L;
-
-save('graph_complete.mat','graph1');
+degreeConnectivity = totalDegree / completeDegree;
 
 %% Graph Clustering
 tic
@@ -77,21 +46,11 @@ A_temp = A(2:end,2:end); %except home node
 C_temp = C(2:end,2:end);
 
 
-% cluIdx = GCModulMax2(A_temp); % DO NOT USE GCModulMax1 -> erroneous algorithm
-% cluIdx = GCSpectralClust1(C_temp,vnum*5); cluIdx = cluIdx(:,end);
-cluIdx = GCModulMax3(C_temp);
-% cluIdx = spectralcluster(A_temp,vnum*2,'LaplacianNormalization','symmetric');
+cluIdx = GCModulMax2(A_temp); % DO NOT USE GCModulMax1 -> erroneous algorithm
+% cluIdx = GCSpectralClust1(C_temp,vnum*1.5); cluIdx = cluIdx(:,end);
 
 cluIdx = vertcat(1,cluIdx+1);
 cluNum = max(cluIdx);
-
-figure(5)
-clf
-p = plot(graph(A),'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
-p.NodeCData = cluIdx;
-colormap jet
-colorbar
-drawnow
 
 nodeInCluIdx = [];
 for i = 1:cluNum
@@ -127,9 +86,9 @@ clusteringTime = toc;
 
 %% SuperNet Construction
 superNet = [];
-superNet.A = sparse(cluNum,cluNum);
-superNet.C = sparse(cluNum,cluNum);
-superNet.ND = sparse(cluNum,1); % super cluster demand (node demand)
+superNet.A = zeros(cluNum,cluNum);
+superNet.C = zeros(cluNum,cluNum);
+superNet.ND = zeros(cluNum,1); % super cluster demand (node demand)
 superNet.pos = [];
 
 for i = 1:cluNum-1
@@ -137,7 +96,7 @@ for i = 1:cluNum-1
         if ~isempty(intraCluIdxSet{i,j})
             superNet.A(i,j) = 1;
             superNet.A(j,i) = 1;
-            tempL = sparse(1,size(intraCluNodeSet{i,j},1));
+            tempL = zeros(1,size(intraCluNodeSet{i,j},1));
             for k = 1:size(intraCluNodeSet{i,j},1)
                 tempL(k) = C(intraCluNodeSet{i,j}(k,1),intraCluNodeSet{i,j}(k,2));
             end
@@ -151,15 +110,6 @@ for i = 2:cluNum
     superNet.C(1,i) = norm(depotPos - mean(node(nodeInCluIdx{i},:)));
     superNet.C(i,1) = superNet.C(1,i);
 end
-
-% for i = 2:cluNum
-%     tempL = [];
-%     for j = 1:size(nodeInCluIdx{i},1)
-%         tempL(j) = norm(depotPos - node(nodeInCluIdx{i},:));
-%     end
-%     superNet.C(1,i) = min(tempL);
-%     superNet.C(i,1) = superNet.C(1,i);
-% end
 
 superNet.ND(1) = 1;
 for i = 2:cluNum
@@ -176,31 +126,6 @@ end
 
 superNet.C_temp = superNet.C;
 
-
-figure(4)
-clf
-grid on
-hold on
-% for i = 1:size(G.Edges,1)
-%     startIdx = G.Edges.EndNodes(i,1);
-%     EndIdx = G.Edges.EndNodes(i,2);
-%     startPos = node(startIdx,:);
-%     EndPos = node(EndIdx,:);
-%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
-% end
-for i = 1:cluNum
-    temp = node(nodeInCluIdx{i},:);
-    plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
-end
-mesh(voxelPosX,voxelPosY,voxelFilterData);
-plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
-for i = 1:cluNum
-    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
-end
-for i = 1:N
-    text(node(i,1),node(i,2),node(i,3),num2str(i));
-end
-
 %% SuperNet (HLP) initialization
 for i = 1:cluNum
     localNet.N = size(nodeInCluIdx{i},1);
@@ -214,7 +139,7 @@ superNet.ND(1) = 1; % depot is nan
 %% Local Network (LLP) Completefication
 
 % superNet complefication (initialization)
-superPosC = sparse(cluNum,cluNum);
+superPosC = zeros(cluNum,cluNum);
 for i = 1:cluNum-1
     for j = i+1:cluNum
         superPosC(i,j) = norm(superNet.pos(i,:)-superNet.pos(j,:));
@@ -229,7 +154,7 @@ for i = 1:cluNum-1
         if superNet.A(i,j) == 0
             disconCluList(disconCount,:) = [i,j];
             disconCount = disconCount + 1;
-            disp("[Warning] disconnected cluster detected");  
+%             disp("[Warning] disconnected cluster detected");  
             distInterest = L(nodeInCluIdx{i},nodeInCluIdx{j});
             [val,I] = min(distInterest,[],'all');
             [idxx,idxy] = ind2sub(size(distInterest),I);
@@ -316,37 +241,11 @@ end
 
 intraCompleteTime = toc;
 
-figure(44)
-clf
-grid on
-hold on
-% for i = 1:size(G.Edges,1)
-%     startIdx = G.Edges.EndNodes(i,1);
-%     EndIdx = G.Edges.EndNodes(i,2);
-%     startPos = node(startIdx,:);
-%     EndPos = node(EndIdx,:);
-%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
-% end
-for i = 1:cluNum
-    temp = node(nodeInCluIdx{i},:);
-    plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
-end
-mesh(voxelPosX,voxelPosY,voxelFilterData);
-plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
-for i = 1:cluNum
-    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
-end
-for i = 1:N
-    text(node(i,1),node(i,2),node(i,3),num2str(i));
-end
-axis equal
-drawnow
-
 %% Solver
 tic
 firstTry = true;
 prevSuperRoute = [];
-superRoute = sparse(vnum,cluNum-vnum+1);
+superRoute = zeros(vnum,cluNum-vnum+1);
 trialNum = 1;
 totalScoreHistory = [];
 totalScoreHistoryL = [];
@@ -354,60 +253,28 @@ totalTourHistory = [];
 terminationType = [];
 superRouteHistory = [];
 vehScoreHistory = [];
+TOO_MANY_VEH = 0;
 while true
-    disp(["==== Trial Num : "+num2str(trialNum)+" ===="]);
-
+%     disp(["==== Trial Num : "+num2str(trialNum)+" ===="]);
     if vnum >= cluNum
         disp("[error] cannot solve VRP : too many vehicles!")
+        TOO_MANY_VEH = 1;
         break;
     end
     
     %% HLP
-%     HLP_complete = false;
-%     map_H.A = superNet.A;
-%     map_H.C = superNet.C;
-%     map_H.ND = superNet.ND;
-%     map_H.vnum = vnum;
-%     map_H.N = cluNum; 
-%     if ~firstTry
-%         map_H.totLoad = totalScore/vnum*0.2;
-%     else
-%         map_H.totLoad = mean(superNet.C(2:end,2:end),'all')*(cluNum/vnum-1) + mean(superNet.ND(2:end))*cluNum/vnum;
-%         map_H.totLoad = map_H.totLoad * 0.5;
-%     end
-% 
-%     while ~HLP_complete
-%         [superRoute,superScore]=HLP_solver(map_H);
-%         if superScore == -1
-%             map_H.totLoad = map_H.totLoad * 1.1;
-%         else
-%             HLP_complete = true;
-%             break;
-%         end
-%     end
-
-%     [superRoute,superScore]=HLP_solver(map_H);
-%     map_H = [];
-%     map_H.N = N;
-%     map_H.C = C;
-%     map_H.totSubProbNodeIdx = totSubProbNodeIdx;
-%     map_H.subProbEndNodeIdx = subProbEndNodeIdx;
-%     [tour] = ACOVRP_forSoleACO(map,antNo,termCond)
-%     [tour,score,clusterCost,bridgeCost,residueCost]=LLP_solver_ACS(map,20,400);
     map_H.n = cluNum;
     map_H.edges = superNet.C;
     map_H.ND = superNet.ND;
     map_H.vnum = vnum;
     superRoute = HLP_solver_ACS(map_H, 20, 400);
 
-    superRoute
-
     %% Check Termination Condition
     if ~firstTry
         %Check termination condition
         HLPSolIdentCheck = 0;
         if size(superRoute) == size(prevSuperRoute)
-            curRouteGroup = sparse(vnum,size(superRoute,2));
+            curRouteGroup = zeros(vnum,size(superRoute,2));
 %             curRouteGroup = [];
             for v = 1:vnum
                 uniqueSuperRouteLen = length(unique(superRoute(v,:)));
@@ -423,8 +290,6 @@ while true
                 end
             end
             if HLPSolIdentCheck == vnum
-                disp("Identical HLP solution derived.");
-                disp("Termination condition met. Finishing the solver!");
                 terminationType = "HLPCONV";
                 break;
             end
@@ -465,9 +330,8 @@ while true
         map.subProbEndNodeIdx = subProbEndNodeIdx;
             
         % run ACO
-%         [tour,score,clusterCost,bridgeCost,residueCost]=LLP_solver(map,antNo,stopThres);
         [tour,score,clusterCost,bridgeCost,residueCost]=LLP_solver_ACS(map,antNo,stopThres);
-        scoreRecord(v) = score;       
+        scoreRecord(v) = score;
         tourRecord{v} = tour;
         costRecord(v).clusterCost = clusterCost;
         costRecord(v).bridgeCost = bridgeCost;
@@ -518,74 +382,23 @@ while true
     
     if ~firstTry %&& trialNum ~= 2
         if totalScoreHistory(end-1) < totalScore
-            disp("Solution deteriorated.")
-            disp("Termination condition met. Finishing the solver!");
+%             disp("Solution deteriorated.")
+%             disp("Termination condition met. Finishing the solver!");
             terminationType = "SOLDET";
             break;
         end
     end
 
-    if 1
-        terminationType = "HLPCONV";
-        break;
-    end
-
-
     firstTry = false;
     trialNum = trialNum + 1;
     prevSuperRoute = superRoute;
 end
-    
-clusteringTime
-interCompleteTime + intraCompleteTime
-solveTime
-totalScoreHistory
-totalScoreHistoryL
-vehScore
-
-%% plot
-
-
-[~,I] = min(totalScoreHistory);
-finalTourRecord = totalTourHistory{I};
-
-figure(4)
-clf
-grid on
-hold on
-% for i = 1:size(G.Edges,1)
-%     startIdx = G.Edges.EndNodes(i,1);
-%     EndIdx = G.Edges.EndNodes(i,2);
-%     startPos = node(startIdx,:);
-%     EndPos = node(EndIdx,:);
-%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
-% end
-alpha = 0.1;
-for i = 1:cluNum
-    temp = node(nodeInCluIdx{i},:);
-    plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
+if TOO_MANY_VEH == 0
+    totalScoreHistory = totalScoreHistory(1);
+    totalScoreHistoryL = totalScoreHistoryL(1);
+    solveTime = solveTime(end);
+else
+    totalScoreHistory = [];
+    totalScoreHistoryL = [];
+    solveTime = [];
 end
-mesh(voxelPosX,voxelPosY,voxelFilterData);
-plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
-for i = 1:cluNum
-    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
-end
-% for i = 1:N
-%     text(node(i,1),node(i,2),0,num2str(i));
-% end
-hold on
-for v= 1:vnum
-    plot3(node(finalTourRecord{v},1),node(finalTourRecord{v},2),node(finalTourRecord{v},3)+2,'LineWidth',3)
-end
-axis equal
-
-figure(6)
-clf
-hold on
-grid on
-plot(totalScoreHistory,'o-');
-xlabel('trialNum');
-ylabel('Score');
-title('total score history')
-%% post processing
-% 2-opt

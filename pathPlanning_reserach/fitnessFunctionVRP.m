@@ -1,4 +1,4 @@
-function [ fitness, fitnessL, fitnessPerV ] = fitnessFunctionVRP (tour, tourLen, graph, vehNum)
+function [ fitness, fitnessL, fitnessPerV, fitnessM ] = fitnessFunctionVRP (tour, tourLen, graph, vehNum)
 
 fitnessPerVeh = zeros(vehNum,1);
 
@@ -10,9 +10,9 @@ for i = 1:vehNum
     end
 end
 
-fitness = max(fitnessPerVeh);
+fitnessM = max(fitnessPerVeh);
 fitnessL = sum(fitnessPerVeh);
 fitnessPerV = fitnessPerVeh;
-fitness = fitnessL;
+fitness = fitnessM;
 
 end

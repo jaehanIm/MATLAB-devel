@@ -212,7 +212,7 @@ end
 % line([],[],'Color','k')
 % xlim([gridEdgeX(1) gridEdgeX(end)])
 % ylim([gridEdgeY(1) gridEdgeY(end)])
-% % zlim([-7 11])
+% zlim([-7 11])
 % 
 % 
 % for i = 1:size(gridPosX,1)

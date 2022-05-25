@@ -12,5 +12,6 @@ end
 
 fitness = max(fitnessPerVeh);
 fitnessL = sum(fitnessPerVeh);
+% fitness = fitnessL;
 
 end

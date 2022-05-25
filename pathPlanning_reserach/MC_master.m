@@ -1,5 +1,4 @@
 %% MC master for ACS work
-
 clear all
 
 addpath('./ACO')
@@ -25,25 +24,34 @@ temp = [];
 fovC = 1;
 totC = 1;
 
-fovFactorSet = 3:-0.5:0.5;
-conThresSet = 5:5:50;
+fovFactorSet = [3:-0.5:1,0.75];
+conThresSet = 5:10:55;
+% fovFactorSet = 1.5:-0.5:1.5;
+% conThresSet = 40:5:40;
 totalTestNum = length(fovFactorSet) * length(conThresSet);
 
 for fovFactor = fovFactorSet
     conC = 1;
     for conThres = conThresSet
+        completeTime_soleACO = [];
         disp("================")
         disp("case setting : ("+num2str(fovFactor)+", "+num2str(conThres)+")");
         disp("Test set progress : "+num2str(totC / totalTestNum * 100)+"% done");
         tryC = 1;
+        disp("Generate map")
+        poc_path_planner;
+        disp("Initialization for ACS")
+        MC_MAIN_soleACS;
         for tryNum = 1:trialNums
             clusteringTime = []; interCompleteTime = []; solveTime = []; totalScoreHistory = [];
-            completeTime_soleACO = []; soleACO_time = []; soleACO_result = [];
+            soleACO_time = []; soleACO_result = [];
+            equiPerformanceTimeL = []; equiPerformanceTime = []; equiTimePerformance = [];
             disp("Try set progress : "+num2str(tryNum/trialNums*100)+"% of Test progress : "+num2str(totC / totalTestNum * 100)+"%")
+
             disp("MAIN start")
-            MC_MAIN
+            MC_MAIN_iter
             disp("soleACS start")
-            MC_MAIN_soleACS
+            ACSVRP_forSoleACS
     
             temp.TestClusteringTime = clusteringTime;
             temp.TestInterCompleteTime = interCompleteTime;
@@ -60,6 +68,10 @@ for fovFactor = fovFactorSet
     
             temp.degreeConnectivity = degreeConnectivity;
             temp.N = N;
+
+            temp.equiPerformanceTime = equiPerformanceTime;
+            temp.equiPerformanceTimeL = equiPerformanceTimeL;
+            temp.equiTimePerformance = equiTimePerformance;
     
             MCData{fovC, conC, tryC} = temp;
             tryC = tryC + 1;
