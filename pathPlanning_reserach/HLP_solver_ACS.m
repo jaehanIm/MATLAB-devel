@@ -89,11 +89,4 @@ for i = 1:vnum
 end
 superRoute(:,end) = [];
 
-% soleACO_time = toc;
-% soleACO_result = colony.queen.fitness;
-% historyACO = history;
-% historyACO(historyACO==0) = [];
-
-
-
 end

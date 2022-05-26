@@ -130,9 +130,17 @@ ylabel('connectivity')
 title('equiPerfTimeL')
 view(-45,45)
 
+figure(5)
+clf
+mesh(N(:,:,1),degreeConn(:,:,1),equiPerformanceTime(:,:,1),'FaceColor',[1 0 0])
+xlabel('nodeNum')
+ylabel('connectivity')
+title('equiPerfTimeM')
+view(-45,45)
+
 figure(6)
 clf
-mesh(N(:,:,1),degreeConn(:,:,1),(equiTimePerformance(:,:,1)-CompScoreL(:,:,1))./CompScoreL(:,:,1)*100,'FaceColor',[1 0 0])
+mesh(N(:,:,1),degreeConn(:,:,1),(equiTimePerformance(:,:,1)-TestScoreL(:,:,1))./TestScoreL(:,:,1)*100,'FaceColor',[1 0 0])
 % mesh(N(:,:,1),degreeConn(:,:,1),(equiTimePerformance(:,:,1)),'FaceColor',[1 0 0])
 % hold on
 % mesh(N(:,:,1),degreeConn(:,:,1),CompScoreL(:,:,1))

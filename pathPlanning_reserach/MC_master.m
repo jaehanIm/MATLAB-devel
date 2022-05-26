@@ -16,7 +16,7 @@ mapheight = 4.0;
 conThres = 10;
 antNo = 20;
 stopThres = 200;
-trialNums = 5;
+trialNums = 4;
 
 
 MCData = [];
@@ -24,7 +24,7 @@ temp = [];
 fovC = 1;
 totC = 1;
 
-fovFactorSet = [3:-0.5:1,0.75];
+fovFactorSet = [3:-0.5:1];
 conThresSet = 5:10:55;
 % fovFactorSet = 1.5:-0.5:1.5;
 % conThresSet = 40:5:40;

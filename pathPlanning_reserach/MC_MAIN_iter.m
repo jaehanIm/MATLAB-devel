@@ -394,9 +394,9 @@ while true
     prevSuperRoute = superRoute;
 end
 if TOO_MANY_VEH == 0
-    totalScoreHistory = totalScoreHistory(1);
-    totalScoreHistoryL = totalScoreHistoryL(1);
-    solveTime = solveTime(end);
+    [totalScoreHistory,I] = min(totalScoreHistory);
+    [totalScoreHistoryL,I2] = min(totalScoreHistoryL);
+    solveTime = solveTime(I);
 else
     totalScoreHistory = [];
     totalScoreHistoryL = [];
