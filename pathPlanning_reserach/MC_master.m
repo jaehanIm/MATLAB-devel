@@ -16,7 +16,7 @@ mapheight = 4.0;
 conThres = 10;
 antNo = 20;
 stopThres = 200;
-trialNums = 4;
+trialNums = 10;
 
 
 MCData = [];
@@ -24,8 +24,9 @@ temp = [];
 fovC = 1;
 totC = 1;
 
-fovFactorSet = [3:-0.5:1];
-conThresSet = 5:10:55;
+fovFactorSet = [4:-0.5:1,0.75,0.5];
+% conThresSet = 5:10:45;
+conThresSet = [4,5,6,7,9,10,15,20,25,35,45];
 % fovFactorSet = 1.5:-0.5:1.5;
 % conThresSet = 40:5:40;
 totalTestNum = length(fovFactorSet) * length(conThresSet);
@@ -49,7 +50,7 @@ for fovFactor = fovFactorSet
             disp("Try set progress : "+num2str(tryNum/trialNums*100)+"% of Test progress : "+num2str(totC / totalTestNum * 100)+"%")
 
             disp("MAIN start")
-            MC_MAIN_iter
+            MC_MAIN
             disp("soleACS start")
             ACSVRP_forSoleACS
     

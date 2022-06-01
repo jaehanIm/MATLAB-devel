@@ -29,7 +29,7 @@ temp = [];
 bestFitness = inf;
 bestTour = [];
 history = zeros(maxIter,1);
-tic
+
 count = 0;
 % disp('Initiating HLP ACS!');
 

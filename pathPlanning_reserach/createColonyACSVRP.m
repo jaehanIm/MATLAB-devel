@@ -15,8 +15,8 @@ for i = 1 : antNo
     vehTourLen = ones(vehNum,1);
 
     while unvisitedNum ~= 0
-%         for j = 1:vehNum
-            j = leastTourAgent(colony.ant(i).tour,L,vehNum,vehTourLen);
+        for j = 1:vehNum
+%             j = leastTourAgent(colony.ant(i).tour,L,vehNum,vehTourLen);
             if unvisitedNum == 0
                 break;
             end
@@ -48,7 +48,7 @@ for i = 1 : antNo
 
             % local pheromone update
             tau(currentNode,nextNode) = tau(currentNode,nextNode) * (1-psi) + tau0 * psi;
-%         end
+        end
     end
     
     colony.ant(i).vehTourLen = vehTourLen;

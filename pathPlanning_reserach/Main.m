@@ -8,14 +8,14 @@ addpath('./ComDetTBv090/Auxiliary/')
 addpath('./ComDetTBv090/Graphs/')
 
 %% Param setting
-vnum = 4;
+vnum = 3;
 depotPos = [60 60 60];
-fovFactor = 0.2;
+fovFactor = 5;
 inpection_dist = 7; % Inspection distance
 mapheight = 5.0;
-conThres = 5;
+conThres = 20;
 antNo = 20;
-stopThres = 20;
+stopThres = 200;
 
 %% wp generator
 poc_path_planner
@@ -24,7 +24,7 @@ node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(a
 node = vertcat(depotPos,node); % add depot
 
 N = size(node,1);
-A = sparse(N,N); % connectivity matrix
+A = zeros(N,N); % connectivity matrix
 C = sparse(N,N); % cost matrix
 L = sparse(N,N); % linear distance matrix
 
@@ -48,7 +48,6 @@ for i = 2:N % do not connect depot!
         end
     end
 end
-
 [A,C]=graphSparseConnection(node,A,C,L);
 A(1,:) = 0; A(:,1) = 0;
 
@@ -77,21 +76,13 @@ A_temp = A(2:end,2:end); %except home node
 C_temp = C(2:end,2:end);
 
 
-% cluIdx = GCModulMax2(A_temp); % DO NOT USE GCModulMax1 -> erroneous algorithm
+cluIdx = GCModulMax2(A_temp); % DO NOT USE GCModulMax1 -> erroneous algorithm
 % cluIdx = GCSpectralClust1(C_temp,vnum*5); cluIdx = cluIdx(:,end);
-cluIdx = GCModulMax3(C_temp);
+% cluIdx = GCModulMax3(C_temp);
 % cluIdx = spectralcluster(A_temp,vnum*2,'LaplacianNormalization','symmetric');
 
 cluIdx = vertcat(1,cluIdx+1);
 cluNum = max(cluIdx);
-
-figure(5)
-clf
-p = plot(graph(A),'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
-p.NodeCData = cluIdx;
-colormap jet
-colorbar
-drawnow
 
 nodeInCluIdx = [];
 for i = 1:cluNum
@@ -123,6 +114,14 @@ for j = 2:cluNum
 end
 
 clusteringTime = toc;
+
+figure(5)
+clf
+p = plot(graph(A),'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
+p.NodeCData = cluIdx;
+colormap jet
+colorbar
+drawnow
 
 
 %% SuperNet Construction
@@ -525,10 +524,10 @@ while true
         end
     end
 
-    if 1
-        terminationType = "HLPCONV";
-        break;
-    end
+%     if 1
+%         terminationType = "HLPCONV";
+%         break;
+%     end
 
 
     firstTry = false;
@@ -553,13 +552,13 @@ figure(4)
 clf
 grid on
 hold on
-% for i = 1:size(G.Edges,1)
-%     startIdx = G.Edges.EndNodes(i,1);
-%     EndIdx = G.Edges.EndNodes(i,2);
-%     startPos = node(startIdx,:);
-%     EndPos = node(EndIdx,:);
-%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
-% end
+for i = 1:size(G.Edges,1)
+    startIdx = G.Edges.EndNodes(i,1);
+    EndIdx = G.Edges.EndNodes(i,2);
+    startPos = node(startIdx,:);
+    EndPos = node(EndIdx,:);
+    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
+end
 alpha = 0.1;
 for i = 1:cluNum
     temp = node(nodeInCluIdx{i},:);

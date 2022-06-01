@@ -84,20 +84,20 @@ for t = 1 : maxIter
         end
     end
 
-    if bestFitness < benchScore && oncePassed1 == 0
-        equiPerformanceTime = toc;
-        oncePassed1 = 1;
-    end
-
-    if bestFitnessL < benchScoreL && oncePassed2 == 0
-        equiPerformanceTimeL = toc;
-        oncePassed2 = 1;
-    end
-
-    if benchTime <= toc && oncePassed3 == 0
-        equiTimePerformance = bestFitness;
-        oncePassed3 = 1;
-    end
+%     if bestFitness < benchScore && oncePassed1 == 0
+%         equiPerformanceTime = toc;
+%         oncePassed1 = 1;
+%     end
+% 
+%     if bestFitnessL < benchScoreL && oncePassed2 == 0
+%         equiPerformanceTimeL = toc;
+%         oncePassed2 = 1;
+%     end
+% 
+%     if benchTime <= toc && oncePassed3 == 0
+%         equiTimePerformance = bestFitness;
+%         oncePassed3 = 1;
+%     end
 
     if count >= stopThres
 %         disp('Solution stabilized. Terminating ACS!');

@@ -243,6 +243,7 @@ intraCompleteTime = toc;
 
 %% Solver
 tic
+solveTime = [];
 firstTry = true;
 prevSuperRoute = [];
 superRoute = zeros(vnum,cluNum-vnum+1);
@@ -342,7 +343,7 @@ while true
     totalScoreL = sum(scoreRecord);
     totalScore = max(scoreRecord);
     vehScore = scoreRecord;
-    solveTime(trialNum) = toc;
+    solveTime = toc;
 
     %% Update Super Network
     for v = 1:vnum
@@ -396,7 +397,6 @@ end
 if TOO_MANY_VEH == 0
     [totalScoreHistory,I] = min(totalScoreHistory);
     [totalScoreHistoryL,I2] = min(totalScoreHistoryL);
-    solveTime = solveTime(I);
 else
     totalScoreHistory = [];
     totalScoreHistoryL = [];

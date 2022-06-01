@@ -13,6 +13,7 @@ for i = 1:N
     end
 end
 
+DONOTSOLVE = 0;
 
 %% Build Network Graph
 for i = 2:N % do not connect depot!
@@ -197,6 +198,7 @@ for i = 1:cluNum-1
                         implicitRoute{origIdxj,origIdxi} = fliplr(locTotNodIdx(implRoute));
                         if d == inf
                             disp("[CRITICAL] FAULTY CLUSTERING ALGORITHM - STOP IMMEDIATELY")
+                            DONOTSOLVE = 1;
                         end
                         C(origIdxi,origIdxj) = d;
                         C(origIdxj,origIdxi) = d;
@@ -256,7 +258,7 @@ vehScoreHistory = [];
 while true
 %     disp(["==== Trial Num : "+num2str(trialNum)+" ===="]);
 
-    if vnum >= cluNum
+    if vnum >= cluNum || DONOTSOLVE
         disp("[error] cannot solve VRP : too many vehicles!")
         break;
     end

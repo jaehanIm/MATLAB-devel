@@ -24,33 +24,6 @@ stlAddr = '/home/jaehan/Desktop/generic.stl';
 
 node = loadStl(stlAddr,inpection_dist);
 
-% node filtering
-% xcut1 = [10 50];
-% ycut1 = [30 130];
-% zcut1 = [690 715];
-% xcutIdx1 = node(:,1)>xcut1(1) & node(:,1)<xcut1(2);
-% ycutIdx1 = node(:,2)>ycut1(1) & node(:,2)<ycut1(2);
-% zcutIdx1 = node(:,3)>zcut1(1) & node(:,3)<zcut1(2);
-% regionIdx1 = find(xcutIdx1 & ycutIdx1 & zcutIdx1);
-% node(regionIdx1,:) = [];
-% xcut2 = [0 60];
-% ycut2 = [-31 22];
-% zcut2 = [700 760];
-% xcutIdx2 = node(:,1)>xcut2(1) & node(:,1)<xcut2(2);
-% ycutIdx2 = node(:,2)>ycut2(1) & node(:,2)<ycut2(2);
-% zcutIdx2 = node(:,3)>zcut2(1) & node(:,3)<zcut2(2);
-% regionIdx2 = find(xcutIdx2 & ycutIdx2 & zcutIdx2);
-% factor = 100;
-% targetNum = floor(size(regionIdx2,1)/factor);
-% targetProb = targetNum / size(regionIdx2,1);
-% tempIdx = ones(size(regionIdx2,1),1);
-% for i = 1:size(regionIdx2,1)
-%     if rand()<=targetProb
-%         tempIdx(i) = 0;
-%     end
-% end
-% node(regionIdx2(find(tempIdx)),:) = [];
-
 % node reduction
 N = size(node,1);
 factor = 2;
@@ -97,8 +70,8 @@ for i = 2:N % do not connect depot!
     end
 end
 
-% [A,C]=graphSparseConnection(node,A,C,L);
-% A(1,:) = 0; A(:,1) = 0;
+[A,C]=graphSparseConnection(node,A,C,L);
+A(1,:) = 0; A(:,1) = 0;
 
 A_orig = A;
 C_orig = C;
