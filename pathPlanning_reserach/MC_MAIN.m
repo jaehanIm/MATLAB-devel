@@ -1,40 +1,40 @@
 
-node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
-node = vertcat(depotPos,node); % add depot
+% node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
+% node = vertcat(depotPos,node); % add depot
 
 N = size(node,1);
 A = zeros(N,N); % connectivity matrix
 C = zeros(N,N); % cost matrix
-L = zeros(N,N); % linear distance matrix
+% L = zeros(N,N); % linear distance matrix
 
-for i = 1:N
-    for j = 1:N
-        L(i,j) = distance(node(i,:), node(j,:));
-    end
-end
+% for i = 1:N
+%     for j = 1:N
+%         L(i,j) = distance(node(i,:), node(j,:));
+%     end
+% end
 
 DONOTSOLVE = 0;
 
 %% Build Network Graph
-for i = 2:N % do not connect depot!
-    for j = 2:N
-        if i~=j
-            if L(i,j) < conThres
-                A(i,j) = 1;
-                C(i,j) = L(i,j);
-            end
-        else
-            A(i,j) = 0;
-        end
-    end
-end
+% for i = 2:N % do not connect depot!
+%     for j = 2:N
+%         if i~=j
+%             if L(i,j) < conThres
+%                 A(i,j) = 1;
+%                 C(i,j) = L(i,j);
+%             end
+%         else
+%             A(i,j) = 0;
+%         end
+%     end
+% end
+% 
+% [A,C]=graphSparseConnection(node,A,C,L);
+% A(1,:) = 0; A(:,1) = 0;
 
-[A,C]=graphSparseConnection(node,A,C,L);
-A(1,:) = 0; A(:,1) = 0;
-
+A = A_orig;
+C = C_orig;
 G = graph(C);
-A_orig = A;
-C_orig = C;
 
 totalDegree = sum(A(2:end,2:end),'all')/2;
 completeDegree = nchoosek(N-1,2);
@@ -42,7 +42,6 @@ degreeConnectivity = totalDegree / completeDegree;
 
 %% Graph Clustering
 tic
-A = A_orig;
 A_temp = A(2:end,2:end); %except home node
 C_temp = C(2:end,2:end);
 
@@ -268,7 +267,7 @@ while true
     map_H.edges = superNet.C;
     map_H.ND = superNet.ND;
     map_H.vnum = vnum;
-    superRoute = HLP_solver_ACS(map_H, 20, 400);
+    superRoute = HLP_solver_ACS(map_H, antNo, stopThres);
 
     %% Check Termination Condition
     if ~firstTry

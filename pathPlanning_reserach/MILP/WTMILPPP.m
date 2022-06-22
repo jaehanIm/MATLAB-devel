@@ -261,7 +261,7 @@ map.oblig = ...
 solve_complete = false;
 tic
 while ~solve_complete
-    [routeResult,score] = TSP_solver_GA(map);
+    [routeResult,score] = TSP_solver(map);
     if score == -1
         map.capacity = map.capacity * 1.1;
     else

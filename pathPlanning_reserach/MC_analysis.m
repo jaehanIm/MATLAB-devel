@@ -1,7 +1,7 @@
 addpath('./data/')
 
 %% Load data
-dat = load('ML4.mat');
+dat = load('ML6_temp.mat'); % ML4 is for paper
 dat = dat.MCData;
 % dat(end,:,:) = [];
 %% Analysis
@@ -33,6 +33,9 @@ iterN = size(dat,3);
 for sizeFactor = 1:size(dat,1)
     for connFactor = 1:size(dat,2)
         for i = 1:iterN
+            if sizeFactor == 9 & connFactor == 1 & i == 9
+                break;
+            end
             TestClusteringTime(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestClusteringTime;
             TestCompleteTime(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestInterCompleteTime;
             TestSolveTime(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestSolveTime;
@@ -96,7 +99,21 @@ CompTotalTime = meanStdProcess(CompTotalTime);
 timeRatio = meanStdProcess(timeRatio);
 scoreRatio = meanStdProcess(scoreRatio);
 
-
+%%
+degreeRange = [0,0.05,0.1,0.2,0.3,0.4,0.5];
+filterDatTime = [];
+filterDatScore = [];
+for k = 1:size(degreeRange,2)-1
+    temp1 = []; temp2 = [];
+    for i = 1:sizeFactor*connFactor
+        if degreeConn(i) > degreeRange(k) && degreeConn(i) < degreeRange(k+1)
+            temp1 = vertcat(temp1,[N(i),scoreRatio(i)]);
+            temp2 = vertcat(temp2,[N(i),timeRatio(i)]);
+        end
+    end
+    filterDatScore{k} = temp1;
+    filterDatTime{k} = temp2;
+end
 %% plot
 % figure(1)
 % clf
@@ -184,7 +201,7 @@ title('Computation Time')
 figure(112)
 clf
 for i = 1:size(degreeConn,1)
-h = errorbar(degreeConn(i,:,1),timeRatio(i,:,1),timeRatio(i,:,2),'*--');
+h = errorbar(degreeConn(i,:,1),timeRatio(i,:,1),timeRatio(i,:,2),'-*');
 text(degreeConn(i,end,1),timeRatio(i,end,1),num2str(Nlist(i)))
 hold on
 end
@@ -209,7 +226,7 @@ title('Score')
 figure(22)
 clf
 for i = 1:size(degreeConn,1)
-h = errorbar(degreeConn(i,:,1),scoreRatio(i,:,1),scoreRatio(i,:,2),'*--');
+h = errorbar(degreeConn(i,:,1),scoreRatio(i,:,1),scoreRatio(i,:,2),'*');
 text(degreeConn(i,end,1),scoreRatio(i,end,1),num2str(Nlist(i)))
 hold on
 end
@@ -224,9 +241,9 @@ clf
 temp = N(:,:,1);
 temp2 = CompTotalTime(:,:,1);
 temp3 = TestTotalTime(:,:,1);
-plot(temp(:),temp2(:),'*')
+loglog(temp(:),temp2(:),'*')
 hold on
-plot(temp(:),temp3(:),'*')
+loglog(temp(:),temp3(:),'*')
 grid on
 xlabel('Node Number')
 ylabel('Computation Time')
@@ -237,9 +254,9 @@ clf
 temp = N(:,:,1);
 temp2 = CompScoreL(:,:,1);
 temp3 = TestScoreL(:,:,1);
-plot(temp(:),temp2(:),'*')
+semilogx(temp(:),temp2(:),'*')
 hold on
-plot(temp(:),temp3(:),'*')
+semilogx(temp(:),temp3(:),'*')
 grid on
 xlabel('Node Number')
 ylabel('Score')
@@ -249,7 +266,7 @@ figure(333)
 clf
 temp = N(:,:,1);
 temp2 = CompScoreL(:,:,1)./TestScoreL(:,:,1);
-plot(temp(:),temp2(:),'*')
+semilogx(temp(:),temp2(:),'*')
 grid on
 xlabel('Node Number')
 ylabel('Score')
@@ -259,47 +276,11 @@ figure(334)
 clf
 temp = N(:,:,1);
 temp2 = CompTotalTime(:,:,1)./TestTotalTime(:,:,1);
-plot(temp(:),temp2(:),'*')
+loglog(temp(:),temp2(:),'*')
 grid on
 xlabel('Node Number')
 ylabel('comp time ratio')
 title('Computation time ratio')
-
-% figure(3331)
-% clf
-% temp = N(:,:,1);
-% temp2 = CompTotalTimeRaw(:,:,1);
-% temp3 = TestTotalTimeRaw(:,:,1);
-% plot(temp(:),temp2(:),'*')
-% hold on
-% plot(temp(:),temp3(:),'*')
-% grid on
-% xlabel('Node Number')
-% ylabel('Computation Time')
-% title('Computation Time Comparison')
-% 
-% figure(3332)
-% clf
-% temp = N(:,:,1);
-% temp2 = CompScoreLRaw(:,:,1);
-% temp3 = TestScoreLRaw(:,:,1);
-% plot(temp(:),temp2(:),'*')
-% hold on
-% plot(temp(:),temp3(:),'*')
-% grid on
-% xlabel('Node Number')
-% ylabel('Score')
-% title('Score Comparison')
-% 
-% figure(3333)
-% clf
-% temp = N(:,:,1);
-% temp2 = CompScoreLRaw(:,:,1)./TestScoreLRaw(:,:,1);
-% plot(temp(:),temp2(:),'*')
-% grid on
-% xlabel('Node Number')
-% ylabel('Score')
-% title('Score ratioh')
 
 figure(441)
 clf
@@ -347,7 +328,82 @@ xlabel('connectivity')
 ylabel('comp time ratio')
 title('Computation time ratio')
 
+figure(551)
+clf
+for i = 1:size(degreeRange,2)-1
+    loglog(filterDatTime{i}(:,1),filterDatTime{i}(:,2),'*')
+    hold on
+end
+grid on
+xlabel('Node num')
+ylabel('time ratio')
+legend('1','2','3','4','5','6')
+title('time ratio')
 
+figure(552)
+clf
+for i = 1:size(degreeRange,2)-1
+    semilogx(filterDatScore{i}(:,1),filterDatScore{i}(:,2),'*')
+    hold on
+end
+grid on
+xlabel('Node num')
+ylabel('score ratio')
+legend('1','2','3','4','5','6')
+title('score ratio')
+
+
+figure(1)
+clf
+temp = degreeConn(:,:,1);
+temp1 = N(:,:,1);
+temp2 = CompCompleteTime(:,:,1);
+temp3 = TestCompleteTime(:,:,1);
+temp4 = TestClusteringTime(:,:,1);
+% semilogy(temp(:),temp2(:)./(temp3(:)+temp4(:)),'*')
+for i = 1:size(degreeConn,1)
+    semilogy(temp(i,:,1),temp2(i,:,1)./(temp3(i,:,1)+temp4(i,:,1)),'*-')
+    text(temp(i,:,1),temp2(i,:,1)./(temp3(i,:,1)+temp4(i,:,1)),num2str(Nlist(i)))
+    hold on
+end
+grid on
+title('Complefication time ratio')
+xlabel('connectivity')
+figure(2)
+clf
+loglog(temp1(:),temp2(:)./(temp3(:)+temp4(:)),'*')
+grid on
+title('Complefication time ratio')
+xlabel('Node number')
+figure(3)
+temp5 = CompSolveTime(:,:,1);
+temp6 = TestSolveTime(:,:,1);
+clf
+plot(temp1(:),temp5(:)./temp6(:),'*')
+grid on
+title('Solve time ratio')
+xlabel('node number')
+figure(4)
+temp5 = CompSolveTime(:,:,1);
+temp6 = TestSolveTime(:,:,1);
+clf
+loglog(temp1(:),temp5(:)./temp6(:),'*')
+grid on
+title('Solve time ratio')
+xlabel('node Number')
+
+figure(5)
+clf
+for i = 1:size(degreeConn,1)
+color = rand(1,3);
+h = plot(degreeConn(i,:,1),CompSolveTime(i,:,1)./TestSolveTime(i,:,1),'*-','Color',color);
+text(degreeConn(i,end,1),CompSolveTime(i,end,1)./TestSolveTime(i,end,1),num2str(Nlist(i)))
+hold on
+end
+grid on
+xlabel('connectivity')
+ylabel('solve time ratio')
+title('solve time ratio')
 %% function
 
 function output = meanStdProcess(input)
