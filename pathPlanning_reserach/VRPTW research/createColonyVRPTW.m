@@ -1,9 +1,9 @@
-function [ colony ] = createColonyVRPTW( graph, colony, antNo, tau, eta, alpha,  beta, q, psi, vehNum)
+function [ colony ] = createColonyVRPTW( graph, colony, antNo, tau, eta, alpha,  beta, gamma, lambda, q, psi, vehNum, timeWindow, capacity, servTime)
 
 global homeIdx debugTemp tau0
 
 nodeNo = graph.n;
-L = graph.edges;
+C = graph.edges;
 
 for i = 1 : antNo
     
@@ -11,18 +11,26 @@ for i = 1 : antNo
     
     initial_node = homeIdx;
     colony.ant(i).tour(:,1) = ones(vehNum,1) * initial_node;
+    colony.ant(i).tick = zeros(vehNum,1);
+    colony.ant(i).tickHistory = zeros(vehNum,1);
     unvisitedNum = unvisitedNum - 1;
     vehTourLen = ones(vehNum,1);
+    tick = zeros(vehNum,1);
 
     while unvisitedNum ~= 0
-        for j = 1:vehNum
-%             j = leastTourAgent(colony.ant(i).tour,L,vehNum,vehTourLen);
+%         for j = 1:vehNum
+%             j = leastTourAgent(colony.ant(i).tour,C,vehNum,vehTourLen);
+            j = getActiveVeh(colony.ant(i).tick, capacity);
+
             if unvisitedNum == 0
                 break;
             end
+            
             % i = antNo, j = vehNum
             currentNode = colony.ant(i).tour(j,vehTourLen(j));
-            P_allNodes = tau(currentNode,:).^alpha.*eta(currentNode,:).^beta;
+            theta = updateTheta(nodeNo, C, currentNode, timeWindow, colony.ant(i).tick(j), lambda);
+
+            P_allNodes = tau(currentNode,:).^alpha.*eta(currentNode,:).^beta.*theta.^gamma;
             P_allNodes(nonzeros(colony.ant(i).tour(:))) = 0;
             P = P_allNodes./sum(P_allNodes);
             
@@ -43,12 +51,19 @@ for i = 1 : antNo
 
             vehTourLen(j) = vehTourLen(j) +1;
             unvisitedNum = unvisitedNum - 1;
-            
             colony.ant(i).tour(j,vehTourLen(j)) = nextNode;
+
+            if timeWindow(nextNode,1) > colony.ant(i).tick(j) + C(currentNode,nextNode)
+                colony.ant(i).tick(j) = timeWindow(nextNode,1) + servTime(nextNode);
+            else
+                colony.ant(i).tick(j) = colony.ant(i).tick(j) + C(currentNode,nextNode) + servTime(nextNode);
+            end
+
+            colony.ant(i).tickHistory(j,vehTourLen(j)) = colony.ant(i).tick(j);
 
             % local pheromone update
             tau(currentNode,nextNode) = tau(currentNode,nextNode) * (1-psi) + tau0 * psi;
-        end
+%         end
     end
     
     colony.ant(i).vehTourLen = vehTourLen;

@@ -3,7 +3,7 @@ function [route, idxRecord, routeL]=NNHeuristic(map)
 % require N(number of nodes), node, full length matrix L
 N = map.n;
 net = map.node;
-costMatrix = map.L;
+costMatrix = map.edges;
 costMatrix(costMatrix == 0) = nan;
 
 % home, end point initialization

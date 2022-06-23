@@ -12,9 +12,21 @@ eta = 1./ mapGraph.edges;  % desirability of each edge
 
 rho = 0.1; % Evaporation rate
 alpha = 1;  % Phromone exponential parameters 
-beta = 2;   % Desirability exponetial paramter
+beta = 1;   % Desirability exponetial paramter
+gamma = 3; % time importance parameter
+lambda = 1; % time scale factor
 psi = 0.1;    % local pheromone evaporation rate
 q = 0.9;    % Exploration Exploitation parameter
+penalFactor = 10; % time violation penalty factor
+
+% rho = 0.1; % global evaporation rate
+% alpha = 1;  % Phromone exponential parameters 
+% beta = 20;   % Desirability exponetial paramter
+% gamma = 2; % time importance parameter
+% lambda = 1; % time scale factor
+% psi = 0.1;    % local pheromone evaporation rate
+% q = 0.9;    % Exploration Exploitation parameter
+% penalFactor = 0.001;
 
 homeIdx = 1; %60 is the main
 
@@ -25,18 +37,19 @@ bestTour = [];
 history = zeros(maxIter,1);
 tic
 count = 0;
-% disp('Initiating ACS!');
+disp('Initiating ACS!');
 
 for t = 1 : maxIter
     % Create Ants 
     
     colony = [];
-    colony = createColonyVRPTW( mapGraph, colony , antNo, tau, eta, alpha,  beta, q, psi, vnum);
-    
-    
+    colony = createColonyVRPTW( mapGraph, colony , antNo, tau, eta, alpha,  beta, gamma,...
+        lambda, q, psi, vnum, timeWindow, capacity, servTime);
+        
     % Calculate the fitness values of all ants 
     for i = 1 : antNo 
-        [colony.ant(i).fitness, colony.ant(i).fitnessL, colony.ant(i).fitnessPer, colony.ant(i).fitnessM] = fitnessFunctionVRPTW(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum);       
+        [colony.ant(i).fitness, colony.ant(i).fitnessL, colony.ant(i).fitnessPer, colony.ant(i).fitnessM, colony.ant(i).violation] = ...
+            fitnessFunctionVRPTW(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum, timeWindow, colony.ant(i).tickHistory, servTime, penalFactor);
     end
     
     % Find the best ant (queen)
@@ -48,6 +61,9 @@ for t = 1 : maxIter
         bestTourLen = colony.ant(minIndex).vehTourLen;
         bestFitnessL = colony.ant(minIndex).fitnessL;        
         bestFitnessPer = colony.ant(minIndex).fitnessPer;
+        bestTick = colony.ant(minIndex).tick;
+        bestTickHistory = colony.ant(minIndex).tickHistory;
+        bestViolation = colony.ant(minIndex).violation;
     end
     
     colony.queen.tour = bestTour;
@@ -55,6 +71,9 @@ for t = 1 : maxIter
     colony.queen.vehTourLen = bestTourLen;
     colony.queen.fitnessL = bestFitnessL;
     colony.queen.fitnessPer = bestFitnessPer;
+    colony.queen.tick = bestTick;
+    colony.queen.tickHistory = bestTickHistory;
+    colony.queen.violation = bestViolation;
         
     % Update phromone matrix 
     tau = updatePhromoneVRPTW(tau , colony, rho, minIndex, vnum);  

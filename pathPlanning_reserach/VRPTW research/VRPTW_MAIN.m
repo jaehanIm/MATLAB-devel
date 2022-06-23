@@ -2,18 +2,30 @@ addpath('./../')
 
 %%%%%%%%%%% ACO for VRPTW version %%%%%%%%%%%
 
-fovFactor = 2;
+% parameter setting
+fovFactor = 4;
 mapheight = 3;
 inpection_dist = 7;
 
-distThres = 10;
-vnum = 3;
+distThres = 50;
+vnum = 25;
 antNo = 20;
-stopThres = 100;
+stopThres = 400;
+capacity = 395;
 
 % generate map
-mapGenerator_VRPTW
-node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
+% mapGenerator_VRPTW
+% node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
+% node = vertcat([20,5,0],node);
+
+% node = [0,0,0;10,10,0;20,0,0;-30,5,0;-25,-15,0]/10;
+
+% load instance
+% no. x. y. demand. init. due. servT.
+map = load('instance.mat');
+map = map.temp;
+node = map(:,2:3); node = horzcat(node,zeros(size(map,1),1));
+
 N = size(node,1);
 
 % Graph construction
@@ -26,24 +38,30 @@ for i = 1:N-1
 end
 
 A = zeros(N,N);
+C = zeros(N,N);
 for i = 1:N-1
     for j = 2:N
         if L(i,j) < distThres
             A(i,j) = 1;
             A(j,i) = 1;
+            C(i,j) = L(i,j);
+            C(j,i) = C(i,j);
+        end
+        if i == j
+            A(i,j) = 0;
+            A(j,i) = 0;
         end
     end
 end
 
+[A,C]=graphSparseConnection(node,A,C,L);
+
 tic
-C = zeros(N,N);
 implicitRoute = cell(N,N);
 for i = 1:N-1
     for j = 2:N
-        if A(i,j) == 1
-            C(i,j) = L(i,j);
-        else
-            [implRoute, implCost, ~] = shortestpath(graph(A),i,j);
+        if A(i,j) == 0
+            [implRoute, implCost, ~] = shortestpath(graph(C),i,j);
             implicitRoute{i,j} = implRoute;
             implicitRoute{j,i} = fliplr(implRoute);
             A(i,j) = 1; A(j,i) = 1;
@@ -55,12 +73,51 @@ toc
 
 % mapData generation
 mapGraph.n = N;
-mapGraph.edges = L;
+mapGraph.edges = C;
 mapGraph.node = node;
 
 % time constraint construction
-[~,~,timeMax] = NNHeuristic_VRPTW(mapGraph);
+% [~,~,timeMax] = NNHeuristic_VRPTW(mapGraph);
+% timeWindow = zeros(N,2);
+% timeWindow(:,1) = 0;
+% timeWindow(:,2) = timeMax;
+timeWindow = map(:,5:6);
+servTime = map(:,7);
+
+% timeWindow = [0, 100; 2,30; 10,40; 60,80; 30,60];
+% servTime = [10;10;10;10;10];
 
 
 % solve problem
 ACS_VRPTW;
+
+% plot result
+drawBestTour_forSoleVRPTW(colony, mapGraph, vnum);
+figure(2)
+clf
+hold on
+for i = 1:N
+    plot([timeWindow(i,1),timeWindow(i,2)],[i, i],'LineWidth',5,'Color',[0.3 0.3 0.3]')
+end
+grid on
+ylim([1 N])
+xlabel('time[s]')
+ylabel('job number')
+title('VRPTW')
+
+plotTickHistory = colony.queen.tickHistory;
+plotTour = colony.queen.tour;
+plotTickHistory(:,1) = [];
+plotTour(:,1) = [];
+
+for v = 1:vnum
+    color = rand(3,1)/2+0.5;
+    for i = 1:length(plotTickHistory(v,plotTickHistory(v,:)~=0))
+        startIdx = plotTour(v,i);
+        endIdx = plotTour(v,i+1);
+        plot([plotTickHistory(v,i)-servTime(startIdx), plotTickHistory(v,i)],[startIdx startIdx],'b','LineWidth',3,'Color',color)
+    end
+end
+
+colony.queen.violation
+sum(colony.queen.violation)
