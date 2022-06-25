@@ -1,7 +1,7 @@
 addpath('./data/')
 
 %% Load data
-dat = load('ML6_temp.mat'); % ML4 is for paper
+dat = load('ML6.mat'); % ML4 is for paper
 dat = dat.MCData;
 % dat(end,:,:) = [];
 %% Analysis

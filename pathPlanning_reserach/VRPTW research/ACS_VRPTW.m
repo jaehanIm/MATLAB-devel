@@ -17,7 +17,7 @@ gamma = 3; % time importance parameter
 lambda = 1; % time scale factor
 psi = 0.1;    % local pheromone evaporation rate
 q = 0.9;    % Exploration Exploitation parameter
-penalFactor = 10; % time violation penalty factor
+penalFactor = 1; % time violation penalty factor
 
 % rho = 0.1; % global evaporation rate
 % alpha = 1;  % Phromone exponential parameters 

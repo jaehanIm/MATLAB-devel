@@ -8,10 +8,10 @@ fovFactor = 4;
 mapheight = 3;
 inpection_dist = 7;
 
-distThres = 50;
-vnum = 25;
+distThres = 100;
+vnum = 3;
 antNo = 20;
-stopThres = 400;
+stopThres = 600;
 capacity = 395;
 
 % generate map
@@ -19,13 +19,13 @@ capacity = 395;
 % node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
 % node = vertcat([20,5,0],node);
 
-% node = [0,0,0;10,10,0;20,0,0;-30,5,0;-25,-15,0]/10;
+node = [0,0,0;10,10,0;20,0,0;-30,5,0;-25,-15,0]/2;
 
 % load instance
 % no. x. y. demand. init. due. servT.
-map = load('instance.mat');
-map = map.temp;
-node = map(:,2:3); node = horzcat(node,zeros(size(map,1),1));
+% map = load('instance.mat');
+% map = map.temp;
+% node = map(:,2:3); node = horzcat(node,zeros(size(map,1),1));
 
 N = size(node,1);
 
@@ -82,11 +82,12 @@ mapGraph.node = node;
 % timeWindow = zeros(N,2);
 % timeWindow(:,1) = 0;
 % timeWindow(:,2) = timeMax;
-timeWindow = map(:,5:6);
-servTime = map(:,7);
+% timeWindow = map(:,5:6);
+% servTime = map(:,7)/2;
+% nodeDemand = map(:,4);
 
-% timeWindow = [0, 100; 2,30; 10,40; 60,80; 30,60];
-% servTime = [10;10;10;10;10];
+timeWindow = [0, 100; 2,30; 10,40; 60,80; 30,60];
+servTime = [10;10;10;10;10];
 
 
 % solve problem
@@ -119,6 +120,17 @@ for v = 1:vnum
         plot([plotTickHistory(v,i)-servTime(startIdx), plotTickHistory(v,i)],[startIdx startIdx],'b','LineWidth',3,'Color',color)
     end
 end
+
+totTourLen = 0;
+tourLen = zeros(vnum,1);
+for v = 1:vnum
+    for i = 1:length(colony.queen.tour(v,colony.queen.tour(v,:)~=0))-1
+        startIdx = colony.queen.tour(v,i);
+        endIdx = colony.queen.tour(v,i+1);
+        tourLen(v) = tourLen(v) + C(startIdx,endIdx);
+    end
+end
+totTourLen = sum(tourLen)
 
 colony.queen.violation
 sum(colony.queen.violation)
