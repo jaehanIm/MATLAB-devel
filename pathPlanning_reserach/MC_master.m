@@ -18,23 +18,20 @@ antNo = 20;
 stopThres = 200;
 trialNums = 10;
 
-
 MCData = [];
 temp = [];
 fovC = 1;
 totC = 1;
 
-fovFactorSet = [4:-0.5:1,0.75,0.5,0.4,0.3];
-% conThresSet = 5:10:45;
+% fovFactorSet = [4:-0.5:1,0.75,0.5,0.4];
+fovFactorSet = 2.6;
 conThresSet = [4,5,6,7,9,10,15,20,25,35,45];
-% fovFactorSet = 1.5:-0.5:1.5;
-% conThresSet = 40:5:40;
 totalTestNum = length(fovFactorSet) * length(conThresSet);
 
 for fovFactor = fovFactorSet
     conC = 1;
     for conThres = conThresSet
-        completeTime_soleACO = [];
+        completeTime_soleACO = []; clusteringTime = []; interCompleteTime = [];
         disp("================")
         disp("case setting : ("+num2str(fovFactor)+", "+num2str(conThres)+")");
         disp("Test set progress : "+num2str(totC / totalTestNum * 100)+"% done");
@@ -43,8 +40,10 @@ for fovFactor = fovFactorSet
         poc_path_planner;
         disp("Initialization for ACS")
         MC_MAIN_soleACS;
+        disp("MC_MAIN_PRIMER")
+        MC_MAIN_PRIME;
         for tryNum = 1:trialNums
-            clusteringTime = []; interCompleteTime = []; solveTime = []; totalScoreHistory = [];
+            solveTime = []; totalScoreHistory = [];
             soleACO_time = []; soleACO_result = [];
             equiPerformanceTimeL = []; equiPerformanceTime = []; equiTimePerformance = [];
             disp("Try set progress : "+num2str(tryNum/trialNums*100)+"% of Test progress : "+num2str(totC / totalTestNum * 100)+"%")

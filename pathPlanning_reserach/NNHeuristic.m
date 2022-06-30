@@ -30,7 +30,7 @@ route = record;
 routeL = cost_NNM;
 
 if N == 1
-    routeL = nan;
+    routeL = 0;
 elseif N <= 2
     routeL = costMatrix(1,2);
 end

@@ -9,11 +9,11 @@ addpath('./ComDetTBv090/Graphs/')
 
 %% Param setting
 vnum = 3;
-depotPos = [60 60 60];
-fovFactor = 5;
+depotPos = [60 60 10];
+fovFactor = 3;
 inpection_dist = 7; % Inspection distance
-mapheight = 5.0;
-conThres = 20;
+mapheight = 4.0;
+conThres = 4;
 antNo = 20;
 stopThres = 200;
 
@@ -117,11 +117,15 @@ clusteringTime = toc;
 
 figure(5)
 clf
-p = plot(graph(A),'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
+p = plot(graph(A),'Layout','force','EdgeAlpha',0.3,'MarkerSize',3);
 p.NodeCData = cluIdx;
 colormap jet
 colorbar
 drawnow
+
+figure(52)
+clf
+p = plot(graph(A),'Layout','force','EdgeAlpha',0.3,'MarkerSize',3);
 
 
 %% SuperNet Construction
@@ -180,25 +184,26 @@ figure(4)
 clf
 grid on
 hold on
-% for i = 1:size(G.Edges,1)
-%     startIdx = G.Edges.EndNodes(i,1);
-%     EndIdx = G.Edges.EndNodes(i,2);
-%     startPos = node(startIdx,:);
-%     EndPos = node(EndIdx,:);
-%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
+for i = 1:size(G.Edges,1)
+    startIdx = G.Edges.EndNodes(i,1);
+    EndIdx = G.Edges.EndNodes(i,2);
+    startPos = node(startIdx,:);
+    EndPos = node(EndIdx,:);
+    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
+end
+% for i = 1:cluNum
+%     temp = node(nodeInCluIdx{i},:);
+%     plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
 % end
-for i = 1:cluNum
-    temp = node(nodeInCluIdx{i},:);
-    plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
-end
+plot3(node(:,1),node(:,2),node(:,3),'kx','LineWidth',5,'MarkerSize',5)
 mesh(voxelPosX,voxelPosY,voxelFilterData);
-plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
-for i = 1:cluNum
-    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
-end
-for i = 1:N
-    text(node(i,1),node(i,2),node(i,3),num2str(i));
-end
+% plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
+% for i = 1:cluNum
+%     text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
+% end
+% for i = 1:N
+%     text(node(i,1),node(i,2),node(i,3),num2str(i));
+% end
 
 %% SuperNet (HLP) initialization
 for i = 1:cluNum
