@@ -377,7 +377,7 @@ temp4 = TestClusteringTime(:,:,1);
 % semilogy(temp(:),temp2(:)./(temp3(:)+temp4(:)),'*')
 for i = 1:size(degreeConn,1)
     semilogy(temp(i,:,1),temp2(i,:,1)./(temp3(i,:,1)+temp4(i,:,1)),'*-')
-    text(temp(i,:,1),temp2(i,:,1)./(temp3(i,:,1)+temp4(i,:,1)),num2str(Nlist(i)))
+    text(temp(i,end,1)+0.01,temp2(i,end,1)./(temp3(i,end,1)+temp4(i,end,1)),num2str(Nlist(i)))
     hold on
 end
 grid on
@@ -409,9 +409,9 @@ xlabel('node Number')
 figure(5)
 clf
 for i = 1:size(degreeConn,1)
-color = rand(1,3);
-h = plot(degreeConn(i,:,1),CompSolveTime(i,:,1)./TestSolveTime(i,:,1),'*-','Color',color);
-text(degreeConn(i,end,1),CompSolveTime(i,end,1)./TestSolveTime(i,end,1),num2str(Nlist(i)))
+% color = rand(1,3);
+h = plot(degreeConn(i,:,1),CompSolveTime(i,:,1)./TestSolveTime(i,:,1),'*-');
+text(degreeConn(i,end,1)+0.01,CompSolveTime(i,end,1)./TestSolveTime(i,end,1),num2str(Nlist(i)))
 hold on
 end
 grid on
