@@ -79,6 +79,8 @@ TestTotalTime = TestClusteringTime + TestCompleteTime + TestSolveTime;
 CompTotalTime = CompCompleteTime + CompSolveTime;
 % timeRatio = (CompTotalTime - TestTotalTime)./TestTotalTime*100;
 timeRatio = CompTotalTime./TestTotalTime;
+completeTimeRatio = CompCompleteTime./TestCompleteTime;
+solveTimeRatio = CompSolveTime./TestSolveTime;
 % scoreRatio = (CompScoreL - TestScoreL)./TestScoreL*100;
 scoreRatio = CompScoreL./TestScoreL;
 TestTotalTimeRaw = TestTotalTime;
@@ -87,6 +89,8 @@ timeRatioRaw = timeRatio;
 scoreRatioRaw = scoreRatio;
 CompScoreLRaw = CompScoreL;
 TestScoreLRaw = TestScoreL;
+completeTimeRatioRaw = completeTimeRatio;
+solveTimeRatioRaw = solveTimeRatio;
 
 % mean - stdev
 TestClusteringTime = meanStdProcess(TestClusteringTime);
@@ -111,87 +115,45 @@ TestTotalTime = meanStdProcess(TestTotalTime);
 CompTotalTime = meanStdProcess(CompTotalTime);
 timeRatio = meanStdProcess(timeRatio);
 scoreRatio = meanStdProcess(scoreRatio);
+completeTimeRatio = meanStdProcess(completeTimeRatio);
+solveTimeRatio = meanStdProcess(solveTimeRatio);
 
 %%
 degreeRange = [0,0.05,0.1,0.2,0.35,0.5];
-filterDatTime = [];
-filterDatScore = [];
+filterDatTime = []; filterDatScore = []; filterDatCompleteTime = []; filterDatSolveTime = [];
 for k = 1:size(degreeRange,2)-1
-    temp1 = []; temp2 = [];
+    temp1 = [];  temp2 = []; temp3 = []; temp4 = [];
     for i = 1:sizeFactor*connFactor
         if degreeConn(i) > degreeRange(k) && degreeConn(i) < degreeRange(k+1)
             temp1 = vertcat(temp1,[N(i),scoreRatio(i)]);
             temp2 = vertcat(temp2,[N(i),timeRatio(i)]);
+            temp3 = vertcat(temp3,[N(i),completeTimeRatio(i)]);
+            temp4 = vertcat(temp4,[N(i),solveTimeRatio(i)]);
         end
     end
     filterDatScore{k} = temp1;
     filterDatTime{k} = temp2;
+    filterDatCompleteTime{k} = temp3;
+    filterDatSolveTime{k} = temp4;
 end
-%% plot
-% figure(1)
-% clf
-% mesh(N(:,:,1),degreeConn(:,:,1),(CompTotalTime(:,:,1)-TestTotalTime(:,:,1))./TestTotalTime(:,:,1)*100,'FaceColor',[1 0 0])
-% % hold on
-% % mesh(N(:,:,1),degreeConn(:,:,1),CompTotalTime(:,:,1))
-% hold on
-% mesh(N(:,:,1),degreeConn(:,:,1),zeros(size(N(:,:,1))))
-% xlabel('nodeNum')
-% ylabel('connectivity')
-% title('calc time - red high better')
-% view(-45,45)
-% 
-% figure(2)
-% clf
-% mesh(N(:,:,1),degreeConn(:,:,1),(CompScore(:,:,1)-TestScore(:,:,1))./TestScore(:,:,1)*100,'FaceColor',[1 0 0])
-% % hold on
-% % mesh(N(:,:,1),degreeConn(:,:,1),CompScore(:,:,1))
-% hold on
-% mesh(N(:,:,1),degreeConn(:,:,1),zeros(size(N(:,:,1))))
-% xlabel('nodeNum')
-% ylabel('connectivity')
-% title('test score')
-% view(-45,45)
-% 
-% figure(3)
-% clf
-% mesh(N(:,:,1),degreeConn(:,:,1),(CompScoreL(:,:,1)-TestScoreL(:,:,1))./TestScoreL(:,:,1)*100,'FaceColor',[1 0 0])
-% % hold on
-% % mesh(N(:,:,1),degreeConn(:,:,1),CompScoreL(:,:,1))
-% hold on
-% mesh(N(:,:,1),degreeConn(:,:,1),zeros(size(N(:,:,1))))
-% xlabel('nodeNum')
-% ylabel('connectivity')
-% title('test score L - red high better')
-% view(-45,45)
-% 
-% figure(4)
-% clf
-% mesh(N(:,:,1),degreeConn(:,:,1),equiPerformanceTimeL(:,:,1),'FaceColor',[1 0 0])
-% xlabel('nodeNum')
-% ylabel('connectivity')
-% title('equiPerfTimeL - red high better')
-% view(-45,45)
-% 
-% figure(5)
-% clf
-% mesh(N(:,:,1),degreeConn(:,:,1),equiPerformanceTime(:,:,1),'FaceColor',[1 0 0])
-% xlabel('nodeNum')
-% ylabel('connectivity')
-% title('equiPerfTime')
-% view(-45,45)
-% 
-% figure(6)
-% clf
-% mesh(N(:,:,1),degreeConn(:,:,1),(equiTimePerformance(:,:,1)-TestScoreL(:,:,1))./TestScoreL(:,:,1)*100,'FaceColor',[1 0 0])
-% % mesh(N(:,:,1),degreeConn(:,:,1),(equiTimePerformance(:,:,1)),'FaceColor',[1 0 0])
-% % hold on
-% % mesh(N(:,:,1),degreeConn(:,:,1),CompScoreL(:,:,1))
-% hold on
-% mesh(N(:,:,1),degreeConn(:,:,1),zeros(size(N(:,:,1))))
-% xlabel('nodeNum')
-% ylabel('connectivity')
-% title('equiTimePerf')
-% view(-45,45)
+
+NRange = [0,100,1000,4000];
+NfilterDatTime = []; NfilterDatScore = []; NfilterDatCompleteTime = []; NfilterDatSolveTime = [];
+for k = 1:size(NRange,2)-1
+    temp1 = []; temp2 = []; temp3 = []; temp4 = [];
+    for i = 1:sizeFactor*connFactor
+        if N(i) > NRange(k) && N(i) < NRange(k+1)
+            temp1 = vertcat(temp1,[degreeConn(i),scoreRatio(i)]);
+            temp2 = vertcat(temp2,[degreeConn(i),timeRatio(i)]);
+            temp3 = vertcat(temp3,[degreeConn(i),completeTimeRatio(i)]);
+            temp4 = vertcat(temp4,[degreeConn(i),solveTimeRatio(i)]);
+        end
+    end
+    NfilterDatScore{k} = temp1;
+    NfilterDatTime{k} = temp2;
+    NfilterDatCompleteTime{k} = temp3;
+    NfilterDatSolveTime{k} = temp4;
+end
 
 %% mono plot
 % legendList = [];
@@ -213,12 +175,16 @@ Nlist = N(:,1,1);
 
 figure(112)
 clf
-for i = 1:size(degreeConn,1)
-% h = errorbar(degreeConn(i,:,1),timeRatio(i,:,1),timeRatio(i,:,2),'-*');
-semilogy(degreeConn(i,:,1),timeRatio(i,:,1),'-*');
-text(degreeConn(i,end,1),timeRatio(i,end,1),num2str(Nlist(i)))
-hold on
+for i = 1:size(NRange,2)-1
+    semilogy(NfilterDatScore{i}(:,1),NfilterDatTime{i}(:,2),'x','LineWidth',5)
+    hold on
 end
+% for i = 1:size(degreeConn,1)
+% h = errorbar(degreeConn(i,:,1),timeRatio(i,:,1),timeRatio(i,:,2),'-*');
+% semilogy(degreeConn(i,:,1),timeRatio(i,:,1),'-*');
+% text(degreeConn(i,end,1),timeRatio(i,end,1),num2str(Nlist(i)))
+% hold on
+% end
 grid on
 xlabel('connectivity')
 ylabel('computation time [%]')
@@ -276,25 +242,30 @@ title('Computation Time Ratio')
 % ylabel('Score')
 % title('Score Comparison')
 
-figure(333)
-clf
-temp = N(:,:,1);
-temp2 = CompScoreL(:,:,1)./TestScoreL(:,:,1);
-semilogx(temp(:),temp2(:),'*')
-grid on
-xlabel('Node Number')
-ylabel('Score')
-title('Score ratio')
+% figure(333)
+% clf
+% temp = N(:,:,1);
+% temp2 = CompScoreL(:,:,1)./TestScoreL(:,:,1);
+% semilogx(temp(:),temp2(:),'*')
+% grid on
+% xlabel('Node Number')
+% ylabel('Score')
+% title('Score ratio')
 
 figure(334)
 clf
 temp = N(:,:,1);
 temp2 = CompTotalTime(:,:,1)./TestTotalTime(:,:,1);
-loglog(temp(:),temp2(:),'*')
+% loglog(temp(:),temp2(:),'*')
+for i = 1:size(NRange,2)-1
+    loglog(filterDatScore{i}(:,1),filterDatTime{i}(:,2),'x','LineWidth',5)
+    hold on
+end
 grid on
 xlabel('Node Number')
 ylabel('comp time ratio')
 title('Computation time ratio')
+legend('low','med','high')
 
 % figure(441)
 % clf
@@ -324,23 +295,27 @@ title('Computation time ratio')
 
 figure(443)
 clf
-temp = degreeConn(:,:,1);
-temp2 = CompScoreL(:,:,1)./TestScoreL(:,:,1);
-plot(temp(:),temp2(:),'*')
+% temp = degreeConn(:,:,1);
+% temp2 = CompScoreL(:,:,1)./TestScoreL(:,:,1);
+% plot(temp(:),temp2(:),'*')
+for i = 1:size(NRange,2)-1
+    plot(NfilterDatScore{i}(:,1),NfilterDatScore{i}(:,2),'x','LineWidth',5)
+    hold on
+end
 grid on
 xlabel('connectivity')
 ylabel('Score')
 title('Score ratio')
 
-figure(444)
-clf
-temp = degreeConn(:,:,1);
-temp2 = CompTotalTime(:,:,1)./TestTotalTime(:,:,1);
-plot(temp(:),temp2(:),'*')
-grid on
-xlabel('connectivity')
-ylabel('comp time ratio')
-title('Computation time ratio')
+% figure(444)
+% clf
+% temp = degreeConn(:,:,1);
+% temp2 = CompTotalTime(:,:,1)./TestTotalTime(:,:,1);
+% plot(temp(:),temp2(:),'*')
+% grid on
+% xlabel('connectivity')
+% ylabel('comp time ratio')
+% title('Computation time ratio')
 
 % figure(551)
 % clf
@@ -383,20 +358,27 @@ end
 grid on
 title('Complefication time ratio')
 xlabel('connectivity')
+
 figure(2)
 clf
 loglog(temp1(:),temp2(:)./(temp3(:)+temp4(:)),'*')
 grid on
 title('Complefication time ratio')
 xlabel('Node number')
-% figure(3)
-% temp5 = CompSolveTime(:,:,1);
-% temp6 = TestSolveTime(:,:,1);
-% clf
-% plot(temp1(:),temp5(:)./temp6(:),'*')
-% grid on
-% title('Solve time ratio')
-% xlabel('node number')
+
+figure(3)
+clf
+temp5 = CompSolveTime(:,:,1);
+temp6 = TestSolveTime(:,:,1);
+% plot(temp(:),temp5(:)./temp6(:),'*')
+for i = 1:size(NRange,2)-1
+    plot(NfilterDatSolveTime{i}(:,1),NfilterDatSolveTime{i}(:,2),'x','LineWidth',5)
+    hold on
+end
+grid on
+title('Solve time ratio')
+xlabel('connectivity')
+
 figure(4)
 temp5 = CompSolveTime(:,:,1);
 temp6 = TestSolveTime(:,:,1);
@@ -406,18 +388,18 @@ grid on
 title('Solve time ratio')
 xlabel('node Number')
 
-figure(5)
-clf
-for i = 1:size(degreeConn,1)
-% color = rand(1,3);
-h = plot(degreeConn(i,:,1),CompSolveTime(i,:,1)./TestSolveTime(i,:,1),'*-');
-text(degreeConn(i,end,1)+0.01,CompSolveTime(i,end,1)./TestSolveTime(i,end,1),num2str(Nlist(i)))
-hold on
-end
-grid on
-xlabel('connectivity')
-ylabel('solve time ratio')
-title('solve time ratio')
+% figure(5)
+% clf
+% for i = 1:size(degreeConn,1)
+% % color = rand(1,3);
+% h = plot(degreeConn(i,:,1),CompSolveTime(i,:,1)./TestSolveTime(i,:,1),'*-');
+% text(degreeConn(i,end,1)+0.01,CompSolveTime(i,end,1)./TestSolveTime(i,end,1),num2str(Nlist(i)))
+% hold on
+% end
+% grid on
+% xlabel('connectivity')
+% ylabel('solve time ratio')
+% title('solve time ratio')
 
 figure(6)
 clf
@@ -440,7 +422,8 @@ end
 grid on
 xlabel('Node number')
 ylabel('compostion ratio [%]')
-title('The ratio of time spent on complete graph construction')
+% title('Ratio of time spent on complete graph construction')
+title('Ratio of CT_{cg}/CT')
 legend('Pure ACS', 'Proposed Algorithm')
 %% function
 
