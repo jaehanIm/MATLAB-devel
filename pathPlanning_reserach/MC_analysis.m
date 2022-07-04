@@ -161,6 +161,7 @@ end
 %     legendList = vertcat(legendList," " + [num2str(i)]);
 % end
 Nlist = N(:,1,1);
+shapeList = ["+","x","o","d","h"];
 % figure(11)
 % clf
 % for i = 1:size(degreeConn,1)
@@ -176,20 +177,22 @@ Nlist = N(:,1,1);
 figure(112)
 clf
 for i = 1:size(NRange,2)-1
-    semilogy(NfilterDatScore{i}(:,1),NfilterDatTime{i}(:,2),'x','LineWidth',5)
+    semilogy(NfilterDatScore{i}(:,1),NfilterDatTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
     hold on
 end
-% for i = 1:size(degreeConn,1)
-% h = errorbar(degreeConn(i,:,1),timeRatio(i,:,1),timeRatio(i,:,2),'-*');
-% semilogy(degreeConn(i,:,1),timeRatio(i,:,1),'-*');
-% text(degreeConn(i,end,1),timeRatio(i,end,1),num2str(Nlist(i)))
-% hold on
-% end
+for i = 1:size(degreeConn,1)
+% h = errorbar(degreeConn(i,:,1),timeRatio(i,:,1),timeRatio(i,:,2),'k-*');
+semilogy(degreeConn(i,:,1),timeRatio(i,:,1),':','Color',[0.6 0.6 0.6]);
+% text(degreeConn(i,end,1)+0.01,timeRatio(i,end,1),num2str(Nlist(i)))
+hold on
+end
 grid on
 xlabel('connectivity')
-ylabel('computation time [%]')
+ylabel('computation time ratio')
 title('Computation Time Ratio')
 % set(get(h,'Parent'), 'XScale','log')
+legend('N <= 100','N <= 1000','N > 1000')
+set(gca,'children',flipud(get(gca,'children')))
 
 % figure(113)
 % clf
@@ -257,15 +260,15 @@ clf
 temp = N(:,:,1);
 temp2 = CompTotalTime(:,:,1)./TestTotalTime(:,:,1);
 % loglog(temp(:),temp2(:),'*')
-for i = 1:size(NRange,2)-1
-    loglog(filterDatScore{i}(:,1),filterDatTime{i}(:,2),'x','LineWidth',5)
+for i = 1:size(degreeRange,2)-1
+    loglog(filterDatScore{i}(:,1),filterDatTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
     hold on
 end
 grid on
 xlabel('Node Number')
-ylabel('comp time ratio')
+ylabel('computation time ratio')
 title('Computation time ratio')
-legend('low','med','high')
+legend('Low','Low-moderate','Moderate','High-moderate','High')
 
 % figure(441)
 % clf
@@ -299,13 +302,14 @@ clf
 % temp2 = CompScoreL(:,:,1)./TestScoreL(:,:,1);
 % plot(temp(:),temp2(:),'*')
 for i = 1:size(NRange,2)-1
-    plot(NfilterDatScore{i}(:,1),NfilterDatScore{i}(:,2),'x','LineWidth',5)
+    plot(NfilterDatScore{i}(:,1),NfilterDatScore{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
     hold on
 end
 grid on
 xlabel('connectivity')
-ylabel('Score')
+ylabel('score ratio')
 title('Score ratio')
+legend('N <= 100','N <= 1000','N > 1000')
 
 % figure(444)
 % clf
@@ -332,7 +336,7 @@ title('Score ratio')
 figure(552)
 clf
 for i = 1:size(degreeRange,2)-1
-    semilogx(filterDatScore{i}(:,1),filterDatScore{i}(:,2),'x','LineWidth',5)
+    semilogx(filterDatScore{i}(:,1),filterDatScore{i}(:,2),shapeList(i),'MarkerSize',7,'LineWidth',1)
     hold on
 end
 grid on

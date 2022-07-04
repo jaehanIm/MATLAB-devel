@@ -23,9 +23,10 @@ temp = [];
 fovC = 1;
 totC = 1;
 
-fovFactorSet = [4:-0.5:1,0.75,0.5,0.4];
+% fovFactorSet = [4:-0.5:1,0.75,0.5,0.4];
 fovFactorSet = 0.4;
-conThresSet = [4,5,6,7,9,10,15,20,25,35,45];
+% conThresSet = [4,5,6,7,9,10,15,20,25,35,45];
+conThresSet = [20,25,35,45];
 totalTestNum = length(fovFactorSet) * length(conThresSet);
 
 for fovFactor = fovFactorSet
