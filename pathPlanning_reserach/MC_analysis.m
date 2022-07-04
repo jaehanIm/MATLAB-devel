@@ -452,10 +452,10 @@ end
 % end
 grid on
 xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
-ylabel('compostion ratio [%]')
+ylabel('proportion [%]')
 % title('Ratio of time spent on complete graph construction')
 % title('Ratio of CT_{cg}/CT')
-title('Portion of CT_{pre}')
+title('Proportion of CT_{pre} to CT')
 legend('Pure ACS', 'Proposed Algorithm')
 %% function
 
