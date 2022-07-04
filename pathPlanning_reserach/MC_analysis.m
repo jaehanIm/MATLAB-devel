@@ -81,6 +81,7 @@ CompTotalTime = CompCompleteTime + CompSolveTime;
 timeRatio = CompTotalTime./TestTotalTime;
 completeTimeRatio = CompCompleteTime./TestCompleteTime;
 solveTimeRatio = CompSolveTime./TestSolveTime;
+preTimeRatio = CompCompleteTime./(TestCompleteTime + TestClusteringTime);
 % scoreRatio = (CompScoreL - TestScoreL)./TestScoreL*100;
 scoreRatio = CompScoreL./TestScoreL;
 TestTotalTimeRaw = TestTotalTime;
@@ -91,6 +92,7 @@ CompScoreLRaw = CompScoreL;
 TestScoreLRaw = TestScoreL;
 completeTimeRatioRaw = completeTimeRatio;
 solveTimeRatioRaw = solveTimeRatio;
+preTimeRatioRaw = preTimeRatio;
 
 % mean - stdev
 TestClusteringTime = meanStdProcess(TestClusteringTime);
@@ -117,42 +119,47 @@ timeRatio = meanStdProcess(timeRatio);
 scoreRatio = meanStdProcess(scoreRatio);
 completeTimeRatio = meanStdProcess(completeTimeRatio);
 solveTimeRatio = meanStdProcess(solveTimeRatio);
+preTimeRatio = meanStdProcess(preTimeRatio);
 
 %%
 degreeRange = [0,0.05,0.1,0.2,0.35,0.5];
-filterDatTime = []; filterDatScore = []; filterDatCompleteTime = []; filterDatSolveTime = [];
+filterDatTime = []; filterDatScore = []; filterDatCompleteTime = []; filterDatSolveTime = []; filterDatPreTime = [];
 for k = 1:size(degreeRange,2)-1
-    temp1 = [];  temp2 = []; temp3 = []; temp4 = [];
+    temp1 = [];  temp2 = []; temp3 = []; temp4 = []; temp5 = [];
     for i = 1:sizeFactor*connFactor
         if degreeConn(i) > degreeRange(k) && degreeConn(i) < degreeRange(k+1)
             temp1 = vertcat(temp1,[N(i),scoreRatio(i)]);
             temp2 = vertcat(temp2,[N(i),timeRatio(i)]);
             temp3 = vertcat(temp3,[N(i),completeTimeRatio(i)]);
             temp4 = vertcat(temp4,[N(i),solveTimeRatio(i)]);
+            temp5 = vertcat(temp5,[N(i),preTimeRatio(i)]);
         end
     end
     filterDatScore{k} = temp1;
     filterDatTime{k} = temp2;
     filterDatCompleteTime{k} = temp3;
     filterDatSolveTime{k} = temp4;
+    filterDatPreTime{k} = temp5;
 end
 
 NRange = [0,100,1000,4000];
-NfilterDatTime = []; NfilterDatScore = []; NfilterDatCompleteTime = []; NfilterDatSolveTime = [];
+NfilterDatTime = []; NfilterDatScore = []; NfilterDatCompleteTime = []; NfilterDatSolveTime = []; NfilterDatPreTime = [];
 for k = 1:size(NRange,2)-1
-    temp1 = []; temp2 = []; temp3 = []; temp4 = [];
+    temp1 = []; temp2 = []; temp3 = []; temp4 = []; temp5 = [];
     for i = 1:sizeFactor*connFactor
         if N(i) > NRange(k) && N(i) < NRange(k+1)
             temp1 = vertcat(temp1,[degreeConn(i),scoreRatio(i)]);
             temp2 = vertcat(temp2,[degreeConn(i),timeRatio(i)]);
             temp3 = vertcat(temp3,[degreeConn(i),completeTimeRatio(i)]);
             temp4 = vertcat(temp4,[degreeConn(i),solveTimeRatio(i)]);
+            temp5 = vertcat(temp5,[degreeConn(i),preTimeRatio(i)]);
         end
     end
     NfilterDatScore{k} = temp1;
     NfilterDatTime{k} = temp2;
     NfilterDatCompleteTime{k} = temp3;
     NfilterDatSolveTime{k} = temp4;
+    NfilterDatPreTime{k} = temp5;
 end
 
 %% mono plot
@@ -187,9 +194,9 @@ semilogy(degreeConn(i,:,1),timeRatio(i,:,1),':','Color',[0.6 0.6 0.6]);
 hold on
 end
 grid on
-xlabel('connectivity')
-ylabel('computation time ratio')
-title('Computation Time Ratio')
+xlabel('$\mathcal{K}$','Interpreter','latex')
+ylabel('CT ratio [log scale]')
+title('CT Ratio')
 % set(get(h,'Parent'), 'XScale','log')
 legend('N <= 100','N <= 1000','N > 1000')
 set(gca,'children',flipud(get(gca,'children')))
@@ -265,9 +272,9 @@ for i = 1:size(degreeRange,2)-1
     hold on
 end
 grid on
-xlabel('Node Number')
-ylabel('computation time ratio')
-title('Computation time ratio')
+xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
+ylabel('CT ratio [log scale]')
+title('CT ratio')
 legend('Low','Low-moderate','Moderate','High-moderate','High')
 
 % figure(441)
@@ -306,9 +313,9 @@ for i = 1:size(NRange,2)-1
     hold on
 end
 grid on
-xlabel('connectivity')
-ylabel('score ratio')
-title('Score ratio')
+xlabel('$\mathcal{K}$','Interpreter','latex')
+ylabel('SQ ratio')
+title('SQ ratio')
 legend('N <= 100','N <= 1000','N > 1000')
 
 % figure(444)
@@ -340,10 +347,10 @@ for i = 1:size(degreeRange,2)-1
     hold on
 end
 grid on
-xlabel('Node num')
-ylabel('score ratio')
+xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
+ylabel('SQ ratio')
 legend('Low','Low-moderate','Moderate','High-moderate','High')
-title('score ratio')
+title('SQ ratio')
 
 
 figure(1)
@@ -353,44 +360,64 @@ temp1 = N(:,:,1);
 temp2 = CompCompleteTime(:,:,1);
 temp3 = TestCompleteTime(:,:,1);
 temp4 = TestClusteringTime(:,:,1);
-% semilogy(temp(:),temp2(:)./(temp3(:)+temp4(:)),'*')
+for i = 1:size(NRange,2)-1
+%     semilogy(NfilterDatCompleteTime{i}(:,1),NfilterDatCompleteTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
+    semilogy(NfilterDatPreTime{i}(:,1),NfilterDatPreTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
+    hold on
+end
 for i = 1:size(degreeConn,1)
-    semilogy(temp(i,:,1),temp2(i,:,1)./(temp3(i,:,1)+temp4(i,:,1)),'*-')
-    text(temp(i,end,1)+0.01,temp2(i,end,1)./(temp3(i,end,1)+temp4(i,end,1)),num2str(Nlist(i)))
+    semilogy(temp(i,:,1),temp2(i,:,1)./(temp3(i,:,1)+temp4(i,:,1)),':','Color',[0.6 0.6 0.6]);
+%     semilogy(temp(i,:,1),temp2(i,:,1)./temp3(i,:,1),':','Color',[0.6 0.6 0.6]);
     hold on
 end
 grid on
-title('Complefication time ratio')
-xlabel('connectivity')
+xlabel('$\mathcal{K}$','Interpreter','latex')
+ylabel('CT_{pre} ratio [log scale]')
+title('CT_{pre} ratio')
+% set(get(h,'Parent'), 'XScale','log') 
+legend('N <= 100','N <= 1000','N > 1000')
+set(gca,'children',flipud(get(gca,'children')))
+
 
 figure(2)
 clf
-loglog(temp1(:),temp2(:)./(temp3(:)+temp4(:)),'*')
-grid on
-title('Complefication time ratio')
-xlabel('Node number')
-
-figure(3)
-clf
-temp5 = CompSolveTime(:,:,1);
-temp6 = TestSolveTime(:,:,1);
-% plot(temp(:),temp5(:)./temp6(:),'*')
-for i = 1:size(NRange,2)-1
-    plot(NfilterDatSolveTime{i}(:,1),NfilterDatSolveTime{i}(:,2),'x','LineWidth',5)
+% loglog(temp1(:),temp2(:)./(temp3(:)+temp4(:)),'*')
+for i = 1:size(degreeRange,2)-1
+    loglog(filterDatPreTime{i}(:,1),filterDatPreTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7);
     hold on
 end
 grid on
-title('Solve time ratio')
-xlabel('connectivity')
+title('CT_{pre} ratio')
+xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
+ylabel('CT_{pre} ratio [log scale]')
+legend('Low','Low-moderate','Moderate','High-moderate','High')
+
+figure(3)
+clf
+% plot(temp(:),temp5(:)./temp6(:),'*')
+for i = 1:size(NRange,2)-1
+    plot(NfilterDatSolveTime{i}(:,1),NfilterDatSolveTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
+    hold on
+end
+grid on
+title('CT_{s} ratio')
+xlabel('$\mathcal{K}$','Interpreter','latex')
+ylabel('CT_{s} ratio')
+legend('N <= 100','N <= 1000','N > 1000')
 
 figure(4)
 temp5 = CompSolveTime(:,:,1);
 temp6 = TestSolveTime(:,:,1);
 clf
-semilogx(temp1(:),temp5(:)./temp6(:),'*')
+% semilogx(temp1(:),temp5(:)./temp6(:),'*')
+for i = 1:size(degreeRange,2)-1
+    semilogx(filterDatSolveTime{i}(:,1),filterDatSolveTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
+    hold on
+end
 grid on
-title('Solve time ratio')
-xlabel('node Number')
+title('CT_{s} ratio')
+ylabel('CT_{s} ratio')
+xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
 
 % figure(5)
 % clf
@@ -424,10 +451,11 @@ end
 %     semilogx(temp(:,i,1),temp2(:,i,1),'bo')
 % end
 grid on
-xlabel('Node number')
+xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
 ylabel('compostion ratio [%]')
 % title('Ratio of time spent on complete graph construction')
-title('Ratio of CT_{cg}/CT')
+% title('Ratio of CT_{cg}/CT')
+title('Portion of CT_{pre}')
 legend('Pure ACS', 'Proposed Algorithm')
 %% function
 
