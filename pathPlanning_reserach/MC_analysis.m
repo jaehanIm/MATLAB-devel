@@ -418,6 +418,8 @@ grid on
 title('CT_{s} ratio')
 ylabel('CT_{s} ratio')
 xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
+legend('Low','Low-moderate','Moderate','High-moderate','High')
+
 
 % figure(5)
 % clf
