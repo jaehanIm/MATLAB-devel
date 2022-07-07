@@ -1,7 +1,7 @@
 
-benchTime = solveTime;
-benchScore = totalScoreHistory;
-benchScoreL = totalScoreHistoryL;
+% benchTime = solveTime;
+% benchScore = totalScoreHistory;
+% benchScoreL = totalScoreHistoryL;
 
 mapGraph = graph1;
 

@@ -6,7 +6,7 @@ depotPos = [10 -5 0];
 fovFactor = 1.8;
 inpection_dist = 1; % Inspection distance
 mapheight = 5.0;
-conThres = 3;
+conThres = 4;
 stlAddr = '/home/jaehan/Desktop/generic.stl';
 % stlAddr = '/home/jaehan/Downloads/generic_edited.stl';
 
@@ -111,7 +111,7 @@ completeTime_soleACO = toc;
 
 %% solve
 antNo = 20;
-stopThres = 400;
+stopThres = 200;
 % ACOVRP_forSoleACO
 ACSVRP_forSoleACS
 

@@ -1,16 +1,17 @@
 addpath('./data/')
 
 %% Load data
-dat = load('ML6.mat'); % ML4 is for paper
+dat = load('MLFF.mat'); % ML4 is for paper
 dat = dat.MCData;
-dat2 = load('ML6_missing.mat');
+% dat = temp;
+dat2 = load('MLF_missing.mat');
 dat2 = dat2.MCData;
-dat3 = load('ML6_missing2.mat');
+dat3 = load('MLF_missing2.mat');
 dat3 = dat3.MCData;
-dat4 = load('ML6_missing3.mat');
+dat4 = load('MLF_missing3.mat');
 dat4 = dat4.MCData;
-% dat(end+1,:,:) = dat2;
-% dat(end+1,:,:) = dat3;
+dat(end+1,:,:) = dat2;
+dat(end+1,:,:) = dat3;
 dat(4,:,:) = [];
 dat(end+1,:,:) = dat4;
 
@@ -44,7 +45,7 @@ iterN = size(dat,3);
 for sizeFactor = 1:size(dat,1)
     for connFactor = 1:size(dat,2)
         for i = 1:iterN
-            if sizeFactor == 8 & connFactor == 1 & i == 9
+            if sizeFactor == 8 & connFactor == 1 & i == 19
                 dat(sizeFactor,connFactor,i) = dat(sizeFactor,connFactor,i-1);
             end
             TestClusteringTime(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestClusteringTime;
@@ -442,7 +443,7 @@ temp1_2 = CompCompleteTime(:,:,1)./CompTotalTime(:,:,1)*100;
 temp2 = TestSolveTime(:,:,1)./TestTotalTime(:,:,1)*100;
 temp2_2 = TestCompleteTime(:,:,1)./TestTotalTime(:,:,1)*100;
 temp2_3 = TestClusteringTime(:,:,1)./TestTotalTime(:,:,1)*100;
-for i = 1:size(degreeConn,1)
+for i = 1:size(degreeConn,2)
     semilogx(temp(:,i,1),temp1_2(:,i,1),'rx')
     hold on
     semilogx(temp(:,i,1),temp2_2(:,i,1)+temp2_3(:,i,1),'bo')

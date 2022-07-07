@@ -14,7 +14,7 @@ depotPos = [10 -5 0];
 fovFactor = 1.8;
 inpection_dist = 1; % Inspection distance
 mapheight = 5.0;
-conThres = 1.5;
+conThres = 4;
 stlAddr = '/home/jaehan/Desktop/generic.stl';
 % stlAddr = '/home/jaehan/Desktop/WT.stl';
 % stlAddr = '/home/jaehan/Downloads/generic_edited.stl';
@@ -342,9 +342,9 @@ for i = 1:cluNum
     temp = node(nodeInCluIdx{i},:);
     plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
 end
-plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
+plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3)+20,'yx','MarkerSize',10,'LineWidth',5)
 for i = 1:cluNum
-    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
+    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3)+20,num2str(i));
 end
 axis equal
 drawnow
