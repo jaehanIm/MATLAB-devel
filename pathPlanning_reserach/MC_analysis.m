@@ -199,7 +199,7 @@ xlabel('$\mathcal{K}$','Interpreter','latex')
 ylabel('CT ratio [log scale]')
 title('CT Ratio')
 % set(get(h,'Parent'), 'XScale','log')
-legend('N <= 100','N <= 1000','N > 1000')
+legend('N <= 100','N <= 1000','N > 1000','Location','best')
 set(gca,'children',flipud(get(gca,'children')))
 
 % figure(113)
@@ -276,7 +276,7 @@ grid on
 xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
 ylabel('CT ratio [log scale]')
 title('CT ratio')
-legend('Low','Low-moderate','Moderate','High-moderate','High')
+legend('Low','Low-moderate','Moderate','High-moderate','High','Location','northwest')
 
 % figure(441)
 % clf
@@ -376,7 +376,7 @@ xlabel('$\mathcal{K}$','Interpreter','latex')
 ylabel('CT_{pre} ratio [log scale]')
 title('CT_{pre} ratio')
 % set(get(h,'Parent'), 'XScale','log') 
-legend('N <= 100','N <= 1000','N > 1000')
+legend('N <= 100','N <= 1000','N > 1000','Location','best')
 set(gca,'children',flipud(get(gca,'children')))
 
 
@@ -391,7 +391,7 @@ grid on
 title('CT_{pre} ratio')
 xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
 ylabel('CT_{pre} ratio [log scale]')
-legend('Low','Low-moderate','Moderate','High-moderate','High')
+legend('Low','Low-moderate','Moderate','High-moderate','High','Location','northwest')
 
 figure(3)
 clf
@@ -419,7 +419,7 @@ grid on
 title('CT_{s} ratio')
 ylabel('CT_{s} ratio')
 xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
-legend('Low','Low-moderate','Moderate','High-moderate','High')
+legend('Low','Low-moderate','Moderate','High-moderate','High','Location','northwest')
 
 
 % figure(5)
@@ -459,7 +459,7 @@ ylabel('proportion [%]')
 % title('Ratio of time spent on complete graph construction')
 % title('Ratio of CT_{cg}/CT')
 title('Proportion of CT_{pre} to CT')
-legend('Pure ACS', 'Proposed Algorithm')
+legend('Pure ACS', 'Proposed Algorithm','Location','northwest')
 %% function
 
 function output = meanStdProcess(input)
