@@ -26,18 +26,18 @@ for i = 1:vehNum
         X = [x1 , x2];
         Y = [y1, y2];
         Z = [z1, z2];
-        plot3(X, Y, Z,'Color',color,'LineWidth',3);
+        plot3(X, Y, Z,'Color',color,'LineWidth',2);
     end
 end
 
-plot3(graph.node.x(homeIdx),graph.node.y(homeIdx),graph.node.z(homeIdx),'ok', 'markerSize' , 10 , 'MarkerEdgeColor' , 'r' , 'MarkerFaceColor', 'g');
+plot3(graph.node.x(homeIdx),graph.node.y(homeIdx),graph.node.z(homeIdx),'ok', 'markerSize' , 5 , 'MarkerEdgeColor' , 'r' , 'MarkerFaceColor', 'g');
 for i = 2 : graph.n
     
     X = [graph.node.x(i)];
     Y = [graph.node.y(i)];
     Z = [graph.node.z(i)];
     
-    plot3(X, Y, Z, 'ok', 'markerSize' , 3 , 'MarkerEdgeColor' , 'r' , 'MarkerFaceColor', [1, 0.6, 0.6]);
+    plot3(X, Y, Z, 'ok', 'markerSize' , 2 , 'MarkerEdgeColor' , 'r' , 'MarkerFaceColor', [1, 0.6, 0.6]);
 end
 
 title('Route Result')
