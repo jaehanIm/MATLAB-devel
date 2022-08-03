@@ -29,6 +29,7 @@ DONOTSOLVE = 0;
 % A(1,:) = 0; A(:,1) = 0;
 
 A = A_orig;
+A_interClu = A;
 C = C_orig;
 G = graph(C);
 
@@ -187,7 +188,7 @@ for i = 1:cluNum-1
                 for kj = ki+1:size(locTotNodIdx,1)
                     origIdxi = locTotNodIdx(ki);
                     origIdxj = locTotNodIdx(kj);
-                    if A(origIdxi,origIdxj) == 0
+                    if A(origIdxi,origIdxj) == 0 && A_interClu(origIdxi,origIdxj) == 0
                         [implRoute,d]=shortestpath(localG,ki,kj,'Method','positive');
                         implicitRoute{origIdxi,origIdxj} = locTotNodIdx(implRoute);
                         implicitRoute{origIdxj,origIdxi} = fliplr(locTotNodIdx(implRoute));
@@ -197,14 +198,16 @@ for i = 1:cluNum-1
                         end
                         C(origIdxi,origIdxj) = d;
                         C(origIdxj,origIdxi) = d;
-                    end
+                        A_interClu(origIdxi,origIdxj) = 1;
+                        A_interClu(origIdxj,origIdxi) = 1;
+                    end     
                 end
             end
             % connection complete
         end
     end
 end
-
+    
 implicitRoute = [];
 for i = fliplr(2:cluNum)
     localNodeIdx = nodeInCluIdx{i};
@@ -222,12 +225,14 @@ for i = fliplr(2:cluNum)
                     origIdxi = locTotNodIdx(ki);
                     origIdxj = locTotNodIdx(kj);
 
-                    if A(origIdxi,origIdxj) == 0
+                    if A(origIdxi,origIdxj) == 0 && A_interClu(origIdxi,origIdxj) == 0
                         [implRoute,d]=shortestpath(localG,ki,kj,'Method','positive');
                         implicitRoute{origIdxi,origIdxj} = locTotNodIdx(implRoute);
                         implicitRoute{origIdxj,origIdxi} = fliplr(locTotNodIdx(implRoute));
                         C(origIdxi,origIdxj) = d;
                         C(origIdxj,origIdxi) = d;
+                        A_interClu(origIdxi,origIdxj) = 1;
+                        A_interClu(origIdxj,origIdxi) = 1;
                     end
                 end
             end

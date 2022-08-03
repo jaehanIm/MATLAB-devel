@@ -1,11 +1,11 @@
-function wpList = loadStl(addr,ispDist)
+function wpList = loadStl(addr,ispDist, reduceFactor)
 
 % tmp = stlread('/home/jaehan/Desktop/F18.stl');
-tmp = stlread('/home/jaehan/Downloads/beluga.stl');
 tmp = stlread(addr);
 
 FV.faces = tmp.ConnectivityList;
 FV.vertices = tmp.Points;
+FV = reducepatch(FV,reduceFactor);
 
 % n = patchnormals(FV);
 n = STLVertexNormals(FV.faces,FV.vertices);

@@ -15,9 +15,29 @@ dat(end+1,:,:) = dat3;
 dat(4,:,:) = [];
 dat(end+1,:,:) = dat4;
 
-% dat(end,:,:) = [];
-%% Analysis
+%% Additional data - MY BIG MISTAKE
+temp = load('MLF_supp.mat');
+temp = temp.MCData;
+temp2 = load('MLF_supp_missing1.mat');
+temp2 = temp2.MCData;
+temp3 = load('MLF_supp_missing2.mat');
+temp3 = temp3.MCData;
+temp4 = load('MLF_supp_missing3.mat');
+temp4 = temp4.MCData;
+temp(end+1,:) = temp2;
+temp(end+1,:) = temp3;
+temp(4,:) = [];
+temp(end+1,:) = temp4;
 
+for i = 1:size(dat,1)
+    for j = 1:size(dat,2)
+        for k = 1:20
+            dat{i,j,k}.TestIntraCompleteTime = temp{i,j}.TestIntraCompleteTime;
+        end
+    end
+end
+
+%% Analysis
 TestClusteringTime = zeros(size(dat));
 TestCompleteTime = zeros(size(dat));
 TestSolveTime = zeros(size(dat));
@@ -49,7 +69,7 @@ for sizeFactor = 1:size(dat,1)
                 dat(sizeFactor,connFactor,i) = dat(sizeFactor,connFactor,i-1);
             end
             TestClusteringTime(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestClusteringTime;
-            TestCompleteTime(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestInterCompleteTime;
+            TestCompleteTime(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestInterCompleteTime + dat{sizeFactor,connFactor,i}.TestIntraCompleteTime;
             TestSolveTime(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestSolveTime;
             TestScore(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestScoreHist;
             TestScoreL(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestScoreHistL;

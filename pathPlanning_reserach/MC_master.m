@@ -16,28 +16,27 @@ mapheight = 4.0;
 conThres = 10;
 antNo = 20;
 stopThres = 200;
-trialNums = 10;
+trialNums = 1;
 
 MCData = [];
 temp = [];
 fovC = 1;
 totC = 1;
 
-% fovFactorSet = [4:-0.5:1,0.75,0.5,0.4];
-fovFactorSet = 3;
+fovFactorSet = [4:-0.5:1,0.75,0.5,0.4];
 conThresSet = [4,5,6,7,9,10,15,20,25,35,45];
 totalTestNum = length(fovFactorSet) * length(conThresSet);
 
 for fovFactor = fovFactorSet
     conC = 1;
+    disp("Generate map")
+    poc_path_planner;
     for conThres = conThresSet
         completeTime_soleACO = []; clusteringTime = []; interCompleteTime = [];
         disp("================")
         disp("case setting : ("+num2str(fovFactor)+", "+num2str(conThres)+")");
         disp("Test set progress : "+num2str(totC / totalTestNum * 100)+"% done");
         tryC = 1;
-        disp("Generate map")
-        poc_path_planner;
         disp("Initialization for ACS")
         MC_MAIN_soleACS;
         disp("MC_MAIN_PRIMER")
@@ -48,31 +47,32 @@ for fovFactor = fovFactorSet
             equiPerformanceTimeL = []; equiPerformanceTime = []; equiTimePerformance = [];
             disp("Try set progress : "+num2str(tryNum/trialNums*100)+"% of Test progress : "+num2str(totC / totalTestNum * 100)+"%")
 
-            disp("MAIN start")
-            MC_MAIN
-            disp("soleACS start")
-            ACSVRP_forSoleACS
-    
-            temp.TestClusteringTime = clusteringTime;
-            temp.TestInterCompleteTime = interCompleteTime;
-            temp.TestSolveTime = solveTime;
-            temp.TestScoreHist = totalScoreHistory;
-            temp.TestScoreHistL = totalScoreHistoryL;
-            temp.TestSCoreHistPerV = vehScore;
-    
-            temp.CompCompleteTime = completeTime_soleACO;
-            temp.CompSolveTime = soleACO_time;
-            temp.CompScore = soleACO_result;
-            temp.CompScoreL = soleACO_resultL;
-            temp.CompScorePer = soleACO_resultPerV;
-    
-            temp.degreeConnectivity = degreeConnectivity;
-            temp.N = N;
+%             disp("MAIN start")
+%             MC_MAIN
+%             disp("soleACS start")
+%             ACSVRP_forSoleACS
+%     
+%             temp.TestClusteringTime = clusteringTime;
+%             temp.TestInterCompleteTime = interCompleteTime;
+%             temp.TestSolveTime = solveTime;
+%             temp.TestScoreHist = totalScoreHistory;
+%             temp.TestScoreHistL = totalScoreHistoryL;
+%             temp.TestSCoreHistPerV = vehScore;
+%     
+%             temp.CompCompleteTime = completeTime_soleACO;
+%             temp.CompSolveTime = soleACO_time;
+%             temp.CompScore = soleACO_result;
+%             temp.CompScoreL = soleACO_resultL;
+%             temp.CompScorePer = soleACO_resultPerV;
+%     
+%             temp.degreeConnectivity = degreeConnectivity;
+%             temp.N = N;
+% 
+%             temp.equiPerformanceTime = equiPerformanceTime;
+%             temp.equiPerformanceTimeL = equiPerformanceTimeL;
+%             temp.equiTimePerformance = equiTimePerformance;
 
-            temp.equiPerformanceTime = equiPerformanceTime;
-            temp.equiPerformanceTimeL = equiPerformanceTimeL;
-            temp.equiTimePerformance = equiTimePerformance;
-    
+            temp.TestIntraCompleteTime = intraCompleteTime;
             MCData{fovC, conC, tryC} = temp;
             tryC = tryC + 1;
         end

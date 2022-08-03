@@ -6,13 +6,14 @@ node = vertcat(depotPos,node); % add depot
 N = size(node,1);
 A = sparse(N,N); % connectivity matrix
 C = sparse(N,N); % cost matrix
-L = sparse(N,N); % linear distance matrix
+% L = sparse(N,N); % linear distance matrix
+L = load('L_large.mat'); L = L.L;
 
-for i = 1:N
-    for j = 1:N
-        L(i,j) = distance(node(i,:), node(j,:));
-    end
-end
+% for i = 1:N
+%     for j = 1:N
+%         L(i,j) = distance(node(i,:), node(j,:));
+%     end
+% end
 
 %% Build Network Graph
 for i = 1:N % do not connect depot!
@@ -36,26 +37,26 @@ A_orig = A;
 C_orig = C;
 
 %% Completefication
-tic
-graph2 = graph(C);
-implicitPath = [];
-for i = 1:N-1
-    for j = i+1:N
-        if A(i,j) == 0 % if disconnected
-            [path,d] = shortestpath(graph2,i,j);
-            C(i,j) = d;
-            C(j,i) = d;
-            implicitPath{i,j} = path;
-            implicitPath{j,i} = path;
-        end
-    end
-end
-completeTime_soleACO = toc;
-
-graph1.n = N;
-graph1.node.x = node(:,1);
-graph1.node.y = node(:,2);
-graph1.node.z = node(:,3);
-graph1.edges = C;
+% tic
+% graph2 = graph(C);
+% implicitPath = [];
+% for i = 1:N-1
+%     for j = i+1:N
+%         if A(i,j) == 0 % if disconnected
+%             [path,d] = shortestpath(graph2,i,j);
+%             C(i,j) = d;
+%             C(j,i) = d;
+%             implicitPath{i,j} = path;
+%             implicitPath{j,i} = path;
+%         end
+%     end
+% end
+% completeTime_soleACO = toc;
+% 
+% graph1.n = N;
+% graph1.node.x = node(:,1);
+% graph1.node.y = node(:,2);
+% graph1.node.z = node(:,3);
+% graph1.edges = C;
 
 %% solve

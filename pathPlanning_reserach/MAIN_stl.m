@@ -5,6 +5,7 @@ addpath('./MILP')
 addpath('./ComDetTBv090/')
 addpath('./ComDetTBv090/Algorithms/')
 addpath('./ComDetTBv090/Auxiliary/')
+addpath('./Model/')
 
 %% Param setting
 vnum = 3;
@@ -14,25 +15,27 @@ depotPos = [10 -5 0];
 fovFactor = 1.8;
 inpection_dist = 1; % Inspection distance
 mapheight = 5.0;
-conThres = 4;
-stlAddr = '/home/jaehan/Desktop/generic.stl';
-% stlAddr = '/home/jaehan/Desktop/WT.stl';
-% stlAddr = '/home/jaehan/Downloads/generic_edited.stl';
+conThres = 10;
+reductionFactor = 0.4;
 
-
+% stlAddr = 'generic.stl'; modelNum = 1;
+stlAddr = 'WT.stl'; modelNum = 2;
+% stlAddr = 'FACTORY.stl'; modelNum = 3;
+% stlAddr = 'F18.stl'; modelNum = 4;
+% stlAddr = 'DORMITORY.stl'; modelNum = 5;
 %% wp generator
 
-node = loadStl(stlAddr,inpection_dist);
+node = loadStl(stlAddr,inpection_dist,reductionFactor);
 
 % node reduction
-N = size(node,1);
-factor = 2;
-node_temp = zeros(floor(N/factor),3);
-for i = 1:floor(size(node_temp,1))
-    node_temp(i,:) = node(i*factor-1,:);
-end
-node = node_temp;
-node(find(isnan(node(:,1))),:) = [];
+% N = size(node,1);
+% factor = 1;
+% node_temp = zeros(floor(N/factor),3);
+% for i = 1:floor(size(node_temp,1))
+%     node_temp(i,:) = node(i*factor-1,:);
+% end
+% node = node_temp;
+% node(find(isnan(node(:,1))),:) = [];
 
 % formulation
 node = vertcat(depotPos,node); % add depot
