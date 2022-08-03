@@ -9,28 +9,44 @@ mapheight = 5.0;
 conThres = 4;
 stlAddr = '/home/jaehan/Desktop/generic.stl';
 % stlAddr = '/home/jaehan/Downloads/generic_edited.stl';
+stlAddr = 'C:\Users\dlawo\Desktop\Model\generic.stl';
+
 
 %% wp generator
 
 node = loadStl(stlAddr,inpection_dist);
-N = size(node,1);
 
-% node_temp = zeros(floor(N/2),3);
-% for i = 1:floor(size(node_temp,1))
-%     node_temp(i,:) = node(i*2-1,:);
-% end
-% node = node_temp;
-% node(find(isnan(node(:,1))),:) = [];
+% node segmentation
+body = node;
 
-% node reduction
-N = size(node,1);
-factor = 2;
-node_temp = zeros(floor(N/factor),3);
-for i = 1:floor(size(node_temp,1))
-    node_temp(i,:) = node(i*factor-1,:);
-end
-node = node_temp;
-node(find(isnan(node(:,1))),:) = [];
+tail = body(body(:,1) > 14.7421 & body(:,2) < 0.955 & body(:,2) > -0.955,:,:);
+body(body(:,1) > 14.7421 & body(:,2) < 0.955 & body(:,2) > -0.955,:,:) = [];
+factor = 0.1; localN = size(tail,1);
+tail = tail(rand(localN,1) < factor,:,:);
+
+lEngine = body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:);
+body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:) = [];
+factor = 0.1; localN = size(lEngine,1);
+lEngine = lEngine(rand(localN,1) < factor,:,:);
+
+rEngine = body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:);
+body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:) = [];
+factor = 0.1; localN = size(rEngine,1);
+rEngine = rEngine(rand(localN,1) < factor,:,:);
+
+lEngineNeg = body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:);
+body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:) = [];
+
+rEngineNeg = body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:);
+body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:) = [];
+
+nose = body(body(:,1) < -2.9,:,:);
+body(body(:,1) < -2.9,:,:) = [];
+factor = 0.5; localN = size(nose,1);
+nose = nose(rand(localN,1) < factor,:,:);
+
+node = [body;tail;lEngine;rEngine;nose];
+
 
 node = vertcat(depotPos,node); % add depot
 N = size(node,1);
@@ -58,6 +74,9 @@ for i = 2:N % do not connect depot!
         end
     end
 end
+
+C(1,:) = L(1,:);
+C(:,1) = L(:,1);
 
 A_orig = A;
 C_orig = C;
@@ -109,10 +128,20 @@ end
 disp("complefication complete")
 completeTime_soleACO = toc;
 
+%% Save Network
+graph1.n = N;
+graph1.node.x = node(:,1);
+graph1.node.y = node(:,2);
+graph1.node.z = node(:,3);
+graph1.edges = C;
+
+save('graph_complete.mat','graph1');
+
 %% solve
 antNo = 20;
-stopThres = 200;
+stopThres = 400;
 % ACOVRP_forSoleACO
+
 ACSVRP_forSoleACS
 
 % IPt = [0.02,0.69,5.71,21.6,197.24,1825.75];

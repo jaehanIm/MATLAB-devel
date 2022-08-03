@@ -10,8 +10,9 @@ queenTourLen = colony.queen.vehTourLen;
 hold on
 %
 for i = 1:vehNum
-    color = rand(1,3);
-    for j = 1:size(queenTour(i,1:queenTourLen(i)),2)  
+    color = zeros(1,3);
+    color(i) = 1;
+    for j = 2:size(queenTour(i,1:queenTourLen(i)),2)-1
         currentNode = queenTour(i,j);
         nextNode = queenTour(i,j+1);
         
@@ -28,6 +29,37 @@ for i = 1:vehNum
         Z = [z1, z2];
         plot3(X, Y, Z,'Color',color,'LineWidth',2);
     end
+    currentNode = queenTour(i,1);
+    nextNode = queenTour(i,2);
+    
+    x1 = graph.node.x(currentNode);
+    y1 = graph.node.y(currentNode);
+    z1 = graph.node.z(currentNode);
+
+    x2 = graph.node.x(nextNode);
+    y2 = graph.node.y(nextNode);
+    z2 = graph.node.z(nextNode);
+
+    X = [x1 , x2];
+    Y = [y1, y2];
+    Z = [z1, z2];
+    plot3(X, Y, Z,'Color',color,'LineWidth',2,'LineStyle',':');
+
+    currentNode = queenTour(i,size(queenTour(i,1:queenTourLen(i)),2));
+    nextNode = queenTour(i,size(queenTour(i,1:queenTourLen(i)),2)+1);
+    
+    x1 = graph.node.x(currentNode);
+    y1 = graph.node.y(currentNode);
+    z1 = graph.node.z(currentNode);
+
+    x2 = graph.node.x(nextNode);
+    y2 = graph.node.y(nextNode);
+    z2 = graph.node.z(nextNode);
+
+    X = [x1 , x2];
+    Y = [y1, y2];
+    Z = [z1, z2];
+    plot3(X, Y, Z,'Color',color,'LineWidth',2,'LineStyle',':');
 end
 
 plot3(graph.node.x(homeIdx),graph.node.y(homeIdx),graph.node.z(homeIdx),'ok', 'markerSize' , 5 , 'MarkerEdgeColor' , 'r' , 'MarkerFaceColor', 'g');

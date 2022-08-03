@@ -15,31 +15,47 @@ depotPos = [10 -5 0];
 fovFactor = 1.8;
 inpection_dist = 1; % Inspection distance
 mapheight = 5.0;
-conThres = 10;
-reductionFactor = 0.4;
 
-% stlAddr = 'generic.stl'; modelNum = 1;
-stlAddr = 'WT.stl'; modelNum = 2;
-% stlAddr = 'FACTORY.stl'; modelNum = 3;
-% stlAddr = 'F18.stl'; modelNum = 4;
-% stlAddr = 'DORMITORY.stl'; modelNum = 5;
+conThres = 2;
+stlAddr = 'C:\Users\dlawo\Desktop\Model\generic.stl';
+
 %% wp generator
+node = loadStl(stlAddr,inpection_dist);
 
-node = loadStl(stlAddr,inpection_dist,reductionFactor);
+% node segmentation
+body = node;
 
-% node reduction
-% N = size(node,1);
-% factor = 1;
-% node_temp = zeros(floor(N/factor),3);
-% for i = 1:floor(size(node_temp,1))
-%     node_temp(i,:) = node(i*factor-1,:);
-% end
-% node = node_temp;
-% node(find(isnan(node(:,1))),:) = [];
+tail = body(body(:,1) > 14.7421 & body(:,2) < 0.955 & body(:,2) > -0.955,:,:);
+body(body(:,1) > 14.7421 & body(:,2) < 0.955 & body(:,2) > -0.955,:,:) = [];
+factor = 0.1; localN = size(tail,1);
+tail = tail(rand(localN,1) < factor,:,:);
+
+lEngine = body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:);
+body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:) = [];
+factor = 0.1; localN = size(lEngine,1);
+lEngine = lEngine(rand(localN,1) < factor,:,:);
+
+rEngine = body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:);
+body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:) = [];
+factor = 0.1; localN = size(rEngine,1);
+rEngine = rEngine(rand(localN,1) < factor,:,:);
+
+lEngineNeg = body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:);
+body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:) = [];
+
+rEngineNeg = body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:);
+body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:) = [];
+
+nose = body(body(:,1) < -2.9,:,:);
+body(body(:,1) < -2.9,:,:) = [];
+factor = 0.5; localN = size(nose,1);
+nose = nose(rand(localN,1) < factor,:,:);
+
+node = [body;tail;lEngine;rEngine;nose];
 
 % formulation
 node = vertcat(depotPos,node); % add depot
-N = size(node,1);
+N = size(node,1)
 A = zeros(N,N); % connectivity matrix
 C = zeros(N,N); % cost matrix
 L = zeros(N,N); % linear distance matrix
@@ -330,28 +346,6 @@ disp("inter-intra completfication complete")
 
 intraCompleteTime = toc;
 
-figure(44)
-clf
-grid on
-hold on
-% for i = 1:size(G.Edges,1)
-%     startIdx = G.Edges.EndNodes(i,1);
-%     EndIdx = G.Edges.EndNodes(i,2);
-%     startPos = node(startIdx,:);
-%     EndPos = node(EndIdx,:);
-%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
-% end
-for i = 1:cluNum
-    temp = node(nodeInCluIdx{i},:);
-    plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
-end
-plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3)+20,'yx','MarkerSize',10,'LineWidth',5)
-for i = 1:cluNum
-    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3)+20,num2str(i));
-end
-axis equal
-drawnow
-
 %% Solver
 tic
 firstTry = true;
@@ -549,21 +543,41 @@ finalTourRecord = totalTourHistory{I};
 figure(4)
 clf
 grid on
-
 drawStl(stlAddr,4);
 hold on
+% for i = 1:cluNum
+%     temp = node(nodeInCluIdx{i},:);
+%     plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
+% end
+% plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
+% for i = 1:cluNum
+%     text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3)+1,num2str(i));
+% end
+plot3(node(:,1),node(:,2),node(:,3),'.')
+for v= 1:vnum
+    color = zeros(1,3);
+    color(v) = 1;
+    plot3(node(finalTourRecord{v}(2:end-1),1),node(finalTourRecord{v}(2:end-1),2),node(finalTourRecord{v}(2:end-1),3),'LineWidth',3,'Color',color)
+    plot3(node(finalTourRecord{v}(1:2),1),node(finalTourRecord{v}(1:2),2),node(finalTourRecord{v}(1:2),3),'LineWidth',2,'Color',color,'LineStyle',':')
+    plot3(node(finalTourRecord{v}(end-1:end),1),node(finalTourRecord{v}(end-1:end),2),node(finalTourRecord{v}(end-1:end),3),'LineWidth',2,'Color',color,'LineStyle',':')
+end
+axis equal
+
+figure(44)
+clf
+grid on
+hold on
+drawStl(stlAddr,44);
 for i = 1:cluNum
     temp = node(nodeInCluIdx{i},:);
     plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
 end
-plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
+plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3)+20,'yx','MarkerSize',10,'LineWidth',10)
 for i = 1:cluNum
-    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3)+1,num2str(i));
-end
-for v= 1:vnum
-    plot3(node(finalTourRecord{v},1),node(finalTourRecord{v},2),node(finalTourRecord{v},3),'LineWidth',3)
+    text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3)+20,num2str(i),"FontSize",20);
 end
 axis equal
+drawnow
 
 
 figure(6)
