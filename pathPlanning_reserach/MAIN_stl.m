@@ -16,7 +16,7 @@ fovFactor = 1.8;
 inpection_dist = 1; % Inspection distance
 mapheight = 5.0;
 
-conThres = 2;
+conThres = 1.7;
 stlAddr = 'C:\Users\dlawo\Desktop\Model\generic.stl';
 
 %% wp generator
@@ -40,18 +40,26 @@ body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & 
 factor = 0.1; localN = size(rEngine,1);
 rEngine = rEngine(rand(localN,1) < factor,:,:);
 
-lEngineNeg = body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:);
-body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:) = [];
+emphennage = body(body(:,1)>12 & body(:,2)<2 & body(:,2)>-2,:,:);
+body(body(:,1)>12 & body(:,2)<2 & body(:,2)>-2,:,:) = [];
+factor = 0.2; localN = size(emphennage,1);
+emphennage = emphennage(rand(localN,1) < factor,:,:);
 
-rEngineNeg = body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:);
-body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:) = [];
+lEngineNeg = body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.5,:,:);
+body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.3,:,:) = [];
+
+rEngineNeg = body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.5,:,:);
+body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.3,:,:) = [];
+
+body(body(:,2) > -3.59 & body(:,2) < -3.51 & body(:,1) > 1.5 & body(:,1) < 3.95 & body(:,3) > 0.22,:,:) = [];
+body(body(:,2) > 3.51 & body(:,2) < 3.59 & body(:,1) > 1.5 & body(:,1) < 3.95 & body(:,3) > 0.22,:,:) = [];
 
 nose = body(body(:,1) < -2.9,:,:);
 body(body(:,1) < -2.9,:,:) = [];
 factor = 0.5; localN = size(nose,1);
 nose = nose(rand(localN,1) < factor,:,:);
 
-node = [body;tail;lEngine;rEngine;nose];
+node = [body;tail;lEngine;rEngine;nose;emphennage];
 
 % formulation
 node = vertcat(depotPos,node); % add depot
@@ -100,6 +108,19 @@ G = graph(C);
 totalDegree = sum(A(2:end,2:end),'all')/2
 completeDegree = nchoosek(N-1,2)
 degreeConnectivity = totalDegree / completeDegree
+
+figure(99)
+clf
+drawStl(stlAddr,98)
+hold on
+plot3(node(:,1),node(:,2),node(:,3),'.')
+for i = 1:size(G.Edges,1)
+    startIdx = G.Edges.EndNodes(i,1);
+    EndIdx = G.Edges.EndNodes(i,2);
+    startPos = node(startIdx,:);
+    EndPos = node(EndIdx,:);
+    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
+end
 
 %% Save Network
 graph1.n = N;
@@ -537,8 +558,8 @@ solveTime = toc;
 
 
 [~,I] = min(totalScoreHistory);
+% I = 2;
 finalTourRecord = totalTourHistory{I};
-
 
 figure(4)
 clf

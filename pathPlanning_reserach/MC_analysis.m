@@ -10,10 +10,10 @@ dat3 = load('MLF_missing2.mat');
 dat3 = dat3.MCData;
 dat4 = load('MLF_missing3.mat');
 dat4 = dat4.MCData;
-dat(end+1,:,:) = dat2;
-dat(end+1,:,:) = dat3;
-dat(4,:,:) = [];
-dat(end+1,:,:) = dat4;
+% dat(end+1,:,:) = dat2;
+% dat(end+1,:,:) = dat3;
+% dat(4,:,:) = [];
+% dat(end+1,:,:) = dat4;
 
 %% Additional data - MY BIG MISTAKE
 temp = load('MLF_supp.mat');
@@ -24,10 +24,12 @@ temp3 = load('MLF_supp_missing2.mat');
 temp3 = temp3.MCData;
 temp4 = load('MLF_supp_missing3.mat');
 temp4 = temp4.MCData;
-temp(end+1,:) = temp2;
-temp(end+1,:) = temp3;
-temp(4,:) = [];
-temp(end+1,:) = temp4;
+% temp(end+1,:) = temp2;
+% temp(end+1,:) = temp3;
+% temp(4,:) = [];
+% temp(end+1,:) = temp4;
+
+% dat(:,5:end,:) = [];
 
 for i = 1:size(dat,1)
     for j = 1:size(dat,2)
@@ -65,11 +67,14 @@ iterN = size(dat,3);
 for sizeFactor = 1:size(dat,1)
     for connFactor = 1:size(dat,2)
         for i = 1:iterN
-            if sizeFactor == 8 & connFactor == 1 & i == 19
+%             if sizeFactor == 8 & connFactor == 1 & i == 19
+%                 dat(sizeFactor,connFactor,i) = dat(sizeFactor,connFactor,i-1);
+%             end
+            if sizeFactor == 9 & connFactor == 1 & i == 19
                 dat(sizeFactor,connFactor,i) = dat(sizeFactor,connFactor,i-1);
             end
             TestClusteringTime(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestClusteringTime;
-            TestCompleteTime(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestInterCompleteTime + dat{sizeFactor,connFactor,i}.TestIntraCompleteTime;
+            TestCompleteTime(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestIntraCompleteTime + dat{sizeFactor,connFactor,i}.TestInterCompleteTime;
             TestSolveTime(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestSolveTime;
             TestScore(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestScoreHist;
             TestScoreL(sizeFactor,connFactor,i) = dat{sizeFactor,connFactor,i}.TestScoreHistL;
@@ -96,6 +101,7 @@ for sizeFactor = 1:size(dat,1)
     end
 end
 
+% TestClusteringTime = zeros(size(TestClusteringTime));
 TestTotalTime = TestClusteringTime + TestCompleteTime + TestSolveTime;
 CompTotalTime = CompCompleteTime + CompSolveTime;
 % timeRatio = (CompTotalTime - TestTotalTime)./TestTotalTime*100;
@@ -143,7 +149,9 @@ solveTimeRatio = meanStdProcess(solveTimeRatio);
 preTimeRatio = meanStdProcess(preTimeRatio);
 
 %%
-degreeRange = [0,0.05,0.1,0.2,0.35,0.5];
+% degreeRange = [0,0.05,0.1,0.2,0.35,0.5];
+degreeRange = [0,0.1,0.3,0.5];
+% degreeRange = [0,0.05,0.1];
 filterDatTime = []; filterDatScore = []; filterDatCompleteTime = []; filterDatSolveTime = []; filterDatPreTime = [];
 for k = 1:size(degreeRange,2)-1
     temp1 = [];  temp2 = []; temp3 = []; temp4 = []; temp5 = [];
@@ -205,15 +213,17 @@ shapeList = ["+","x","o","d","h"];
 figure(112)
 clf
 for i = 1:size(NRange,2)-1
-    semilogy(NfilterDatScore{i}(:,1),NfilterDatTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
+    plot(NfilterDatScore{i}(:,1),NfilterDatTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
     hold on
 end
 for i = 1:size(degreeConn,1)
 % h = errorbar(degreeConn(i,:,1),timeRatio(i,:,1),timeRatio(i,:,2),'k-*');
-semilogy(degreeConn(i,:,1),timeRatio(i,:,1),':','Color',[0.6 0.6 0.6]);
+plot(degreeConn(i,:,1),timeRatio(i,:,1),':','Color',[0.6 0.6 0.6]);
 % text(degreeConn(i,end,1)+0.01,timeRatio(i,end,1),num2str(Nlist(i)))
 hold on
 end
+lim = axis;
+plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
 xlabel('$\mathcal{K}$','Interpreter','latex')
 ylabel('CT ratio [log scale]')
@@ -289,9 +299,11 @@ temp = N(:,:,1);
 temp2 = CompTotalTime(:,:,1)./TestTotalTime(:,:,1);
 % loglog(temp(:),temp2(:),'*')
 for i = 1:size(degreeRange,2)-1
-    loglog(filterDatScore{i}(:,1),filterDatTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
+    semilogx(filterDatScore{i}(:,1),filterDatTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
     hold on
 end
+lim = axis;
+plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
 xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
 ylabel('CT ratio [log scale]')
@@ -333,6 +345,8 @@ for i = 1:size(NRange,2)-1
     plot(NfilterDatScore{i}(:,1),NfilterDatScore{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
     hold on
 end
+lim = axis;
+plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
 xlabel('$\mathcal{K}$','Interpreter','latex')
 ylabel('SQ ratio')
@@ -367,6 +381,8 @@ for i = 1:size(degreeRange,2)-1
     semilogx(filterDatScore{i}(:,1),filterDatScore{i}(:,2),shapeList(i),'MarkerSize',7,'LineWidth',1)
     hold on
 end
+lim = axis;
+plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
 xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
 ylabel('SQ ratio')
@@ -391,6 +407,8 @@ for i = 1:size(degreeConn,1)
 %     semilogy(temp(i,:,1),temp2(i,:,1)./temp3(i,:,1),':','Color',[0.6 0.6 0.6]);
     hold on
 end
+lim = axis;
+plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
 xlabel('$\mathcal{K}$','Interpreter','latex')
 ylabel('CT_{pre} ratio [log scale]')
@@ -407,6 +425,8 @@ for i = 1:size(degreeRange,2)-1
     loglog(filterDatPreTime{i}(:,1),filterDatPreTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7);
     hold on
 end
+lim = axis;
+plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
 title('CT_{pre} ratio')
 xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
@@ -420,6 +440,8 @@ for i = 1:size(NRange,2)-1
     plot(NfilterDatSolveTime{i}(:,1),NfilterDatSolveTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
     hold on
 end
+lim = axis;
+plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
 title('CT_{s} ratio')
 xlabel('$\mathcal{K}$','Interpreter','latex')
@@ -435,6 +457,8 @@ for i = 1:size(degreeRange,2)-1
     semilogx(filterDatSolveTime{i}(:,1),filterDatSolveTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
     hold on
 end
+lim = axis;
+plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
 title('CT_{s} ratio')
 ylabel('CT_{s} ratio')
@@ -468,6 +492,8 @@ for i = 1:size(degreeConn,2)
     hold on
     semilogx(temp(:,i,1),temp2_2(:,i,1)+temp2_3(:,i,1),'bo')
 end
+lim = axis;
+plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 % for i = 1:size(degreeConn,1)
 %     semilogx(temp(:,i,1),temp1(:,i,1),'rx')
 %     hold on

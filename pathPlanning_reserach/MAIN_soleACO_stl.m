@@ -6,7 +6,7 @@ depotPos = [10 -5 0];
 fovFactor = 1.8;
 inpection_dist = 1; % Inspection distance
 mapheight = 5.0;
-conThres = 4;
+conThres = 1.7;
 stlAddr = '/home/jaehan/Desktop/generic.stl';
 % stlAddr = '/home/jaehan/Downloads/generic_edited.stl';
 stlAddr = 'C:\Users\dlawo\Desktop\Model\generic.stl';
@@ -34,18 +34,26 @@ body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & 
 factor = 0.1; localN = size(rEngine,1);
 rEngine = rEngine(rand(localN,1) < factor,:,:);
 
-lEngineNeg = body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:);
-body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:) = [];
+emphennage = body(body(:,1)>12 & body(:,2)<2 & body(:,2)>-2,:,:);
+body(body(:,1)>12 & body(:,2)<2 & body(:,2)>-2,:,:) = [];
+factor = 0.2; localN = size(emphennage,1);
+emphennage = emphennage(rand(localN,1) < factor,:,:);
 
-rEngineNeg = body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:);
-body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22,:,:) = [];
+lEngineNeg = body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.5,:,:);
+body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.3,:,:) = [];
+
+rEngineNeg = body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.5,:,:);
+body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.3,:,:) = [];
+
+body(body(:,2) > -3.59 & body(:,2) < -3.51 & body(:,1) > 1.5 & body(:,1) < 3.95 & body(:,3) > 0.22,:,:) = [];
+body(body(:,2) > 3.51 & body(:,2) < 3.59 & body(:,1) > 1.5 & body(:,1) < 3.95 & body(:,3) > 0.22,:,:) = [];
 
 nose = body(body(:,1) < -2.9,:,:);
 body(body(:,1) < -2.9,:,:) = [];
 factor = 0.5; localN = size(nose,1);
 nose = nose(rand(localN,1) < factor,:,:);
 
-node = [body;tail;lEngine;rEngine;nose];
+node = [body;tail;lEngine;rEngine;nose;emphennage];
 
 
 node = vertcat(depotPos,node); % add depot
