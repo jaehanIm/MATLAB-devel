@@ -9,51 +9,13 @@ mapheight = 5.0;
 conThres = 1.7;
 stlAddr = '/home/jaehan/Desktop/generic.stl';
 % stlAddr = '/home/jaehan/Downloads/generic_edited.stl';
-stlAddr = 'C:\Users\dlawo\Desktop\Model\generic.stl';
+% stlAddr = 'C:\Users\dlawo\Desktop\Model\generic.stl';
 
 
 %% wp generator
 
-node = loadStl(stlAddr,inpection_dist);
-
-% node segmentation
-body = node;
-
-tail = body(body(:,1) > 14.7421 & body(:,2) < 0.955 & body(:,2) > -0.955,:,:);
-body(body(:,1) > 14.7421 & body(:,2) < 0.955 & body(:,2) > -0.955,:,:) = [];
-factor = 0.1; localN = size(tail,1);
-tail = tail(rand(localN,1) < factor,:,:);
-
-lEngine = body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:);
-body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:) = [];
-factor = 0.1; localN = size(lEngine,1);
-lEngine = lEngine(rand(localN,1) < factor,:,:);
-
-rEngine = body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:);
-body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:) = [];
-factor = 0.1; localN = size(rEngine,1);
-rEngine = rEngine(rand(localN,1) < factor,:,:);
-
-emphennage = body(body(:,1)>12 & body(:,2)<2 & body(:,2)>-2,:,:);
-body(body(:,1)>12 & body(:,2)<2 & body(:,2)>-2,:,:) = [];
-factor = 0.2; localN = size(emphennage,1);
-emphennage = emphennage(rand(localN,1) < factor,:,:);
-
-lEngineNeg = body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.5,:,:);
-body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.3,:,:) = [];
-
-rEngineNeg = body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.5,:,:);
-body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.3,:,:) = [];
-
-body(body(:,2) > -3.59 & body(:,2) < -3.51 & body(:,1) > 1.5 & body(:,1) < 3.95 & body(:,3) > 0.22,:,:) = [];
-body(body(:,2) > 3.51 & body(:,2) < 3.59 & body(:,1) > 1.5 & body(:,1) < 3.95 & body(:,3) > 0.22,:,:) = [];
-
-nose = body(body(:,1) < -2.9,:,:);
-body(body(:,1) < -2.9,:,:) = [];
-factor = 0.5; localN = size(nose,1);
-nose = nose(rand(localN,1) < factor,:,:);
-
-node = [body;tail;lEngine;rEngine;nose;emphennage];
+node = load('stlnode.mat');
+node = node.node;
 
 
 node = vertcat(depotPos,node); % add depot

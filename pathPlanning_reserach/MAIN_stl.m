@@ -17,7 +17,8 @@ inpection_dist = 1; % Inspection distance
 mapheight = 5.0;
 
 conThres = 1.7;
-stlAddr = 'C:\Users\dlawo\Desktop\Model\generic.stl';
+% stlAddr = 'C:\Users\dlawo\Desktop\Model\generic.stl';
+stlAddr = 'generic.stl';
 
 %% wp generator
 node = loadStl(stlAddr,inpection_dist);
@@ -60,6 +61,8 @@ factor = 0.5; localN = size(nose,1);
 nose = nose(rand(localN,1) < factor,:,:);
 
 node = [body;tail;lEngine;rEngine;nose;emphennage];
+
+save('stlnode.mat','node');
 
 % formulation
 node = vertcat(depotPos,node); % add depot
