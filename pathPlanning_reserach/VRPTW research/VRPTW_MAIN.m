@@ -9,9 +9,9 @@ mapheight = 3;
 inpection_dist = 7;
 
 distThres = 100;
-vnum = 20;
+vnum = 25;
 antNo = 20;
-stopThres = 200;
+stopThres = 400;
 capacity = 395;
 
 % generate map

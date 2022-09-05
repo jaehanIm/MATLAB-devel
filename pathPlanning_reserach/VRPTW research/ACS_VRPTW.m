@@ -3,12 +3,12 @@
 
 global homeIdx tau0
 %% Initial parameters of ACO 
-maxIter = 100000;
+maxIter = 10000;
 
 tau0 = 1 / (mapGraph.n * mean( mapGraph.edges(:)) * N);  % Initial phromone concentration
-
-tau = tau0 * ones( mapGraph.n , mapGraph.n); % Phromone matirx 
-eta = 1./ mapGraph.edges;  % desirability of each edge 
+tau = tau0 * ones( mapGraph.n , mapGraph.n); % Phromone matirx
+eta = 1./ mapGraph.edges;  % desirability of each edge
+reservation = zeros(mapGraph.n, mapGraph.n);
 
 rho = 0.1; % Evaporation rate
 alpha = 1;  % Phromone exponential parameters 
@@ -17,7 +17,7 @@ gamma = 3; % time importance parameter
 lambda = 1; % time scale factor
 psi = 0.1;    % local pheromone evaporation rate
 q = 0.9;    % Exploration Exploitation parameter
-penalFactor = 1; % time violation penalty factor
+penalFactor = 2; % time violation penalty factor
 
 % rho = 0.1; % global evaporation rate
 % alpha = 1;  % Phromone exponential parameters 

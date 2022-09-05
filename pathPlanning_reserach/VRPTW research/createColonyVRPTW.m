@@ -15,7 +15,7 @@ for i = 1 : antNo
     colony.ant(i).tickHistory = zeros(vehNum,1);
     unvisitedNum = unvisitedNum - 1;
     vehTourLen = ones(vehNum,1);
-    tick = zeros(vehNum,1);
+    colony.ant(i).tick = zeros(vehNum,1);
 
     while unvisitedNum ~= 0
 %         for j = 1:vehNum
