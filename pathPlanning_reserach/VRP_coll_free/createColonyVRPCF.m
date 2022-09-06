@@ -1,4 +1,4 @@
-function [ colony ] = createColonyVRPTW( graph, colony, antNo, tau, eta, alpha,  beta, gamma, lambda, q, psi, vehNum, timeWindow, capacity, servTime)
+function [ colony ] = createColonyVRPCF( graph, colony, antNo, tau, eta, alpha,  beta, gamma, lambda, q, psi, vehNum, timeWindow, capacity, servTime)
 
 global homeIdx debugTemp tau0
 
@@ -28,9 +28,7 @@ for i = 1 : antNo
             
             % i = antNo, j = vehNum
             currentNode = colony.ant(i).tour(j,vehTourLen(j));
-            theta = updateTheta(nodeNo, C, currentNode, timeWindow, colony.ant(i).tick(j), lambda);
-
-            P_allNodes = tau(currentNode,:).^alpha.*eta(currentNode,:).^beta.*theta.^gamma;
+            P_allNodes = tau(currentNode,:).^alpha.*eta(currentNode,:).^beta;
             P_allNodes(nonzeros(colony.ant(i).tour(:))) = 0;
             P = P_allNodes./sum(P_allNodes);
             

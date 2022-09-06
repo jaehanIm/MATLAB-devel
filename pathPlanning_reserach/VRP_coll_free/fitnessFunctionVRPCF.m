@@ -1,4 +1,4 @@
-function [ fitness, fitnessL, fitnessPerV, fitnessM, violation] = fitnessFunctionVRPTW (tour, tourLen, graph, vehNum, timeWindow, tickHistory, servTime, penalFactor)
+function [ fitness, fitnessL, fitnessPerV, fitnessM, violation] = fitnessFunctionVRPCF (tour, tourLen, graph, vehNum, timeWindow, tickHistory, servTime, penalFactor)
 
 fitnessPerVeh = zeros(vehNum,1);
 violation = zeros(vehNum,1);

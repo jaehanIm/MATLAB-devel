@@ -1,4 +1,4 @@
-function [ tau ] = updatePhromoneVRPTW(tau , colony, rho, minIdx, vnum)
+function [ tau ] = updatePhromoneVRPCF(tau , colony, rho, minIdx, vnum)
 
 % Update best ant pheromone trail
 for j = 1:vnum

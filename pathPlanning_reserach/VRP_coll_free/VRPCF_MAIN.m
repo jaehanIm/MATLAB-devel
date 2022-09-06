@@ -1,31 +1,23 @@
 addpath('./../')
 addpath('..\ACO\')
 
-%%%%%%%%%%% ACO for VRPTW version %%%%%%%%%%%
+%%%%%%%%%%% ACO for VRPCF version %%%%%%%%%%%
 
 % parameter setting
 fovFactor = 4;
 mapheight = 3;
 inpection_dist = 7;
 
-distThres = 100;
-vnum = 12;
+distThres = 50;
+vnum = 3;
 antNo = 20;
 stopThres = 200;
 capacity = 395;
 
 % generate map
-% mapGenerator_VRPTW
-% node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
-% node = vertcat([20,5,0],node);
-
-% node = [0,0,0;10,10,0;20,0,0;-30,5,0;-25,-15,0]/2;
-
-% load instance
-% no. x. y. demand. init. due. servT.
-map = load('instance.mat');
-map = map.temp;
-node = map(:,2:3); node = horzcat(node,zeros(size(map,1),1));
+mapGenerator_VRPCF
+node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
+node = vertcat([20,5,0],node);
 
 N = size(node,1);
 
@@ -56,7 +48,7 @@ for i = 1:N-1
 end
 
 [A,C]=graphSparseConnection(node,A,C,L);
-
+A_orig = A;
 tic
 implicitRoute = cell(N,N);
 for i = 1:N-1
@@ -71,30 +63,18 @@ for i = 1:N-1
     end
 end
 toc
+A = A_orig;
 
 % mapData generation
 mapGraph.n = N;
 mapGraph.edges = C;
 mapGraph.node = node;
 
-% time constraint construction
-% [~,~,timeMax] = NNHeuristic_VRPTW(mapGraph);
-% timeWindow = zeros(N,2);
-% timeWindow(:,1) = 0;
-% timeWindow(:,2) = timeMax;
-timeWindow = map(:,5:6);
-servTime = map(:,7)/2;
-nodeDemand = map(:,4);
-
-% timeWindow = [0, 100; 2,30; 10,40; 60,80; 30,60];
-% servTime = [10;10;10;10;10];
-
-
 % solve problem
-ACS_VRPTW;
+ACS_VRPCF;
 
 % plot result
-drawBestTour_forSoleVRPTW(colony, mapGraph, vnum);
+drawBestTour_forSoleVRPCF(colony, mapGraph, vnum);
 figure(2)
 clf
 hold on
@@ -105,7 +85,7 @@ grid on
 ylim([1 N])
 xlabel('time[s]')
 ylabel('job number')
-title('VRPTW')
+title('VRPCF')
 
 plotTickHistory = colony.queen.tickHistory;
 plotTour = colony.queen.tour;
