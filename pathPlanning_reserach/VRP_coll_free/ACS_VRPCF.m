@@ -8,16 +8,15 @@ maxIter = 10000;
 tau0 = 1 / (mapGraph.n * mean( mapGraph.edges(:)) * N);  % Initial phromone concentration
 tau = tau0 * ones( mapGraph.n , mapGraph.n); % Phromone matirx
 eta = 1./ mapGraph.edges;  % desirability of each edge
-reservation = sparse(mapGraph.n, mapGraph.n);
 
-rho = 0.1; % Evaporation rate
-alpha = 1;  % Phromone exponential parameters 
-beta = 1;   % Desirability exponetial paramter
-gamma = 3; % time importance parameter
-lambda = 1; % time scale factor
-psi = 0.1;    % local pheromone evaporation rate
-q = 0.9;    % Exploration Exploitation parameter
-penalFactor = 2; % time violation penalty factor
+param.rho = 0.1; % Evaporation rate
+param.alpha = 1;  % Phromone exponential parameters 
+param.beta = 1;   % Desirability exponetial paramter
+param.gamma = 3; % time importance parameter
+param.lambda = 1; % time scale factor
+param.psi = 0.1;    % local pheromone evaporation rate
+param.q = 0.9;    % Exploration Exploitation parameter
+param.penalFactor = 2; % time violation penalty factor
 
 homeIdx = 1; %60 is the main
 
@@ -30,17 +29,16 @@ tic
 count = 0;
 disp('Initiating ACS!');
 colony = [];
-colony.reservation = reservation;
+colony.reservation = [];
 
 for t = 1 : maxIter
     % Create Ants 
-    colony = createColonyVRPCF( mapGraph, colony , antNo, tau, eta, alpha,  beta, gamma,...
-        lambda, q, psi, vnum, timeWindow, capacity, servTime);
+    colony = createColonyVRPCF( mapGraph, antNo, tau, eta, param, vnum, capacity, servTime, implicitRoute);
         
     % Calculate the fitness values of all ants 
     for i = 1 : antNo 
         [colony.ant(i).fitness, colony.ant(i).fitnessL, colony.ant(i).fitnessPer, colony.ant(i).fitnessM, colony.ant(i).violation] = ...
-            fitnessFunctionVRPCF(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum, timeWindow, colony.ant(i).tickHistory, servTime, penalFactor);
+            fitnessFunctionVRPCF(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum, colony.ant(i).tickHistory, servTime, param);
     end
     
     % Find the best ant (queen)
@@ -55,6 +53,7 @@ for t = 1 : maxIter
         bestTick = colony.ant(minIndex).tick;
         bestTickHistory = colony.ant(minIndex).tickHistory;
         bestViolation = colony.ant(minIndex).violation;
+        bestReservation = colony.ant(minIndex).reservation;
     end
     
     colony.queen.tour = bestTour;
@@ -65,9 +64,10 @@ for t = 1 : maxIter
     colony.queen.tick = bestTick;
     colony.queen.tickHistory = bestTickHistory;
     colony.queen.violation = bestViolation;
+    colony.queen.reservation = bestReservation;
         
     % Update phromone matrix 
-    tau = updatePhromoneVRPCF(tau , colony, rho, minIndex, vnum);  
+    tau = updatePhromoneVRPCF(tau , colony, param.rho, minIndex, vnum);
     
     % Display the results
     if mod(t,50) == 0
