@@ -6,12 +6,12 @@ addpath('..\ACO\')
 %%%%%%%%%%% ACO for VRPCF version %%%%%%%%%%%
 
 % parameter setting
-fovFactor = 4;
+fovFactor = 2;
 mapheight = 3;
 inpection_dist = 7;
 
 distThres = 25;
-vnum = 3;
+vnum = 10;
 antNo = 20;
 stopThres = 200;
 capacity = 395;
@@ -77,4 +77,4 @@ mapGraph.A = A;
 
 % solve problem
 ACS_VRPCF;
-drawSchedule(2, N, colony.queen.reservation, vnum);
+drawSchedule(2, N, colony, vnum);

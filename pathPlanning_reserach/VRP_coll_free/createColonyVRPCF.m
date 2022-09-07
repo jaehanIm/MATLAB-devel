@@ -84,10 +84,11 @@ for i = 1 : antNo
     
     colony.ant(i).vehTourLen = vehTourLen;
     colony.ant(i).reservation = reservation;
-    
     % complete the tour 
     for j = 1:vehNum
         colony.ant(i).tour(j,vehTourLen(j)+1) = homeIdx;
+        colony.ant(i).tick(j,vehTourLen(j)+1) = ...
+            colony.ant(i).tickHistory(j,vehTourLen(j)) + C(colony.ant(i).tour(j,vehTourLen(j)),homeIdx);
     end
 end
 
