@@ -6,12 +6,12 @@ addpath('..\ACO\')
 %%%%%%%%%%% ACO for VRPCF version %%%%%%%%%%%
 
 % parameter setting
-fovFactor = 2;
+fovFactor = 3;
 mapheight = 3;
 inpection_dist = 7;
 
 distThres = 25;
-vnum = 10;
+vnum = 6;
 antNo = 20;
 stopThres = 200;
 capacity = 395;
