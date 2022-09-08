@@ -54,6 +54,7 @@ for t = 1 : maxIter
         bestTickHistory = colony.ant(minIndex).tickHistory;
         bestViolation = colony.ant(minIndex).violation;
         bestReservation = colony.ant(minIndex).reservation;
+        bestOccupancy = colony.ant(minIndex).occupancy;
     end
     
     colony.queen.tour = bestTour;
@@ -65,6 +66,7 @@ for t = 1 : maxIter
     colony.queen.tickHistory = bestTickHistory;
     colony.queen.violation = bestViolation;
     colony.queen.reservation = bestReservation;
+    colony.queen.occupancy = bestOccupancy;
         
     % Update phromone matrix 
     tau = updatePhromoneVRPCF(tau , colony, param.rho, minIndex, vnum);

@@ -23,6 +23,7 @@ for i = 1 : antNo
     colony.ant(i).tour(:,1) = ones(vehNum,1) * initial_node;
     colony.ant(i).tick = zeros(vehNum,1);
     colony.ant(i).tickHistory = zeros(vehNum,1);
+    colony.ant(i).occupancy = {};
     unvisitedNum = unvisitedNum - 1;
     vehTourLen = ones(vehNum,1);
     reservation{N,N} = [];
@@ -72,9 +73,10 @@ for i = 1 : antNo
             unvisitedNum = unvisitedNum - 1;
             colony.ant(i).tour(j,vehTourLen(j)) = nextNode;
 
-            [timeSlack, reservation] = resolveConflict(reservation, A, C, currentNode, nextNode, colony.ant(i).tick(j), implicitRoute, j);
+            [timeSlack, reservation, occupancy] = resolveConflict(reservation, A, C, currentNode, nextNode, colony.ant(i).tick(j), implicitRoute, j);
+            
+            colony.ant(i).occupancy{j,vehTourLen(j)} = occupancy;
             colony.ant(i).tick(j) = colony.ant(i).tick(j) + C(currentNode,nextNode) + timeSlack;
-
             colony.ant(i).tickHistory(j,vehTourLen(j)) = colony.ant(i).tick(j);
 
             % local pheromone update
@@ -87,8 +89,9 @@ for i = 1 : antNo
     % complete the tour 
     for j = 1:vehNum
         colony.ant(i).tour(j,vehTourLen(j)+1) = homeIdx;
-        colony.ant(i).tick(j,vehTourLen(j)+1) = ...
+        colony.ant(i).tickHistory(j,vehTourLen(j)+1) = ...
             colony.ant(i).tickHistory(j,vehTourLen(j)) + C(colony.ant(i).tour(j,vehTourLen(j)),homeIdx);
+        colony.ant(i).occupancy{j,vehTourLen(j)+1} = [0 0 0 0];
     end
 end
 
