@@ -46,9 +46,9 @@ for i = 1:L-1 % for all route nodes
     % update reservation schedule
     relevantNodes = find(A(termNode,:));
     for j = relevantNodes
-        reservation{termNode,j}.num = reservation{termNode,j}.num + 1;
+%         reservation{termNode,j}.num = reservation{termNode,j}.num + 1;
         reservation{j,termNode}.num = reservation{j,termNode}.num + 1;
-        reservation{termNode,j}.info{end+1} = [reqInit, reqTerm, vehIdx, localDelay];
+%         reservation{termNode,j}.info{end+1} = [reqInit, reqTerm, vehIdx, localDelay];
         reservation{j,termNode}.info{end+1} = [reqInit, reqTerm, vehIdx, localDelay];
     end
 end
