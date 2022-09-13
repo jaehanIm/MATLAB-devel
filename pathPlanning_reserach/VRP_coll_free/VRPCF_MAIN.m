@@ -16,10 +16,12 @@ antNo = 20;
 stopThres = 50;
 capacity = 395;
 
+homePos = [20,20,6];
+
 % generate map
 mapGenerator_VRPCF
 node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
-node = vertcat([20,5,0],node);
+node = vertcat(homePos,node);
 
 N = size(node,1);
 servTime = zeros(N,1);
@@ -112,6 +114,9 @@ tick = colony.queen.tickHistory;
 reservation = colony.queen.reservation;
 occupancy = colony.queen.occupancy;
 
+vid = VideoWriter('animation.avi');
+open(vid);
+
 simStep = 1;
 T = max(tick,[],'all');
 stepNum = ceil(T/simStep);
@@ -167,6 +172,33 @@ for t = simT
 %         end
 %     end
     drawnow;
+    frame = getframe(gcf);
+    writeVideo(vid,frame);
     pause(0.01)
-    mov(count) = getframe(gcf);
 end
+close(vid);
+
+%%
+
+figure(1)
+clf
+% draw node
+for i = 1:size(node,1)
+    plot3(node(:,1),node(:,2),node(:,3),'.');
+end
+lineList = find(A(:));
+for i = 1:N-1
+    for j= i+1:N
+        if A(i,j) ~= 0
+            initIdx = i;
+            termIdx = j;
+            line([node(initIdx,1), node(termIdx,1)],[node(initIdx,2), node(termIdx,2)],[node(initIdx,3), node(termIdx,3)]);
+        end
+    end
+end
+hold on
+plot3(node(1,1),node(1,2),node(1,3),'x','MarkerSize',5,'LineWidth',4)
+grid on
+axis equal
+title('Tour animation')
+% view(0, 90)
