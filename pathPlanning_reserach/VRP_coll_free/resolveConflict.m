@@ -1,4 +1,4 @@
-function [waitFee, reservation, occupancy] = resolveConflict(reservation, A, C, curNode, nextNode, tick, implicitRoute, vehIdx)
+function [waitFee, reservation, occupancy, blocked] = resolveConflict(reservation, blocked, A, C, curNode, nextNode, tick, implicitRoute, vehIdx)
 % get route info
 if A(curNode, nextNode) == 0
     routeInfo = implicitRoute{curNode, nextNode};
@@ -46,10 +46,12 @@ for i = 1:L-1 % for all route nodes
     % update reservation schedule
     relevantNodes = find(A(termNode,:));
     for j = relevantNodes
-%         reservation{termNode,j}.num = reservation{termNode,j}.num + 1;
         reservation{j,termNode}.num = reservation{j,termNode}.num + 1;
-%         reservation{termNode,j}.info{end+1} = [reqInit, reqTerm, vehIdx, localDelay];
         reservation{j,termNode}.info{end+1} = [reqInit, reqTerm, vehIdx, localDelay];
+    end
+    if i == L-1
+        blocked(nextNode) = 1;
+        blocked(curNode) = 0;
     end
 end
 

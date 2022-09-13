@@ -1,5 +1,6 @@
-function out = getActiveVeh(tick, capacity)
+function out = getActiveVeh(tick, stuckVeh)
 
+tick(stuckVeh==true) = inf;
 [~,out] = min(tick);
 
 end

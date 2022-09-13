@@ -6,17 +6,17 @@ addpath('..\ACO\')
 %%%%%%%%%%% ACO for VRPCF version %%%%%%%%%%%
 
 % parameter setting
-fovFactor = 3;
+fovFactor = 2.8;
 mapheight = 3;
 inpection_dist = 7;
 
-distThres = 25;
-vnum = 6;
+distThres = 15;
+vnum = 7;
 antNo = 20;
-stopThres = 50;
+stopThres = 100;
 capacity = 395;
 
-homePos = [20,20,6];
+homePos = [30,40,6];
 
 % generate map
 mapGenerator_VRPCF
@@ -113,6 +113,8 @@ tour = colony.queen.tour;
 tick = colony.queen.tickHistory;
 reservation = colony.queen.reservation;
 occupancy = colony.queen.occupancy;
+tourLen = colony.queen.vehTourLen;
+finished = zeros(vnum,1);
 
 vid = VideoWriter('animation.avi');
 open(vid);
@@ -128,6 +130,7 @@ for i = 1:vnum
     hold on
 end
 hh(i) = line([0,0],[0,0],[0,0]);
+view(0,90)
 
 count = 0;
 for t = simT
@@ -137,24 +140,28 @@ for t = simT
         routeIdx = getRouteStep(tick(v,:),t);
         if routeIdx ~= -1
             initNode = tour(v,routeIdx); termNode = tour(v,routeIdx+1);
-            if A(initNode, termNode) ~= 0 || termNode == 1
+            if A(initNode, termNode) ~= 0 && termNode ~= 1
                 regionDur = tick(v,routeIdx+1) - tick(v,routeIdx);
                 weight = (t-tick(v,routeIdx))/regionDur;
                 newPos = (1-weight) .* node(initNode,:) + weight .* node(termNode,:);
                 set(vv(v), 'XData', newPos(1), 'YData', newPos(2), 'ZData', newPos(3));
+            elseif termNode == 1
+                finished(v) = true;
+                set(vv(v), 'XData', node(tour(v,tourLen(v)),1), 'YData', node(tour(v,tourLen(v)),2), 'ZData', node(tour(v,tourLen(v)),3));
             else
                 bypassRoute = implicitRoute{initNode, termNode};
                 occupancyInfo = occupancy{v,routeIdx+1}(:,3:4);
                 occupancyInit = occupancyInfo(:,1);
-                subRouteIdx = max(find((occupancyInit - t)<0));
-                if ~isempty(subRouteIdx)
+                subRouteIdx = max(find((occupancyInit - t) < 0));
+                if ~isempty(subRouteIdx) && min(occupancyInit) <= t
                     subRouteInfo = occupancyInfo(subRouteIdx,:);
                     regionDur = subRouteInfo(2) - subRouteInfo(1);
                     weight = (t - subRouteInfo(1))/regionDur;
                     newPos = (1-weight) .* node(bypassRoute(subRouteIdx),:) + weight .* node(bypassRoute(subRouteIdx+1),:);
-                    set(vv(v), 'XData', newPos(1), 'YData', newPos(2), 'ZData', newPos(3));                    
+                    set(vv(v), 'XData', newPos(1), 'YData', newPos(2), 'ZData', newPos(3));
                 end
             end
+        elseif finished(v) == true
         else
             set(vv(v), 'XData', node(1,1), 'YData', node(1,2), 'ZData', node(1,3));
         end
