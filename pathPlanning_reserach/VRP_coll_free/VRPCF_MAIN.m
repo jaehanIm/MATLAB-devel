@@ -11,7 +11,7 @@ mapheight = 3;
 inpection_dist = 7;
 
 distThres = 15;
-vnum = 7;
+vnum = 8;
 antNo = 20;
 stopThres = 100;
 capacity = 395;
@@ -116,6 +116,9 @@ occupancy = colony.queen.occupancy;
 tourLen = colony.queen.vehTourLen;
 finished = zeros(vnum,1);
 
+% vid = VideoWriter('animation.avi','MPEG-4');
+% vid.FrameRate = fps;
+% vid.Quality = 100;
 vid = VideoWriter('animation.avi');
 open(vid);
 
@@ -123,7 +126,6 @@ simStep = 1;
 T = max(tick,[],'all');
 stepNum = ceil(T/simStep);
 simT = linspace(0,T,stepNum);
-mov(1:stepNum) = struct('cdata', [], 'colormap', []);
 
 for i = 1:vnum
     vv(i) = plot3(node(1,1),node(1,2),node(1,3),'o','LineWidth',3);
@@ -143,6 +145,9 @@ for t = simT
             if A(initNode, termNode) ~= 0 && termNode ~= 1
                 regionDur = tick(v,routeIdx+1) - tick(v,routeIdx);
                 weight = (t-tick(v,routeIdx))/regionDur;
+                if t-tick(v,routeIdx) > regionDur
+                    weight = 1;
+                end
                 newPos = (1-weight) .* node(initNode,:) + weight .* node(termNode,:);
                 set(vv(v), 'XData', newPos(1), 'YData', newPos(2), 'ZData', newPos(3));
             elseif termNode == 1
@@ -157,6 +162,9 @@ for t = simT
                     subRouteInfo = occupancyInfo(subRouteIdx,:);
                     regionDur = subRouteInfo(2) - subRouteInfo(1);
                     weight = (t - subRouteInfo(1))/regionDur;
+                    if (t - subRouteInfo(1)) > regionDur
+                        weight = 1;
+                    end
                     newPos = (1-weight) .* node(bypassRoute(subRouteIdx),:) + weight .* node(bypassRoute(subRouteIdx+1),:);
                     set(vv(v), 'XData', newPos(1), 'YData', newPos(2), 'ZData', newPos(3));
                 end

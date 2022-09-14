@@ -13,7 +13,7 @@ eff_y = py - ov_y;
 %% Load data (Inspection Area Loading)
 area = imread('area.png');
 area = area~=0;
-% area = ones(size(area));
+area = ones(size(area));
 
 area_xl = size(area,2)*voxel_width; % Acutal size[m] of area
 area_yl = size(area,1)*voxel_width;

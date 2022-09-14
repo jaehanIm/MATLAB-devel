@@ -4,28 +4,28 @@ addpath('..\ACO\')
 %%%%%%%%%%% ACO for VRPTW version %%%%%%%%%%%
 
 % parameter setting
-fovFactor = 4;
+fovFactor = 2.8;
 mapheight = 3;
 inpection_dist = 7;
 
-distThres = 100;
-vnum = 25;
+distThres = 15;
+vnum = 8;
 antNo = 20;
-stopThres = 400;
+stopThres = 200;
 capacity = 395;
 
 % generate map
-% mapGenerator_VRPTW
-% node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
-% node = vertcat([20,5,0],node);
+mapGenerator_VRPTW
+node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
+node = vertcat([20,5,0],node);
 
 % node = [0,0,0;10,10,0;20,0,0;-30,5,0;-25,-15,0]/2;
 
 % load instance
 % no. x. y. demand. init. due. servT.
-map = load('instance.mat');
-map = map.temp;
-node = map(:,2:3); node = horzcat(node,zeros(size(map,1),1));
+% map = load('instance.mat');
+% map = map.temp;
+% node = map(:,2:3); node = horzcat(node,zeros(size(map,1),1));
 
 N = size(node,1);
 
@@ -57,6 +57,8 @@ end
 
 [A,C]=graphSparseConnection(node,A,C,L);
 
+
+A_orig = A;
 tic
 implicitRoute = cell(N,N);
 for i = 1:N-1
@@ -70,6 +72,7 @@ for i = 1:N-1
         end
     end
 end
+A=A_orig;
 toc
 
 % mapData generation
@@ -77,14 +80,20 @@ mapGraph.n = N;
 mapGraph.edges = C;
 mapGraph.node = node;
 
+% free timeWindow
+timeWindow = zeros(N,2);
+timeWindow(:,1) = 0;
+timeWindow(:,2) = 10000;
+servTime = zeros(N,1);
+
 % time constraint construction
 % [~,~,timeMax] = NNHeuristic_VRPTW(mapGraph);
 % timeWindow = zeros(N,2);
 % timeWindow(:,1) = 0;
 % timeWindow(:,2) = timeMax;
-timeWindow = map(:,5:6);
-servTime = map(:,7)/2;
-nodeDemand = map(:,4);
+% timeWindow = map(:,5:6);
+% servTime = map(:,7)/2;
+% nodeDemand = map(:,4);
 
 % timeWindow = [0, 100; 2,30; 10,40; 60,80; 30,60];
 % servTime = [10;10;10;10;10];
@@ -134,3 +143,111 @@ totTourLen = sum(tourLen)
 
 colony.queen.violation
 sum(colony.queen.violation)
+
+%% Animation
+
+figure(5)
+clf
+% draw node
+for i = 1:size(node,1)
+    plot3(node(:,1),node(:,2),node(:,3),'.');
+end
+lineList = find(A(:));
+for i = 1:N-1
+    for j= i+1:N
+        if A(i,j) ~= 0
+            initIdx = i;
+            termIdx = j;
+            line([node(initIdx,1), node(termIdx,1)],[node(initIdx,2), node(termIdx,2)],[node(initIdx,3), node(termIdx,3)]);
+        end
+    end
+end
+hold on
+plot3(node(1,1),node(1,2),node(1,3),'x','MarkerSize',5,'LineWidth',4)
+grid on
+axis equal
+title('Tour animation')
+% view(0, 90)
+
+% animate
+tour = colony.queen.tour;
+tick = colony.queen.tickHistory;
+tourLen = colony.queen.vehTourLen;
+finished = zeros(vnum,1);
+
+% vid = VideoWriter('animation.avi','MPEG-4');
+% vid.FrameRate = fps;
+% vid.Quality = 100;
+vid = VideoWriter('animation_comparison.avi');
+open(vid);
+
+simStep = 1;
+T = max(tick,[],'all');
+stepNum = ceil(T/simStep);
+simT = linspace(0,T,stepNum);
+
+for i = 1:vnum
+    vv(i) = plot3(node(1,1),node(1,2),node(1,3),'o','LineWidth',3);
+    hold on
+end
+hh(i) = line([0,0],[0,0],[0,0]);
+view(0,90)
+
+count = 0;
+for t = simT
+    count = count + 1;
+    for v = 1:vnum
+        % calc status
+        routeIdx = getRouteStep(tick(v,:),t);
+        if routeIdx ~= -1
+            initNode = tour(v,routeIdx); termNode = tour(v,routeIdx+1);
+            if A(initNode, termNode) ~= 0 && termNode ~= 1
+                regionDur = tick(v,routeIdx+1) - tick(v,routeIdx);
+                weight = (t-tick(v,routeIdx))/regionDur;
+                if t-tick(v,routeIdx) > regionDur
+                    weight = 1;
+                end
+                newPos = (1-weight) .* node(initNode,:) + weight .* node(termNode,:);
+                set(vv(v), 'XData', newPos(1), 'YData', newPos(2), 'ZData', newPos(3));
+            elseif termNode == 1
+                finished(v) = true;
+                set(vv(v), 'XData', node(tour(v,tourLen(v)),1), 'YData', node(tour(v,tourLen(v)),2), 'ZData', node(tour(v,tourLen(v)),3));
+            else
+                bypassRoute = implicitRoute{initNode, termNode};
+                occupancyInfo = occupancy{v,routeIdx+1}(:,3:4);
+                occupancyInit = occupancyInfo(:,1);
+                subRouteIdx = max(find((occupancyInit - t) < 0));
+                if ~isempty(subRouteIdx) && min(occupancyInit) <= t
+                    subRouteInfo = occupancyInfo(subRouteIdx,:);
+                    regionDur = subRouteInfo(2) - subRouteInfo(1);
+                    weight = (t - subRouteInfo(1))/regionDur;
+                    if (t - subRouteInfo(1)) > regionDur
+                        weight = 1;
+                    end
+                    newPos = (1-weight) .* node(bypassRoute(subRouteIdx),:) + weight .* node(bypassRoute(subRouteIdx+1),:);
+                    set(vv(v), 'XData', newPos(1), 'YData', newPos(2), 'ZData', newPos(3));
+                end
+            end
+        elseif finished(v) == true
+        else
+            set(vv(v), 'XData', node(1,1), 'YData', node(1,2), 'ZData', node(1,3));
+        end
+    end
+%     for i = 1:N
+%         for j = 1:N
+%             reservationLen = reservation{i,j}.num;
+%             if reservationLen ~= 0
+%                 for k = 1:reservationLen
+%                     timeRange = reservation{i,j}.info{k}(1:2);
+%                     if (timeRange(1)-t) * (timeRange(2)-t) < 0
+%                     end
+%                 end
+%             end
+%         end
+%     end
+    drawnow;
+    frame = getframe(gcf);
+    writeVideo(vid,frame);
+    pause(0.01)
+end
+close(vid);
