@@ -96,7 +96,7 @@ for i = 1:tickLen-1
         termTick = tick(v,i+1);
         if initTick ~= 0 && termTick ~= 0
             linIdx = sub2ind([N,N],initIdx,termIdx);
-            plot([initTick termTick],[linIdx,linIdx],'LineWidth',Width(v),'Color',Color(v,:),'LineStyle',':')
+            plot([initTick termTick],[linIdx,linIdx],'LineWidth',Width(v),'Color',Color(v,:))
             hold on
         end
     end

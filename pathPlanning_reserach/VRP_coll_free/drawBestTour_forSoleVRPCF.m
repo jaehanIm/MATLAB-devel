@@ -1,4 +1,4 @@
-function [] = drawBestTour_forSoleVRPCF(colony , mapGraph, vehNum)
+function [] = drawBestTour_forSoleVRPCF(colony , mapGraph, vehNum, figNum)
 
 global homeIdx
 
@@ -7,7 +7,7 @@ graph.node.y = mapGraph.node(:,2);
 graph.node.z = mapGraph.node(:,3);
 graph.n = mapGraph.n;
 
-figure(1)
+figure(figNum)
 clf
 hold on
 queenTour = colony.queen.tour;

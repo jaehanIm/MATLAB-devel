@@ -10,7 +10,7 @@ fovFactor = 2.8;
 mapheight = 3;
 inpection_dist = 7;
 
-distThres = 15;
+distThres = 20;
 vnum = 8;
 antNo = 20;
 stopThres = 100;
@@ -22,6 +22,12 @@ homePos = [30,40,6];
 mapGenerator_VRPCF
 node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
 node = vertcat(homePos,node);
+
+% temp node generator
+% node = [0,0;1,1;1,-1;2,0;3,0;4,1;4,-1;5,0];
+% node = horzcat(node,zeros(8,1));
+% vnum = 2;
+% distThres = sqrt(2)+0.1;
 
 N = size(node,1);
 servTime = zeros(N,1);
@@ -77,11 +83,16 @@ mapGraph.edges = C;
 mapGraph.node = node;
 mapGraph.A = A;
 
+graphDensity = sum(A,'all')/2/nchoosek(N,2)*100;
+
 % solve problem
 ACS_VRPCF;
 
 % plot
 drawSchedule(2, N, colony, vnum);
+xlabel('time[s]')
+ylabel('edge index')
+legend('veh 1','veh2')
 
 %%
 
@@ -121,8 +132,8 @@ finished = zeros(vnum,1);
 % vid.Quality = 100;
 vid = VideoWriter('animation.avi');
 open(vid);
-
 simStep = 1;
+
 T = max(tick,[],'all');
 stepNum = ceil(T/simStep);
 simT = linspace(0,T,stepNum);
@@ -152,7 +163,7 @@ for t = simT
                 set(vv(v), 'XData', newPos(1), 'YData', newPos(2), 'ZData', newPos(3));
             elseif termNode == 1
                 finished(v) = true;
-                set(vv(v), 'XData', node(tour(v,tourLen(v)),1), 'YData', node(tour(v,tourLen(v)),2), 'ZData', node(tour(v,tourLen(v)),3));
+                set(vv(v), 'XData', node(tour(v,tourLen(v)),1), 'YData', node(tour(v,tourLen(v)),2), 'ZData', node(tour(v,tourLen(v)),3),'Color',[0.4 0.4 0.4]);
             else
                 bypassRoute = implicitRoute{initNode, termNode};
                 occupancyInfo = occupancy{v,routeIdx+1}(:,3:4);
@@ -170,6 +181,7 @@ for t = simT
                 end
             end
         elseif finished(v) == true
+            set(vv(v),'Color',[0.4 0.4 0.4])
         else
             set(vv(v), 'XData', node(1,1), 'YData', node(1,2), 'ZData', node(1,3));
         end
@@ -195,8 +207,10 @@ close(vid);
 
 %%
 
+drawBestTour_forSoleVRPCF(colony,mapGraph,vnum,1)
+
 figure(1)
-clf
+hold on
 % draw node
 for i = 1:size(node,1)
     plot3(node(:,1),node(:,2),node(:,3),'.');
@@ -215,5 +229,5 @@ hold on
 plot3(node(1,1),node(1,2),node(1,3),'x','MarkerSize',5,'LineWidth',4)
 grid on
 axis equal
-title('Tour animation')
+title('Result')
 % view(0, 90)
