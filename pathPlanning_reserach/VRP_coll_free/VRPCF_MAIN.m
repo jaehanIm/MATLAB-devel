@@ -11,23 +11,25 @@ mapheight = 3;
 inpection_dist = 7;
 
 distThres = 20;
-vnum = 8;
+vnum = 9;
 antNo = 20;
-stopThres = 100;
+stopThres = 200;
 capacity = 395;
 
-homePos = [30,40,6];
+% homePos = [30,40,6];
+homePos = [10, 100, 6];
 
 % generate map
-mapGenerator_VRPCF
-node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
-node = vertcat(homePos,node);
+% mapGenerator_VRPCF
+% node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
+% node = vertcat(homePos,node);
 
 % temp node generator
-% node = [0,0;1,1;1,-1;2,0;3,0;4,1;4,-1;5,0];
-% node = horzcat(node,zeros(8,1));
-% vnum = 2;
-% distThres = sqrt(2)+0.1;
+node = [0,0;1,1;1,-1;2,0;3,0;4,1;4,-1;5,0];
+node = horzcat(node,zeros(8,1));
+% node = vertcat([1.5,1,0],node);
+vnum = 3;
+distThres = sqrt(2)+0.1;
 
 N = size(node,1);
 servTime = zeros(N,1);
@@ -132,7 +134,7 @@ finished = zeros(vnum,1);
 % vid.Quality = 100;
 vid = VideoWriter('animation.avi');
 open(vid);
-simStep = 1;
+simStep = 0.05;
 
 T = max(tick,[],'all');
 stepNum = ceil(T/simStep);
