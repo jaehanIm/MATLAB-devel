@@ -43,6 +43,15 @@ for i = 1:L-1 % for all route nodes
 
     occupancy(i,:) = [initNode, termNode, reqInit, reqTerm];
 
+    % if delay occurred -> extend previous reservation
+    if localDelay > 0 && i>1
+        relevantNodes = find(A(initNode,:));
+        for j = relevantNodes
+            reservation{j,initNode}.info{end}(2) = reservation{j,initNode}.info{end}(2) + localDelay;
+            occupancy(i-1,4) = reservation{j,initNode}.info{end}(2) + localDelay;
+        end
+    end
+
     % update reservation schedule
     relevantNodes = find(A(termNode,:));
     for j = relevantNodes

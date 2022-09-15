@@ -11,9 +11,9 @@ mapheight = 3;
 inpection_dist = 7;
 
 distThres = 20;
-vnum = 9;
+vnum = 12;
 antNo = 20;
-stopThres = 200;
+stopThres = 100;
 capacity = 395;
 
 % homePos = [30,40,6];
@@ -23,13 +23,23 @@ homePos = [10, 100, 6];
 % mapGenerator_VRPCF
 % node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
 % node = vertcat(homePos,node);
+% simStep = 1;
 
 % temp node generator
-node = [0,0;1,1;1,-1;2,0;3,0;4,1;4,-1;5,0];
-node = horzcat(node,zeros(8,1));
-% node = vertcat([1.5,1,0],node);
-vnum = 3;
-distThres = sqrt(2)+0.1;
+% node = [0,0;1,1;1,-1;2,0;3,0;4,1;4,-1;5,0;1,2];
+% node = horzcat(node,zeros(size(node,1),1));
+% node = vertcat([1,4,0],node);
+% vnum = 3; 
+% distThres = sqrt(2)+0.02;
+% simStep = 0.03;
+
+% random node generator
+N = 80;
+node = rand(N,3);
+node(:,1:2) = node(:,1:2) * 100;
+node(:,3) = node(:,3) * 10;
+node = vertcat(homePos,node);
+simStep = 1;
 
 N = size(node,1);
 servTime = zeros(N,1);
@@ -85,7 +95,7 @@ mapGraph.edges = C;
 mapGraph.node = node;
 mapGraph.A = A;
 
-graphDensity = sum(A,'all')/2/nchoosek(N,2)*100;
+graphDensity = sum(A,'all')/2/nchoosek(N,2)*100
 
 % solve problem
 ACS_VRPCF;
@@ -134,7 +144,6 @@ finished = zeros(vnum,1);
 % vid.Quality = 100;
 vid = VideoWriter('animation.avi');
 open(vid);
-simStep = 0.05;
 
 T = max(tick,[],'all');
 stepNum = ceil(T/simStep);
@@ -175,9 +184,9 @@ for t = simT
                     subRouteInfo = occupancyInfo(subRouteIdx,:);
                     regionDur = subRouteInfo(2) - subRouteInfo(1);
                     weight = (t - subRouteInfo(1))/regionDur;
-                    if (t - subRouteInfo(1)) > regionDur
-                        weight = 1;
-                    end
+%                     if (t - subRouteInfo(1)) > regionDur
+%                         weight = 1;
+%                     end
                     newPos = (1-weight) .* node(bypassRoute(subRouteIdx),:) + weight .* node(bypassRoute(subRouteIdx+1),:);
                     set(vv(v), 'XData', newPos(1), 'YData', newPos(2), 'ZData', newPos(3));
                 end
@@ -226,6 +235,9 @@ for i = 1:N-1
             line([node(initIdx,1), node(termIdx,1)],[node(initIdx,2), node(termIdx,2)],[node(initIdx,3), node(termIdx,3)]);
         end
     end
+end
+for i = 1:N
+    text(node(i,1)+0.1,node(i,2),num2str(i))
 end
 hold on
 plot3(node(1,1),node(1,2),node(1,3),'x','MarkerSize',5,'LineWidth',4)
