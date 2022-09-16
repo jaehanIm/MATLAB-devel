@@ -109,8 +109,8 @@ for i = 1 : antNo
                 unvisitedNum = unvisitedNum - 1;
                 colony.ant(i).tour(j,vehTourLen(j)) = nextNode;
     
-                [timeSlack, reservation, occupancy, blocked] = resolveConflict(reservation, blocked, A, C, currentNode, nextNode, colony.ant(i).tick(j), implicitRoute, j);
-                
+                [timeSlack, reservation, occupancy, blocked, initPrevDelay] = resolveConflict(reservation, blocked, A, C, currentNode, nextNode, colony.ant(i).tick(j), implicitRoute, j);
+
                 colony.ant(i).occupancy{j,vehTourLen(j)} = occupancy;
                 colony.ant(i).tick(j) = colony.ant(i).tick(j) + C(currentNode,nextNode) + timeSlack;
                 colony.ant(i).tickHistory(j,vehTourLen(j)) = colony.ant(i).tick(j);

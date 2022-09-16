@@ -1,4 +1,5 @@
-function [waitFee, reservation, occupancy, blocked] = resolveConflict(reservation, blocked, A, C, curNode, nextNode, tick, implicitRoute, vehIdx)
+function [waitFee, reservation, occupancy, blocked, prevDelay] = resolveConflict(reservation, blocked, A, C, curNode, nextNode, tick, implicitRoute, vehIdx)
+global wowCount
 % get route info
 if A(curNode, nextNode) == 0
     routeInfo = implicitRoute{curNode, nextNode};
@@ -8,6 +9,7 @@ end
 L = size(routeInfo,2);
 waitFee = 0;
 occupancy = zeros(L-1,4);
+prevDelay = 0;
 
 % detect conflict & update
 for i = 1:L-1 % for all route nodes
@@ -44,11 +46,19 @@ for i = 1:L-1 % for all route nodes
     occupancy(i,:) = [initNode, termNode, reqInit, reqTerm];
 
     % if delay occurred -> extend previous reservation
-    if localDelay > 0 && i>1
+    if localDelay > 0
         relevantNodes = find(A(initNode,:));
         for j = relevantNodes
-            reservation{j,initNode}.info{end}(2) = reservation{j,initNode}.info{end}(2) + localDelay;
-            occupancy(i-1,4) = reservation{j,initNode}.info{end}(2) + localDelay;
+            if ~isempty(reservation{j,initNode}.info)
+                localReserveLen = reservation{j,initNode}.num;
+                for k = 1:localReserveLen
+                    if reservation{j,initNode}.info{end-k+1}(3) == vehIdx
+                        updateIdx = localReserveLen-k+1;
+                        break;
+                    end
+                end
+                reservation{j,initNode}.info{updateIdx}(2) = reservation{j,initNode}.info{updateIdx}(2) + localDelay;
+            end
         end
     end
 
@@ -63,8 +73,5 @@ for i = 1:L-1 % for all route nodes
         blocked(curNode) = 0;
     end
 end
-
-% sort reservation schedule (according to start time)
-
 
 end

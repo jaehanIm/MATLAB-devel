@@ -11,13 +11,16 @@ mapheight = 3;
 inpection_dist = 7;
 
 distThres = 20;
-vnum = 12;
+vnum = 8;
 antNo = 20;
 stopThres = 100;
 capacity = 395;
 
 % homePos = [30,40,6];
 homePos = [10, 100, 6];
+
+global wowCount;
+wowCount = 0;
 
 % generate map
 % mapGenerator_VRPCF
@@ -26,15 +29,15 @@ homePos = [10, 100, 6];
 % simStep = 1;
 
 % temp node generator
-% node = [0,0;1,1;1,-1;2,0;3,0;4,1;4,-1;5,0;1,2];
+% node = [0,0;1,1;1,-1;2,0;3,0;4,1;4,-1;5,0;1,2;1,3.1;2,2.5;2,1.5];
 % node = horzcat(node,zeros(size(node,1),1));
-% node = vertcat([1,4,0],node);
-% vnum = 3; 
+% node = vertcat([1,3.9,0],node);
+% vnum = 4; 
 % distThres = sqrt(2)+0.02;
 % simStep = 0.03;
 
 % random node generator
-N = 80;
+N = 40;
 node = rand(N,3);
 node(:,1:2) = node(:,1:2) * 100;
 node(:,3) = node(:,3) * 10;
@@ -106,6 +109,18 @@ xlabel('time[s]')
 ylabel('edge index')
 legend('veh 1','veh2')
 
+%% occupancy post-process
+for v = 1:vnum
+    tempOccuList = occupancy(v,:);
+    continueSearch = true;
+    while continueSearch
+        tempOccuList
+    end
+    for j = 2:size(tempOccuList,2)
+        tempLocalOccuList = tempOccuList{j};
+    end
+end
+
 %%
 
 figure(4)
@@ -165,10 +180,13 @@ for t = simT
         if routeIdx ~= -1
             initNode = tour(v,routeIdx); termNode = tour(v,routeIdx+1);
             if A(initNode, termNode) ~= 0 && termNode ~= 1
-                regionDur = tick(v,routeIdx+1) - tick(v,routeIdx);
-                weight = (t-tick(v,routeIdx))/regionDur;
-                if t-tick(v,routeIdx) > regionDur
+                actualStart = occupancy{v,routeIdx+1}(1,3);
+                regionDur = tick(v,routeIdx+1) - actualStart;
+                weight = (t-actualStart)/regionDur;
+                if t-actualStart > regionDur
                     weight = 1;
+                elseif t-actualStart < 0
+                    weight = 0;
                 end
                 newPos = (1-weight) .* node(initNode,:) + weight .* node(termNode,:);
                 set(vv(v), 'XData', newPos(1), 'YData', newPos(2), 'ZData', newPos(3));
@@ -184,9 +202,9 @@ for t = simT
                     subRouteInfo = occupancyInfo(subRouteIdx,:);
                     regionDur = subRouteInfo(2) - subRouteInfo(1);
                     weight = (t - subRouteInfo(1))/regionDur;
-%                     if (t - subRouteInfo(1)) > regionDur
-%                         weight = 1;
-%                     end
+                    if (t - subRouteInfo(1)) > regionDur
+                        weight = 1;
+                    end
                     newPos = (1-weight) .* node(bypassRoute(subRouteIdx),:) + weight .* node(bypassRoute(subRouteIdx+1),:);
                     set(vv(v), 'XData', newPos(1), 'YData', newPos(2), 'ZData', newPos(3));
                 end
@@ -220,7 +238,7 @@ close(vid);
 
 drawBestTour_forSoleVRPCF(colony,mapGraph,vnum,1)
 
-figure(1)
+figure(2)
 hold on
 % draw node
 for i = 1:size(node,1)
@@ -236,12 +254,12 @@ for i = 1:N-1
         end
     end
 end
-for i = 1:N
-    text(node(i,1)+0.1,node(i,2),num2str(i))
-end
 hold on
 plot3(node(1,1),node(1,2),node(1,3),'x','MarkerSize',5,'LineWidth',4)
 grid on
 axis equal
 title('Result')
+for i = 1:N
+    text(node(i,1)+0.1,node(i,2),num2str(i))
+end
 % view(0, 90)
