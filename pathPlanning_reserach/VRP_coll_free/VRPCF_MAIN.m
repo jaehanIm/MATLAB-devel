@@ -6,7 +6,7 @@ addpath('..\ACO\')
 %%%%%%%%%%% ACO for VRPCF version %%%%%%%%%%%
 
 % parameter setting
-fovFactor = 2.8;
+fovFactor = 3;
 mapheight = 3;
 inpection_dist = 7;
 
@@ -17,7 +17,8 @@ stopThres = 100;
 capacity = 395;
 
 % homePos = [30,40,6];
-homePos = [10, 100, 6];
+% homePos = [10, 80, 6];
+homePos = [0,0,0];
 
 global wowCount;
 wowCount = 0;
@@ -37,9 +38,20 @@ wowCount = 0;
 % simStep = 0.03;
 
 % random node generator
-N = 40;
+% N = 50;
+% node = rand(N,3);
+% node(:,1:2) = node(:,1:2) * 100;
+% node(:,3) = node(:,3) * 10;
+% node = vertcat(homePos,node);
+% simStep = 1;
+
+% random bridge generator
+N = 25;
 node = rand(N,3);
-node(:,1:2) = node(:,1:2) * 100;
+node(:,1:2) = node(:,1:2) * 100 - 50;
+node2 = rand(N,3);
+node2(:,1:2) = node2(:,1:2) * 100 + 50;
+node = vertcat(node,node2);
 node(:,3) = node(:,3) * 10;
 node = vertcat(homePos,node);
 simStep = 1;
@@ -109,18 +121,6 @@ xlabel('time[s]')
 ylabel('edge index')
 legend('veh 1','veh2')
 
-%% occupancy post-process
-for v = 1:vnum
-    tempOccuList = occupancy(v,:);
-    continueSearch = true;
-    while continueSearch
-        tempOccuList
-    end
-    for j = 2:size(tempOccuList,2)
-        tempLocalOccuList = tempOccuList{j};
-    end
-end
-
 %%
 
 figure(4)
@@ -170,6 +170,7 @@ for i = 1:vnum
 end
 hh(i) = line([0,0],[0,0],[0,0]);
 view(0,90)
+tt = text(0,120,num2str(0.0));
 
 count = 0;
 for t = simT
@@ -215,6 +216,7 @@ for t = simT
             set(vv(v), 'XData', node(1,1), 'YData', node(1,2), 'ZData', node(1,3));
         end
     end
+    set(tt,'String',num2str(t))
 %     for i = 1:N
 %         for j = 1:N
 %             reservationLen = reservation{i,j}.num;
@@ -227,6 +229,7 @@ for t = simT
 %             end
 %         end
 %     end
+    
     drawnow;
     frame = getframe(gcf);
     writeVideo(vid,frame);
@@ -238,7 +241,8 @@ close(vid);
 
 drawBestTour_forSoleVRPCF(colony,mapGraph,vnum,1)
 
-figure(2)
+figure(1)
+clf
 hold on
 % draw node
 for i = 1:size(node,1)
