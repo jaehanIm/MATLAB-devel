@@ -46,7 +46,7 @@ wowCount = 0;
 % simStep = 1;
 
 % random bridge generator
-N = 25;
+N = 15;
 node = rand(N,3);
 node(:,1:2) = node(:,1:2) * 100 - 50;
 node2 = rand(N,3);
@@ -55,6 +55,7 @@ node = vertcat(node,node2);
 node(:,3) = node(:,3) * 10;
 node = vertcat(homePos,node);
 simStep = 1;
+vnum=5;
 
 N = size(node,1);
 servTime = zeros(N,1);
