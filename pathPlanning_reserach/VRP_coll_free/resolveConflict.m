@@ -1,5 +1,4 @@
 function [waitFee, reservation, occupancy, blocked, prevDelay] = resolveConflict(reservation, blocked, A, C, curNode, nextNode, tick, implicitRoute, vehIdx)
-global wowCount
 % get route info
 if A(curNode, nextNode) == 0
     routeInfo = implicitRoute{curNode, nextNode};
@@ -52,12 +51,21 @@ for i = 1:L-1 % for all route nodes
             if ~isempty(reservation{j,initNode}.info)
                 localReserveLen = reservation{j,initNode}.num;
                 for k = 1:localReserveLen
-                    if reservation{j,initNode}.info{end-k+1}(3) == vehIdx
+                    if reservation{j,initNode}.info{end-k+1}(3) == vehIdx %뒤부터 확인
                         updateIdx = localReserveLen-k+1;
                         break;
                     end
+                    if k == localReserveLen
+                        disp("OOPS!")
+%                         reservation{j,initNode}.info{end-k+1}(3)
+%                         vehIdx
+%                         reservation{j,initNode}.info
+%                         updateIdx
+%                         localReserveLen
+                    end
                 end
                 reservation{j,initNode}.info{updateIdx}(2) = reservation{j,initNode}.info{updateIdx}(2) + localDelay;
+%                 reservation{j,initNode}.info{updateIdx}(2) = reservation{j,initNode}.info{updateIdx}(2) + localDelay;
             end
         end
     end
@@ -71,6 +79,21 @@ for i = 1:L-1 % for all route nodes
     if i == L-1
         blocked(nextNode) = 1;
         blocked(curNode) = 0;
+    end
+
+    % sort reservation
+    for j = relevantNodes
+        tempCell = [];
+        tempCell{1,reservation{j,termNode}.num} = [];
+        forSortInits = zeros(reservation{j,termNode}.num,1);
+        for k = 1:reservation{j,termNode}.num
+            forSortInits(k) = reservation{j,termNode}.info{k}(1);
+        end
+        [~,I] = sort(forSortInits);
+        for k = 1:reservation{j,termNode}.num
+            tempCell{k} = reservation{j,termNode}.info{I==k};
+        end
+        reservation{j,termNode}.info = tempCell;
     end
 end
 
