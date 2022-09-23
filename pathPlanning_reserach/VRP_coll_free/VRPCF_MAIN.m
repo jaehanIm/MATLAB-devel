@@ -6,12 +6,12 @@ addpath('..\ACO\')
 %%%%%%%%%%% ACO for VRPCF version %%%%%%%%%%%
 
 % parameter setting
-fovFactor = 3;
+fovFactor = 2.8;
 mapheight = 3;
 inpection_dist = 7;
 
 distThres = 20;
-vnum = 8;
+vnum = 12;
 antNo = 20;
 stopThres = 100;
 capacity = 395;
@@ -33,29 +33,30 @@ wowCount = 0;
 % node = [0,0;1,1;1,-1;2,0;3,0;4,1;4,-1;5,0;1,2;1,3.1;2,2.5;2,1.5];
 % node = horzcat(node,zeros(size(node,1),1));
 % node = vertcat([1,3.9,0],node);
-% vnum = 4; 
+% vnum = 5; 
 % distThres = sqrt(2)+0.02;
 % simStep = 0.03;
 
 % random node generator
-% N = 50;
-% node = rand(N,3);
-% node(:,1:2) = node(:,1:2) * 100;
-% node(:,3) = node(:,3) * 10;
-% node = vertcat(homePos,node);
-% simStep = 1;
-
-% random bridge generator
-N = 15;
+N = 50;
 node = rand(N,3);
-node(:,1:2) = node(:,1:2) * 100 - 50;
-node2 = rand(N,3);
-node2(:,1:2) = node2(:,1:2) * 100 + 50;
-node = vertcat(node,node2);
+node(:,1:2) = node(:,1:2) * 100;
 node(:,3) = node(:,3) * 10;
 node = vertcat(homePos,node);
 simStep = 1;
-vnum=5;
+vnum = 9;
+
+% random bridge generator
+% N = 30;
+% node = rand(N,3);
+% node(:,1:2) = node(:,1:2) * 100 - 50;
+% node2 = rand(N,3);
+% node2(:,1:2) = node2(:,1:2) * 100 + 50;
+% node = vertcat(node,node2);
+% node(:,3) = node(:,3) * 10;
+% node = vertcat(homePos,node);
+% simStep = 1;
+% vnum = 9;
 
 N = size(node,1);
 servTime = zeros(N,1);
@@ -230,7 +231,9 @@ for t = simT
 %             end
 %         end
 %     end
-    
+    if finished == 1
+        break;
+    end
     drawnow;
     frame = getframe(gcf);
     writeVideo(vid,frame);

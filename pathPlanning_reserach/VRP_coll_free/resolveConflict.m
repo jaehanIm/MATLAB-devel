@@ -28,7 +28,7 @@ for i = 1:L-1 % for all route nodes
             reservationInfo = reservation{initNode,termNode}.info{j};
             isConflict = detectConflict(reqInfo, reservationInfo);
             if isConflict % update reqinfo when conflict occurs
-                if tick < reservationInfo(2)
+                if tick <= reservationInfo(2)
                     tick = reservationInfo(2);
                     reqInit = tick;
                     reqTerm = tick + C(initNode,termNode);
@@ -50,22 +50,39 @@ for i = 1:L-1 % for all route nodes
         for j = relevantNodes
             if ~isempty(reservation{j,initNode}.info)
                 localReserveLen = reservation{j,initNode}.num;
+%                 updateIdx = [];
                 for k = 1:localReserveLen
                     if reservation{j,initNode}.info{end-k+1}(3) == vehIdx %뒤부터 확인
                         updateIdx = localReserveLen-k+1;
                         break;
                     end
-                    if k == localReserveLen
-                        disp("OOPS!")
-%                         reservation{j,initNode}.info{end-k+1}(3)
-%                         vehIdx
-%                         reservation{j,initNode}.info
-%                         updateIdx
-%                         localReserveLen
+                end
+%                 if ~isempty(updateIdx)
+%                     reservation{j,initNode}.info{updateIdx}(2) = reservation{j,initNode}.info{updateIdx}(2) + localDelay;
+%                 else
+                    reservation{j,initNode}.info{end}(2) = reservation{j,initNode}.info{end}(2) + localDelay;
+%                 end
+%                 
+            end
+        end
+        if i > 2
+            prevNode = routeInfo(i-1);
+            if ~isempty(reservation{initNode,prevNode}.info)
+                localReserveLen = reservation{initNode,prevNode}.num;
+%                 updateIdx = [];
+                for k = 1:localReserveLen
+                    if reservation{initNode,prevNode}.info{end-k+1}(3) == vehIdx %뒤부터 확인
+                        updateIdx = localReserveLen-k+1;
+                        break;
                     end
                 end
-                reservation{j,initNode}.info{updateIdx}(2) = reservation{j,initNode}.info{updateIdx}(2) + localDelay;
-%                 reservation{j,initNode}.info{updateIdx}(2) = reservation{j,initNode}.info{updateIdx}(2) + localDelay;
+%                 if ~isempty(updateIdx)
+%                     reservation{initNode,prevNode}.info{updateIdx}(2) = reservation{initNode,prevNode}.info{updateIdx}(2) + localDelay;
+%                 else
+                    reservation{initNode,prevNode}.info{end}(2) = reservation{initNode,prevNode}.info{end}(2) + localDelay;
+%                 end
+%                 reservation{initNode,prevNode}.info{updateIdx}(2) = reservation{initNode,prevNode}.info{updateIdx}(2) + localDelay;
+%                 reservation{initNode,prevNode}.info{end}(2) = reservation{initNode,prevNode}.info{end}(2) + localDelay;
             end
         end
     end
@@ -76,6 +93,8 @@ for i = 1:L-1 % for all route nodes
         reservation{j,termNode}.num = reservation{j,termNode}.num + 1;
         reservation{j,termNode}.info{end+1} = [reqInit, reqTerm, vehIdx, localDelay];
     end
+    reservation{termNode,initNode}.num = reservation{termNode,initNode}.num + 1;
+    reservation{termNode,initNode}.info{end+1} = [reqInit, reqTerm, vehIdx, localDelay];
     if i == L-1
         blocked(nextNode) = 1;
         blocked(curNode) = 0;
@@ -95,6 +114,17 @@ for i = 1:L-1 % for all route nodes
         end
         reservation{j,termNode}.info = tempCell;
     end
+    tempCell = [];
+    tempCell{1,reservation{termNode,initNode}.num} = [];
+    forSortInits = zeros(reservation{termNode,initNode}.num,1);
+    for k = 1:reservation{termNode,initNode}.num
+        forSortInits(k) = reservation{termNode,initNode}.info{k}(1);
+    end
+    [~,I] = sort(forSortInits);
+    for k = 1:reservation{termNode,initNode}.num
+        tempCell{k} = reservation{termNode,initNode}.info{I==k};
+    end
+    reservation{termNode,initNode}.info = tempCell;
 end
 
 end
