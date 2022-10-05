@@ -44,7 +44,7 @@ node(:,1:2) = node(:,1:2) * 100;
 node(:,3) = node(:,3) * 10;
 node = vertcat(homePos,node);
 simStep = 1;
-vnum = 9;
+vnum = 8;
 
 % random bridge generator
 % N = 30;

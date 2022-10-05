@@ -506,6 +506,34 @@ ylabel('proportion [%]')
 % title('Ratio of CT_{cg}/CT')
 title('Proportion of CT_{pre} to CT')
 legend('Pure ACS', 'Proposed Algorithm','Location','northwest')
+
+figure(7)
+clf
+temp = N(:,:,1);
+temp1 = CompSolveTime(:,:,1)./CompTotalTime(:,:,1)*100;
+temp1_2 = CompCompleteTime(:,:,1)./CompTotalTime(:,:,1)*100;
+temp2 = TestSolveTime(:,:,1)./TestTotalTime(:,:,1)*100;
+temp2_2 = TestCompleteTime(:,:,1)./TestTotalTime(:,:,1)*100;
+temp2_3 = TestClusteringTime(:,:,1)./TestTotalTime(:,:,1)*100;
+for i = 1:size(degreeConn,2)
+    semilogx(temp(:,i,1),temp1_2(:,i,1),'bo')
+    hold on
+    semilogx(temp(:,i,1),temp2_2(:,i,1)+temp2_3(:,i,1),'rx')
+end
+lim = axis;
+plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
+% for i = 1:size(degreeConn,1)
+%     semilogx(temp(:,i,1),temp1(:,i,1),'rx')
+%     hold on
+%     semilogx(temp(:,i,1),temp2(:,i,1),'bo')
+% end
+grid on
+xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
+ylabel('proportion [%]')
+% title('Ratio of time spent on complete graph construction')
+% title('Ratio of CT_{cg}/CT')
+title('Proportion of CT_{pre} to CT')
+legend('Pure ACS', 'Proposed Algorithm','Location','northwest')
 %% function
 
 function output = meanStdProcess(input)
