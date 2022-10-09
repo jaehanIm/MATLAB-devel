@@ -192,23 +192,9 @@ for k = 1:size(NRange,2)-1
 end
 
 %% mono plot
-% legendList = [];
-% for i = 1:10
-%     legendList = vertcat(legendList," " + [num2str(i)]);
-% end
+
 Nlist = N(:,1,1);
 shapeList = ["+","x","o","d","h"];
-% figure(11)
-% clf
-% for i = 1:size(degreeConn,1)
-% semilogx(degreeConn(i,:,1),CompTotalTime(i,:,1),'*--')
-% hold on
-% semilogx(degreeConn(i,:,1),TestTotalTime(i,:,1),'o-')
-% end
-% grid on
-% xlabel('connectivity')
-% ylabel('computation time [s]')
-% title('Computation Time')
 
 figure(112)
 clf
@@ -222,76 +208,18 @@ plot(degreeConn(i,:,1),timeRatio(i,:,1),':','Color',[0.6 0.6 0.6]);
 % text(degreeConn(i,end,1)+0.01,timeRatio(i,end,1),num2str(Nlist(i)))
 hold on
 end
+ax = gca;
+ax.XAxis.FontSize = 14;
+ax.YAxis.FontSize = 14;
 lim = axis;
 plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
-xlabel('$\mathcal{K}$','Interpreter','latex')
-ylabel('CT ratio [log scale]')
-title('CT Ratio')
+xlabel('$\mathcal{K}$','Interpreter','latex','fontsize',15)
+ylabel('ratio','fontsize',15)
+title('CT Ratio','fontsize',15)
 % set(get(h,'Parent'), 'XScale','log')
-legend('N <= 100','N <= 1000','N > 1000','Location','best')
+legend('$\textbf{N} \le 100$','$\textbf{N} \le 1000$','$\textbf{N} > 1000$','Location','best','Interpreter','latex','fontsize',13)
 set(gca,'children',flipud(get(gca,'children')))
-
-% figure(113)
-% clf
-% for i = 1:size(degreeConn,1)
-% plot(degreeConn(i,:,1),CompScoreL(i,:,1),'*--')
-% hold on
-% plot(degreeConn(i,:,1),TestScoreL(i,:,1),'o-')
-% end
-% grid on
-% xlabel('connectivity')
-% ylabel('score')
-% title('Score')
-% 
-% figure(22)
-% clf
-% for i = 1:size(degreeConn,1)
-% h = errorbar(degreeConn(i,:,1),scoreRatio(i,:,1),scoreRatio(i,:,2),'*');
-% text(degreeConn(i,end,1),scoreRatio(i,end,1),num2str(Nlist(i)))
-% hold on
-% end
-% grid on
-% xlabel('connectivity')
-% ylabel('score ratio [%]')
-% title('score ratio ')
-% % set(get(h,'Parent'), 'YScale','log')
-
-% figure(33)
-% clf
-% temp = N(:,:,1);
-% temp2 = CompTotalTime(:,:,1);
-% temp3 = TestTotalTime(:,:,1);
-% loglog(temp(:),temp2(:),'*')
-% hold on
-% loglog(temp(:),temp3(:),'*')
-% grid on
-% xlabel('Node Number')
-% ylabel('Computation Time')
-% title('Computation Time Comparison')
-% 
-% figure(332)
-% clf
-% temp = N(:,:,1);
-% temp2 = CompScoreL(:,:,1);
-% temp3 = TestScoreL(:,:,1);
-% semilogx(temp(:),temp2(:),'*')
-% hold on
-% semilogx(temp(:),temp3(:),'*')
-% grid on
-% xlabel('Node Number')
-% ylabel('Score')
-% title('Score Comparison')
-
-% figure(333)
-% clf
-% temp = N(:,:,1);
-% temp2 = CompScoreL(:,:,1)./TestScoreL(:,:,1);
-% semilogx(temp(:),temp2(:),'*')
-% grid on
-% xlabel('Node Number')
-% ylabel('Score')
-% title('Score ratio')
 
 figure(334)
 clf
@@ -302,39 +230,16 @@ for i = 1:size(degreeRange,2)-1
     semilogx(filterDatScore{i}(:,1),filterDatTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
     hold on
 end
+ax = gca;
+ax.XAxis.FontSize = 14;
+ax.YAxis.FontSize = 14;
 lim = axis;
 plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
-xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
-ylabel('CT ratio [log scale]')
-title('CT ratio')
-legend('Low','Low-moderate','Moderate','High-moderate','High','Location','northwest')
-
-% figure(441)
-% clf
-% temp = degreeConn(:,:,1);
-% temp2 = CompTotalTime(:,:,1);
-% temp3 = TestTotalTime(:,:,1);
-% plot(temp(:),temp2(:),'*')
-% hold on
-% plot(temp(:),temp3(:),'*')
-% grid on
-% xlabel('connectivity')
-% ylabel('Computation Time')
-% title('Computation Time Comparison')
-% 
-% figure(442)
-% clf
-% temp = degreeConn(:,:,1);
-% temp2 = CompScoreL(:,:,1);
-% temp3 = TestScoreL(:,:,1);
-% plot(temp(:),temp2(:),'*')
-% hold on
-% plot(temp(:),temp3(:),'*')
-% grid on
-% xlabel('connectivity')
-% ylabel('Score')
-% title('Score Comparison')
+xlabel('$\textbf{N}$ [log scale]','Interpreter','latex','fontsize',15)
+ylabel('ratio','fontsize',15)
+title('CT ratio','fontsize',15)
+legend('Low ($\mathcal{K}<0.1$)','Moderate ($\mathcal{K}<0.3$)','High ($\mathcal{K}<0.5$)','Location','northwest','Interpreter','latex','fontsize',13)
 
 figure(443)
 clf
@@ -345,78 +250,33 @@ for i = 1:size(NRange,2)-1
     plot(NfilterDatScore{i}(:,1),NfilterDatScore{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
     hold on
 end
+ax = gca;
+ax.XAxis.FontSize = 14;
+ax.YAxis.FontSize = 14;
 lim = axis;
 plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
-xlabel('$\mathcal{K}$','Interpreter','latex')
-ylabel('SQ ratio')
-title('SQ ratio')
-legend('N <= 100','N <= 1000','N > 1000')
+xlabel('$\mathcal{K}$','Interpreter','latex','fontsize',15)
+ylabel('ratio','fontsize',15)
+title('SQ ratio','fontsize',15)
+legend('$\textbf{N} \le 100$','$\textbf{N} \le 1000$','$\textbf{N} > 1000$','Location','best','Interpreter','latex','fontsize',13)
 
-% figure(444)
-% clf
-% temp = degreeConn(:,:,1);
-% temp2 = CompTotalTime(:,:,1)./TestTotalTime(:,:,1);
-% plot(temp(:),temp2(:),'*')
-% grid on
-% xlabel('connectivity')
-% ylabel('comp time ratio')
-% title('Computation time ratio')
-
-% figure(551)
-% clf
-% for i = 1:size(degreeRange,2)-1
-%     loglog(filterDatTime{i}(:,1),filterDatTime{i}(:,2),'*')
-%     hold on
-% end
-% grid on
-% xlabel('Node num')
-% ylabel('time ratio')
-% legend('1','2','3','4','5','6')
-% title('time ratio')
-% 
 figure(552)
 clf
 for i = 1:size(degreeRange,2)-1
     semilogx(filterDatScore{i}(:,1),filterDatScore{i}(:,2),shapeList(i),'MarkerSize',7,'LineWidth',1)
     hold on
 end
+ax = gca;
+ax.XAxis.FontSize = 14;
+ax.YAxis.FontSize = 14;
 lim = axis;
 plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
-xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
-ylabel('SQ ratio')
-legend('Low','Low-moderate','Moderate','High-moderate','High')
-title('SQ ratio')
-
-
-figure(1)
-clf
-temp = degreeConn(:,:,1);
-temp1 = N(:,:,1);
-temp2 = CompCompleteTime(:,:,1);
-temp3 = TestCompleteTime(:,:,1);
-temp4 = TestClusteringTime(:,:,1);
-for i = 1:size(NRange,2)-1
-%     semilogy(NfilterDatCompleteTime{i}(:,1),NfilterDatCompleteTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
-    semilogy(NfilterDatPreTime{i}(:,1),NfilterDatPreTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
-    hold on
-end
-for i = 1:size(degreeConn,1)
-    semilogy(temp(i,:,1),temp2(i,:,1)./(temp3(i,:,1)+temp4(i,:,1)),':','Color',[0.6 0.6 0.6]);
-%     semilogy(temp(i,:,1),temp2(i,:,1)./temp3(i,:,1),':','Color',[0.6 0.6 0.6]);
-    hold on
-end
-lim = axis;
-plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
-grid on
-xlabel('$\mathcal{K}$','Interpreter','latex')
-ylabel('CT_{pre} ratio [log scale]')
-title('CT_{pre} ratio')
-% set(get(h,'Parent'), 'XScale','log') 
-legend('N <= 100','N <= 1000','N > 1000','Location','best')
-set(gca,'children',flipud(get(gca,'children')))
-
+xlabel('$\textbf{N}$ [log scale]','Interpreter','latex','fontsize',15)
+ylabel('ratio','fontsize',15)
+legend('Low ($\mathcal{K}<0.1$)','Moderate ($\mathcal{K}<0.3$)','High ($\mathcal{K}<0.5$)','Location','best','Interpreter','latex','fontsize',13)
+title('SQ ratio','fontsize',15)
 
 figure(2)
 clf
@@ -425,28 +285,16 @@ for i = 1:size(degreeRange,2)-1
     loglog(filterDatPreTime{i}(:,1),filterDatPreTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7);
     hold on
 end
+ax = gca;
+ax.XAxis.FontSize = 14;
+ax.YAxis.FontSize = 14;
 lim = axis;
 plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
-title('CT_{pre} ratio')
-xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
-ylabel('CT_{pre} ratio [log scale]')
-legend('Low','Low-moderate','Moderate','High-moderate','High','Location','northwest')
-
-figure(3)
-clf
-% plot(temp(:),temp5(:)./temp6(:),'*')
-for i = 1:size(NRange,2)-1
-    plot(NfilterDatSolveTime{i}(:,1),NfilterDatSolveTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
-    hold on
-end
-lim = axis;
-plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
-grid on
-title('CT_{s} ratio')
-xlabel('$\mathcal{K}$','Interpreter','latex')
-ylabel('CT_{s} ratio')
-legend('N <= 100','N <= 1000','N > 1000')
+title('CT_{pre} ratio','fontsize',15)
+xlabel('$\textbf{N}$ [log scale]','Interpreter','latex','fontsize',15)
+ylabel('ratio [log scale]','fontsize',15)
+legend('Low ($\mathcal{K}<0.1$)','Moderate ($\mathcal{K}<0.3$)','High ($\mathcal{K}<0.5$)','Location','northwest','Interpreter','latex','fontsize',13)
 
 figure(4)
 temp5 = CompSolveTime(:,:,1);
@@ -457,55 +305,17 @@ for i = 1:size(degreeRange,2)-1
     semilogx(filterDatSolveTime{i}(:,1),filterDatSolveTime{i}(:,2),shapeList(i),'LineWidth',1,'MarkerSize',7)
     hold on
 end
+ax = gca;
+ax.XAxis.FontSize = 14;
+ax.YAxis.FontSize = 14;
 lim = axis;
 plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 grid on
-title('CT_{s} ratio')
-ylabel('CT_{s} ratio')
-xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
-legend('Low','Low-moderate','Moderate','High-moderate','High','Location','northwest')
-
-
-% figure(5)
-% clf
-% for i = 1:size(degreeConn,1)
-% % color = rand(1,3);
-% h = plot(degreeConn(i,:,1),CompSolveTime(i,:,1)./TestSolveTime(i,:,1),'*-');
-% text(degreeConn(i,end,1)+0.01,CompSolveTime(i,end,1)./TestSolveTime(i,end,1),num2str(Nlist(i)))
-% hold on
-% end
-% grid on
-% xlabel('connectivity')
-% ylabel('solve time ratio')
-% title('solve time ratio')
-
-figure(6)
-clf
-temp = N(:,:,1);
-temp1 = CompSolveTime(:,:,1)./CompTotalTime(:,:,1)*100;
-temp1_2 = CompCompleteTime(:,:,1)./CompTotalTime(:,:,1)*100;
-temp2 = TestSolveTime(:,:,1)./TestTotalTime(:,:,1)*100;
-temp2_2 = TestCompleteTime(:,:,1)./TestTotalTime(:,:,1)*100;
-temp2_3 = TestClusteringTime(:,:,1)./TestTotalTime(:,:,1)*100;
-for i = 1:size(degreeConn,2)
-    semilogx(temp(:,i,1),temp1_2(:,i,1),'rx')
-    hold on
-    semilogx(temp(:,i,1),temp2_2(:,i,1)+temp2_3(:,i,1),'bo')
-end
-lim = axis;
-plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
-% for i = 1:size(degreeConn,1)
-%     semilogx(temp(:,i,1),temp1(:,i,1),'rx')
-%     hold on
-%     semilogx(temp(:,i,1),temp2(:,i,1),'bo')
-% end
-grid on
-xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
-ylabel('proportion [%]')
-% title('Ratio of time spent on complete graph construction')
-% title('Ratio of CT_{cg}/CT')
-title('Proportion of CT_{pre} to CT')
-legend('Pure ACS', 'Proposed Algorithm','Location','northwest')
+title('CT_{s} ratio','fontsize',15)
+ylabel('ratio','fontsize',15)
+xlabel('$\textbf{N}$ [log scale]','Interpreter','latex','fontsize',15)
+legend('Low ($\mathcal{K}<0.1$)','Moderate ($\mathcal{K}<0.3$)','High ($\mathcal{K}<0.5$)','Location','northwest','Interpreter','latex','fontsize',13)
+ylim([0.5 5])
 
 figure(7)
 clf
@@ -520,20 +330,23 @@ for i = 1:size(degreeConn,2)
     hold on
     semilogx(temp(:,i,1),temp2_2(:,i,1)+temp2_3(:,i,1),'rx')
 end
+ax = gca;
+ax.XAxis.FontSize = 14;
+ax.YAxis.FontSize = 14;
 lim = axis;
-plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
+% plot([lim(1) lim(2)],[1 1],'k:','LineWidth',2)
 % for i = 1:size(degreeConn,1)
 %     semilogx(temp(:,i,1),temp1(:,i,1),'rx')
 %     hold on
 %     semilogx(temp(:,i,1),temp2(:,i,1),'bo')
 % end
 grid on
-xlabel('$\textbf{N}$ [log scale]','Interpreter','latex')
-ylabel('proportion [%]')
+xlabel('$\textbf{N}$ [log scale]','Interpreter','latex','fontsize',15)
+ylabel('proportion [%]','fontsize',15)
 % title('Ratio of time spent on complete graph construction')
 % title('Ratio of CT_{cg}/CT')
-title('Proportion of CT_{pre} to CT')
-legend('Pure ACS', 'Proposed Algorithm','Location','northwest')
+title('Proportion of CT_{pre} to CT','fontsize',15)
+legend('Pure ACS', 'Proposed Algorithm','Location','northwest','fontsize',13)
 %% function
 
 function output = meanStdProcess(input)
