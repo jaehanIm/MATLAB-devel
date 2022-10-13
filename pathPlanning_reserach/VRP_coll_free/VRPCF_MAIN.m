@@ -17,17 +17,17 @@ stopThres = 100;
 capacity = 395;
 
 % homePos = [30,40,6];
-% homePos = [10, 80, 6];
-homePos = [0,0,0];
+homePos = [10, 80, 6];
+% homePos = [0,0,0];
 
 global wowCount;
 wowCount = 0;
 
 % generate map
-% mapGenerator_VRPCF
-% node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
-% node = vertcat(homePos,node);
-% simStep = 1;
+mapGenerator_VRPCF
+node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
+node = vertcat(homePos,node);
+simStep = 1;
 
 % temp node generator
 % node = [0,0;1,1;1,-1;2,0;3,0;4,1;4,-1;5,0;1,2;1,3.1;2,2.5;2,1.5];
@@ -38,13 +38,13 @@ wowCount = 0;
 % simStep = 0.03;
 
 % random node generator
-N = 50;
-node = rand(N,3);
-node(:,1:2) = node(:,1:2) * 100;
-node(:,3) = node(:,3) * 10;
-node = vertcat(homePos,node);
-simStep = 1;
-vnum = 8;
+% N = 50;
+% node = rand(N,3);
+% node(:,1:2) = node(:,1:2) * 100;
+% node(:,3) = node(:,3) * 10;
+% node = vertcat(homePos,node);
+% simStep = 1;
+% vnum = 8;
 
 % random bridge generator
 % N = 30;
@@ -147,6 +147,7 @@ grid on
 axis equal
 title('Tour animation')
 % view(0, 90)
+drawnow
 
 % animate
 tour = colony.queen.tour;

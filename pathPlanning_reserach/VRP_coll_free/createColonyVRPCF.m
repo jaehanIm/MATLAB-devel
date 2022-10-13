@@ -104,13 +104,18 @@ for i = 1 : antNo
                     [~,nextNode] = max(P_allNodes);
                     nextNode = nextNode(1); % just in case multiple nextNodes are generated
                 end
-    
+
+                if debugTemp.vehTourLen(j) == 1%isempty(colony.ant(i).occupancy)
+                    occu_hist = [];
+                else
+                    occu_hist = colony.ant(i).occupancy(j,:);
+                end
+                
+                [timeSlack, reservation, occupancy, blocked, initPrevDelay] = resolveConflict(reservation, occu_hist, vehTourLen(j), blocked, A, C, currentNode, nextNode, colony.ant(i).tick(j), implicitRoute, j);
+
                 vehTourLen(j) = vehTourLen(j) +1;
                 unvisitedNum = unvisitedNum - 1;
                 colony.ant(i).tour(j,vehTourLen(j)) = nextNode;
-    
-                [timeSlack, reservation, occupancy, blocked, initPrevDelay] = resolveConflict(reservation, blocked, A, C, currentNode, nextNode, colony.ant(i).tick(j), implicitRoute, j);
-
                 colony.ant(i).occupancy{j,vehTourLen(j)} = occupancy;
                 colony.ant(i).tick(j) = colony.ant(i).tick(j) + C(currentNode,nextNode) + timeSlack;
                 colony.ant(i).tickHistory(j,vehTourLen(j)) = colony.ant(i).tick(j);
