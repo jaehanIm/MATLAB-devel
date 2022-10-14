@@ -7,14 +7,14 @@ addpath('./../Model/')
 %%%%%%%%%%% ACO for VRPCF version %%%%%%%%%%%
 
 % parameter setting
-fovFactor = 2.8;
+fovFactor = 2.7;
 mapheight = 3;
 inpection_dist = 7;
 
 distThres = 20;
-vnum = 4;
+vnum = 8;
 antNo = 20;
-stopThres = 100;
+stopThres = 30;
 capacity = 395;
 servTime = 1;
 
@@ -40,16 +40,16 @@ simStep = 1;
 % simStep = 0.03;
 
 % random node generator
-% N = 70;
+% N = 100;
 % node = rand(N,3);
 % node(:,1:2) = node(:,1:2) * 100;
 % node(:,3) = node(:,3) * 10;
 % node = vertcat(homePos,node);
 % simStep = 1;
-% vnum = 15;
+% vnum = 8;
 
 % random bridge generator
-% N = 40;
+% N = 100;
 % node = rand(N,3);
 % node(:,1:2) = node(:,1:2) * 100 - 50;
 % node2 = rand(N,3);
@@ -58,7 +58,7 @@ simStep = 1;
 % node(:,3) = node(:,3) * 10;
 % node = vertcat(homePos,node);
 % simStep = 1;
-% vnum = 9;
+% vnum = 8;
 
 % stl
 % stlAddr = 'generic.stl';

@@ -3,7 +3,7 @@
 
 global homeIdx tau0
 %% Initial parameters of ACO 
-maxIter = 50;
+maxIter = 1000;
 
 tau0 = 1 / (mapGraph.n * mean( mapGraph.edges(:)) * N);  % Initial phromone concentration
 tau = tau0 * ones( mapGraph.n , mapGraph.n); % Phromone matirx
