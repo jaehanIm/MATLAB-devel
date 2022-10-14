@@ -1,4 +1,6 @@
-function [waitFee, reservation, occupancy, blocked, prevDelay] = resolveConflict(reservation, occu_hist, vehTourLen, blocked, A, C, curNode, nextNode, tick, implicitRoute, vehIdx)
+function [waitFee, reservation, occupancy, blocked, occu_hist, getAwayTime, unableFlag] = resolveConflict(reservation, occu_hist, vehTourLen, blocked, A, C, curNode, nextNode, tick, implicitRoute, vehIdx, getAwayTime)
+unableFlag = false;
+
 % get route info
 if A(curNode, nextNode) == 0
     routeInfo = implicitRoute{curNode, nextNode};
@@ -37,118 +39,148 @@ for i = 1:L-1 % for all route nodes
             end
         end
     end
-    % update waitFee for i (certain route node)
-    localDelay = tick - origTick;
-    waitFee = waitFee + localDelay;
-    tick = reqTerm;
 
-    occupancy(i,:) = [initNode, termNode, reqInit, reqTerm];
-
-%     if ~isempty(occu_hist)
-%         occu_hist(1:vehTourLen);
-%     end
-%     colony.queen.occupancy{5,colony.queen.vehTourLen(5)}(end,:)
-
-    % if delay occurred -> extend previous reservation
-    if localDelay > 0
-        relevantNodes = find(A(initNode,:));
-        for j = relevantNodes % extend initNode related reservations
-            if ~isempty(reservation{j,initNode}.info)
-                localReserveLen = reservation{j,initNode}.num;
-                updateIdx = [];
-                for k = 1:localReserveLen
-                    if reservation{j,initNode}.info{end-k+1}(3) == vehIdx %뒤부터 확인
-                        updateIdx = localReserveLen-k+1;
-                        break;
+    if i<L-1 % check whether i can escape from the next node
+        runawayTime = min(getAwayTime{termNode}(getAwayTime{termNode}>origTick));
+        if ~isempty(runawayTime)
+            preview_tick = reqTerm;
+            preview_initNode = routeInfo(i+1);
+            preview_termNode = routeInfo(i+2);
+            preview_reqInit = preview_tick;
+            preview_reqTerm = preview_reqInit + C(preview_initNode,preview_termNode);
+            preview_reqInfo = [preview_reqInit,preview_reqTerm];
+            preview_reserveNum = reservation{preview_initNode,preview_termNode}.num;
+            if preview_reserveNum ~= 0
+                for pj = 1:preview_reserveNum
+                    preview_reservationInfo = reservation{preview_initNode,preview_termNode}.info{pj};
+                    preview_isConflict = detectConflict(preview_reqInfo,preview_reservationInfo);
+                    if preview_isConflict
+                        if preview_tick <= preview_reservationInfo(2)
+                            preview_tick = preview_reservationInfo(2);
+                            if preview_tick > runawayTime
+                                unableFlag = true;
+                            end
+                        end
                     end
-                end
-                if ~isempty(updateIdx)
-                    reservation{j,initNode}.info{updateIdx}(2) = reservation{j,initNode}.info{updateIdx}(2) + localDelay;
-                else
-%                     reservation{j,initNode}.info{end}(2) = reservation{j,initNode}.info{end}(2) + localDelay;
-                end
-%                 
-            end
-        end
-        % extend from init to prev reservation
-        if i > 1 % if we are within current session
-            prevNode = routeInfo(i-1);
-            if ~isempty(reservation{initNode,prevNode}.info)
-                localReserveLen = reservation{initNode,prevNode}.num;
-                updateIdx = [];
-                for k = 1:localReserveLen
-                    if reservation{initNode,prevNode}.info{end-k+1}(3) == vehIdx %뒤부터 확인
-                        updateIdx = localReserveLen-k+1;
-                        break;
-                    end
-                end
-                if ~isempty(updateIdx)
-                    reservation{initNode,prevNode}.info{updateIdx}(2) = reservation{initNode,prevNode}.info{updateIdx}(2) + localDelay;
-                else
-%                     reservation{initNode,prevNode}.info{end}(2) = reservation{initNode,prevNode}.info{end}(2) + localDelay;
-                end
-            end
-        else % if we are extending previous session
-            if ~isempty(occu_hist)
-                prevSessionInit = occu_hist{vehTourLen}(end,1);
-                prevSessionTerm = occu_hist{vehTourLen}(end,2);
-                prevSessionEndingT = occu_hist{vehTourLen}(end,4);
-                localReserveLen = size(reservation{initNode,prevSessionInit}.info,2);
-                updateIdx = [];
-                for k = 1:localReserveLen
-                    if reservation{initNode,prevSessionInit}.info{end-k+1}(3) == vehIdx
-%                     if reservation{initNode,prevSessionInit}.info{end-k+1}(2) == prevSessionEndingT && reservation{initNode,prevSessionInit}.info{end-k+1}(3) == vehIdx
-                        updateIdx = localReserveLen-k+1;
-                        break;
-                    end
-                end
-                if ~isempty(updateIdx)
-                    reservation{initNode,prevSessionInit}.info{updateIdx}(2) = reservation{initNode,prevSessionInit}.info{updateIdx}(2) + localDelay;
-                else
-%                     reservation{initNode,prevSessionInit}.info{end}(2) = reservation{initNode,prevSessionInit}.info{end}(2) + localDelay;
                 end
             end
         end
     end
 
-    % update reservation schedule
-    relevantNodes = find(A(termNode,:));
-    for j = relevantNodes
-        reservation{j,termNode}.num = reservation{j,termNode}.num + 1;
-        reservation{j,termNode}.info{end+1} = [reqInit, reqTerm, vehIdx, localDelay];
-    end
-    reservation{termNode,initNode}.num = reservation{termNode,initNode}.num + 1;
-    reservation{termNode,initNode}.info{end+1} = [reqInit, reqTerm, vehIdx, localDelay];
-    if i == L-1
-        blocked(nextNode) = 1;
-        blocked(curNode) = 0;
-    end
-
-    % sort reservation
-    for j = relevantNodes
+    if unableFlag == false
+        % update waitFee for i (certain route node)
+        localDelay = tick - origTick;
+        waitFee = waitFee + localDelay;
+        tick = reqTerm;
+    
+        occupancy(i,:) = [initNode, termNode, reqInit, reqTerm];
+        getAwayTime{termNode} = vertcat(getAwayTime{termNode},reqTerm);
+    
+        % if delay occurred -> extend previous reservation
+        if localDelay > 0
+            relevantNodes = find(A(initNode,:));
+            for j = relevantNodes % extend initNode related reservations
+                if ~isempty(reservation{j,initNode}.info)
+                    localReserveLen = reservation{j,initNode}.num;
+                    updateIdx = [];
+                    for k = 1:localReserveLen
+                        if reservation{j,initNode}.info{end-k+1}(3) == vehIdx %뒤부터 확인
+                            updateIdx = localReserveLen-k+1;
+                            break;
+                        end
+                    end
+                    if ~isempty(updateIdx)
+                        reservation{j,initNode}.info{updateIdx}(2) = reservation{j,initNode}.info{updateIdx}(2) + localDelay;
+                    else
+    %                     reservation{j,initNode}.info{end}(2) = reservation{j,initNode}.info{end}(2) + localDelay;
+                    end
+    %                 
+                end
+            end
+            % extend from init to prev reservation
+            if i > 1 % if we are within current session
+                prevNode = routeInfo(i-1);
+                if ~isempty(reservation{initNode,prevNode}.info)
+                    localReserveLen = reservation{initNode,prevNode}.num;
+                    updateIdx = [];
+                    for k = 1:localReserveLen
+                        if reservation{initNode,prevNode}.info{end-k+1}(3) == vehIdx %뒤부터 확인
+                            updateIdx = localReserveLen-k+1;
+                            break;
+                        end
+                    end
+                    if ~isempty(updateIdx)
+                        reservation{initNode,prevNode}.info{updateIdx}(2) = reservation{initNode,prevNode}.info{updateIdx}(2) + localDelay;
+                    else
+    %                     reservation{initNode,prevNode}.info{end}(2) = reservation{initNode,prevNode}.info{end}(2) + localDelay;
+                    end
+                end
+            else % if we are extending previous session
+                if ~isempty(occu_hist)
+                    prevSessionInit = occu_hist{vehTourLen}(end,1);
+                    prevSessionTerm = occu_hist{vehTourLen}(end,2);
+                    prevSessionEndingT = occu_hist{vehTourLen}(end,4);
+                    localReserveLen = size(reservation{initNode,prevSessionInit}.info,2);
+                    updateIdx = [];
+                    for k = 1:localReserveLen
+    %                     if reservation{initNode,prevSessionInit}.info{end-k+1}(3) == vehIdx
+                        if reservation{initNode,prevSessionInit}.info{end-k+1}(2) == prevSessionEndingT && reservation{initNode,prevSessionInit}.info{end-k+1}(3) == vehIdx
+                            updateIdx = localReserveLen-k+1;
+                            break;
+                        end
+                    end
+                    if ~isempty(updateIdx)
+                        reservation{initNode,prevSessionInit}.info{updateIdx}(2) = reservation{initNode,prevSessionInit}.info{updateIdx}(2) + localDelay;
+                        occu_hist{vehTourLen}(end,2) = reservation{initNode,prevSessionInit}.info{updateIdx}(2);
+                    else
+    %                     reservation{initNode,prevSessionInit}.info{end}(2) = reservation{initNode,prevSessionInit}.info{end}(2) + localDelay;
+    %                     occu_hist{vehTourLen}(end,2) = reservation{initNode,prevSessionInit}.info{end}(2);
+                    end
+                end
+            end
+        end
+        % update reservation schedule
+        relevantNodes = find(A(termNode,:));
+    %     relevantNodes(relevantNodes==initNode) = [];
+        for j = relevantNodes
+            reservation{j,termNode}.num = reservation{j,termNode}.num + 1;
+            reservation{j,termNode}.info{end+1} = [reqInit, reqTerm, vehIdx, localDelay];
+        end
+        reservation{termNode,initNode}.num = reservation{termNode,initNode}.num + 1;
+        reservation{termNode,initNode}.info{end+1} = [reqInit, reqTerm, vehIdx, localDelay];
+        if i == L-1
+            blocked(nextNode) = 1;
+            blocked(curNode) = 0;
+        end
+    
+        % sort reservation
+        for j = relevantNodes
+            tempCell = [];
+            tempCell{1,reservation{j,termNode}.num} = [];
+            forSortInits = zeros(reservation{j,termNode}.num,1);
+            for k = 1:reservation{j,termNode}.num
+                forSortInits(k) = reservation{j,termNode}.info{k}(1);
+            end
+            [~,I] = sort(forSortInits);
+            for k = 1:reservation{j,termNode}.num
+                tempCell{k} = reservation{j,termNode}.info{I==k};
+            end
+            reservation{j,termNode}.info = tempCell;
+        end
         tempCell = [];
-        tempCell{1,reservation{j,termNode}.num} = [];
-        forSortInits = zeros(reservation{j,termNode}.num,1);
-        for k = 1:reservation{j,termNode}.num
-            forSortInits(k) = reservation{j,termNode}.info{k}(1);
+        tempCell{1,reservation{termNode,initNode}.num} = [];
+        forSortInits = zeros(reservation{termNode,initNode}.num,1);
+        for k = 1:reservation{termNode,initNode}.num
+            forSortInits(k) = reservation{termNode,initNode}.info{k}(1);
         end
         [~,I] = sort(forSortInits);
-        for k = 1:reservation{j,termNode}.num
-            tempCell{k} = reservation{j,termNode}.info{I==k};
+        for k = 1:reservation{termNode,initNode}.num
+            tempCell{k} = reservation{termNode,initNode}.info{I==k};
         end
-        reservation{j,termNode}.info = tempCell;
+        reservation{termNode,initNode}.info = tempCell;
+    else
+        break;
     end
-    tempCell = [];
-    tempCell{1,reservation{termNode,initNode}.num} = [];
-    forSortInits = zeros(reservation{termNode,initNode}.num,1);
-    for k = 1:reservation{termNode,initNode}.num
-        forSortInits(k) = reservation{termNode,initNode}.info{k}(1);
-    end
-    [~,I] = sort(forSortInits);
-    for k = 1:reservation{termNode,initNode}.num
-        tempCell{k} = reservation{termNode,initNode}.info{I==k};
-    end
-    reservation{termNode,initNode}.info = tempCell;
 end
 
 end

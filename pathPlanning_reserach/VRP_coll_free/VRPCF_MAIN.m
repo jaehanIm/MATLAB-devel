@@ -2,6 +2,7 @@ clear all
 
 addpath('./../')
 addpath('..\ACO\')
+addpath('./../Model/')
 
 %%%%%%%%%%% ACO for VRPCF version %%%%%%%%%%%
 
@@ -11,10 +12,11 @@ mapheight = 3;
 inpection_dist = 7;
 
 distThres = 20;
-vnum = 12;
+vnum = 4;
 antNo = 20;
 stopThres = 100;
 capacity = 395;
+servTime = 1;
 
 % homePos = [30,40,6];
 homePos = [10, 80, 6];
@@ -38,16 +40,16 @@ simStep = 1;
 % simStep = 0.03;
 
 % random node generator
-% N = 50;
+% N = 70;
 % node = rand(N,3);
 % node(:,1:2) = node(:,1:2) * 100;
 % node(:,3) = node(:,3) * 10;
 % node = vertcat(homePos,node);
 % simStep = 1;
-% vnum = 8;
+% vnum = 15;
 
 % random bridge generator
-% N = 30;
+% N = 40;
 % node = rand(N,3);
 % node(:,1:2) = node(:,1:2) * 100 - 50;
 % node2 = rand(N,3);
@@ -58,8 +60,67 @@ simStep = 1;
 % simStep = 1;
 % vnum = 9;
 
+% stl
+% stlAddr = 'generic.stl';
+% inpection_dist = 1;
+% node = loadStl(stlAddr,inpection_dist);
+% rndF = rand(size(node,1),1);
+% node(rndF>0.3,:,:) = [];
+% 
+% % node segmentation
+% body = node;
+% 
+% tail = body(body(:,1) > 14.7421 & body(:,2) < 0.955 & body(:,2) > -0.955,:,:);
+% body(body(:,1) > 14.7421 & body(:,2) < 0.955 & body(:,2) > -0.955,:,:) = [];
+% factor = 0.1; localN = size(tail,1);
+% tail = tail(rand(localN,1) < factor,:,:);
+% 
+% lEngine = body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:);
+% body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:) = [];
+% factor = 0.1; localN = size(lEngine,1);
+% lEngine = lEngine(rand(localN,1) < factor,:,:);
+% 
+% rEngine = body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:);
+% body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) < 0.22,:,:) = [];
+% factor = 0.1; localN = size(rEngine,1);
+% rEngine = rEngine(rand(localN,1) < factor,:,:);
+% 
+% emphennage = body(body(:,1)>12 & body(:,2)<2 & body(:,2)>-2,:,:);
+% body(body(:,1)>12 & body(:,2)<2 & body(:,2)>-2,:,:) = [];
+% factor = 0.2; localN = size(emphennage,1);
+% emphennage = emphennage(rand(localN,1) < factor,:,:);
+% 
+% lEngineNeg = body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.5,:,:);
+% body(body(:,2) < -1.9 & body(:,2) > -5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.3,:,:) = [];
+% 
+% rEngineNeg = body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.5,:,:);
+% body(body(:,2) > 1.9 & body(:,2) < 5.13 & body(:,1) > 1.13 & body(:,1) < 4.08 & body(:,3) > 0.22 & body(:,3) < 0.3,:,:) = [];
+% 
+% body(body(:,2) > -3.59 & body(:,2) < -3.51 & body(:,1) > 1.5 & body(:,1) < 3.95 & body(:,3) > 0.22,:,:) = [];
+% body(body(:,2) > 3.51 & body(:,2) < 3.59 & body(:,1) > 1.5 & body(:,1) < 3.95 & body(:,3) > 0.22,:,:) = [];
+% 
+% nose = body(body(:,1) < -2.9,:,:);
+% body(body(:,1) < -2.9,:,:) = [];
+% factor = 0.5; localN = size(nose,1);
+% nose = nose(rand(localN,1) < factor,:,:);
+% 
+% node = [body;tail;lEngine;rEngine;nose;emphennage];
+% 
+% save('stlnode.mat','node');
+% 
+% figure(98)
+% clf
+% drawStl(stlAddr,98)
+% hold on
+% plot3(node(:,1),node(:,2),node(:,3),'.')
+% 
+% simStep = 0.1;
+% vnum = 9;
+% distThres = 0.5;
+% stopThres = 30;
+
+
 N = size(node,1);
-servTime = zeros(N,1);
 
 % Graph construction
 L = zeros(N,N);
@@ -127,6 +188,8 @@ legend('veh 1','veh2')
 
 figure(4)
 clf
+% drawStl(stlAddr,4);
+hold on
 % draw node
 for i = 1:size(node,1)
     plot3(node(:,1),node(:,2),node(:,3),'.');
@@ -173,6 +236,7 @@ for i = 1:vnum
 end
 hh(i) = line([0,0],[0,0],[0,0]);
 view(0,90)
+% view(-80,-10)
 tt = text(0,120,num2str(0.0));
 
 count = 0;

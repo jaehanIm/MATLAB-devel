@@ -3,20 +3,26 @@
 
 global homeIdx tau0
 %% Initial parameters of ACO 
-maxIter = 10000;
+maxIter = 50;
 
 tau0 = 1 / (mapGraph.n * mean( mapGraph.edges(:)) * N);  % Initial phromone concentration
 tau = tau0 * ones( mapGraph.n , mapGraph.n); % Phromone matirx
 eta = 1./ mapGraph.edges;  % desirability of each edge
 
+% param.rho = 0.1; % Evaporation rate
+% param.alpha = 1;  % Phromone exponential parameters 
+% param.beta = 1;   % Desirability exponetial paramter
+% param.gamma = 3; % time importance parameter
+% param.lambda = 1; % time scale factor
+% param.psi = 0.1;    % local pheromone evaporation rate
+% param.q = 0.9;    % Exploration Exploitation parameter
+% param.penalFactor = 2; % time violation penalty factor
+
 param.rho = 0.1; % Evaporation rate
 param.alpha = 1;  % Phromone exponential parameters 
-param.beta = 1;   % Desirability exponetial paramter
-param.gamma = 3; % time importance parameter
-param.lambda = 1; % time scale factor
+param.beta = 3;   % Desirability exponetial paramter
 param.psi = 0.1;    % local pheromone evaporation rate
 param.q = 0.9;    % Exploration Exploitation parameter
-param.penalFactor = 2; % time violation penalty factor
 
 homeIdx = 1; %60 is the main
 
@@ -72,7 +78,7 @@ for t = 1 : maxIter
     tau = updatePhromoneVRPCF(tau , colony, param.rho, minIndex, vnum);
     
     % Display the results
-    if mod(t,50) == 0
+    if mod(t,5) == 0
         outmsg = [ 'Iteration #' , num2str(t) , ' Shortest length = ' , num2str(colony.queen.fitness)  ];
         disp(outmsg)
     end
@@ -97,7 +103,7 @@ VRPCF_result = colony.queen.fitness;
 VRPCF_resultL = colony.queen.fitnessL;
 VRPCF_resultPerV = colony.queen.fitnessPer;
 
-history(t+1,:) = [];
+% history(t+1,:) = [];
 historyACO = history;
 historyACO(historyACO==0) = [];
 
