@@ -1,6 +1,7 @@
-function [ colony ] = createColonyVRPCF( graph, antNo, tau, eta, param, vehNum, capacity, servTime, implicitRoute)
+function [ colony, incompleteFlag ] = createColonyVRPCF( graph, antNo, tau, eta, param, vehNum, capacity, servTime, implicitRoute)
 
 global homeIdx debugTemp tau0
+incompleteFlag = false;
 
 alpha = param.alpha;
 beta = param.beta;
@@ -98,6 +99,7 @@ for i = 1 : antNo
                 debugTemp.vehTourLen = vehTourLen;
                 debugTemp.unvisitedNum = unvisitedNum;
                 debugTemp.tempBlocked =tempBlocked;
+                debugTemp.reservation = reservation;
                 if unvisitedNum == N-1
                     debugTemp.initColony = colony;
                 end
@@ -116,36 +118,54 @@ for i = 1 : antNo
                     orig_occu_hist = occu_hist;
                 end
 
-                [timeSlack, reservation_o, occupancy_o, blocked_o, occu_hist_o, getAwayTime_o, unableFlag] = resolveConflict(reservation, occu_hist, vehTourLen(j), blocked, A, C, currentNode, nextNode, colony.ant(i).tick(j), implicitRoute, j, getAwayTime);
+                [timeSlack, reservation_o, occupancy_o, blocked_o, occu_hist_o, getAwayTime_o, unableFlag, damnFlag] = resolveConflict(reservation, occu_hist, vehTourLen(j), blocked, A, C, currentNode, nextNode, colony.ant(i).tick(j), implicitRoute, j, getAwayTime);
 
-                if ~unableFlag
-                    tempBlocked{j} = [];
-                    %update info
-                    reservation = reservation_o;
-                    blocked = blocked_o;
-                    occupancy = occupancy_o;
-                    occu_hist = occu_hist_o;
-                    getAwayTime = getAwayTime_o;
-    
-                    if ~isempty(occu_hist)
-                        colony.ant(i).occupancy{j,vehTourLen(j)} = occu_hist{vehTourLen(j)};
-                    end
-    
-                    vehTourLen(j) = vehTourLen(j) +1;
-                    unvisitedNum = unvisitedNum - 1;
-                    colony.ant(i).tour(j,vehTourLen(j)) = nextNode;
-                    colony.ant(i).occupancy{j,vehTourLen(j)} = occupancy;
-                    colony.ant(i).tick(j) = colony.ant(i).tick(j) + C(currentNode,nextNode) + timeSlack;
-                    colony.ant(i).tickHistory(j,vehTourLen(j)) = colony.ant(i).tick(j);
-        
-                    % local pheromone update
-                    tau(currentNode,nextNode) = tau(currentNode,nextNode) * (1-psi) + tau0 * psi;
+                if damnFlag && vehTourLen(j) > 1
+                    disp("[notice] Withdraw!")
+                    reservation = withdrawReservation(colony.ant(i).occupancy{j,vehTourLen(j)},reservation,j);
+                    colony.ant(i).tour(j,vehTourLen(j)) = 0;
+                    unvisitedNum = unvisitedNum+1;
+                    colony.ant(i).occupancy{j,vehTourLen(j)} = [];
+                    colony.ant(i).tick(j) = colony.ant(i).tickHistory(j,vehTourLen(j)-1);
+                    colony.ant(i).tickHistory(j,vehTourLen(j)) = 0;
+                    vehTourLen(j) = vehTourLen(j)-1;
+%                     stuckVeh(j) = true;
                 else
-                    tempBlocked{j} = vertcat(tempBlocked{j},nextNode);
-                    tempBlocked{j} = unique(tempBlocked{j});
+                    if ~unableFlag && ~damnFlag
+                        tempBlocked{j} = [];
+                        %update info
+                        reservation = reservation_o;
+                        blocked = blocked_o;
+                        occupancy = occupancy_o;
+                        occu_hist = occu_hist_o;
+                        getAwayTime = getAwayTime_o;
+        
+                        if ~isempty(occu_hist)
+                            colony.ant(i).occupancy{j,vehTourLen(j)} = occu_hist{vehTourLen(j)};
+                        end
+        
+                        vehTourLen(j) = vehTourLen(j) +1;
+                        unvisitedNum = unvisitedNum - 1;
+                        colony.ant(i).tour(j,vehTourLen(j)) = nextNode;
+                        colony.ant(i).occupancy{j,vehTourLen(j)} = occupancy;
+                        colony.ant(i).tick(j) = colony.ant(i).tick(j) + C(currentNode,nextNode) + timeSlack;
+                        colony.ant(i).tickHistory(j,vehTourLen(j)) = colony.ant(i).tick(j);
+            
+                        % local pheromone update
+                        tau(currentNode,nextNode) = tau(currentNode,nextNode) * (1-psi) + tau0 * psi;
+                    else
+                        tempBlocked{j} = vertcat(tempBlocked{j},nextNode);
+                        tempBlocked{j} = unique(tempBlocked{j});
+                    end
                 end
             else % no viable nodes to visit
                 stuckVeh(j) = true;
+                debugTemp.stuck = stuckVeh;
+                if stuckVeh == true
+                    disp("Shit...")
+                    incompleteFlag = true;
+                    break;
+                end
             end
     end
     

@@ -1,5 +1,7 @@
-function [waitFee, reservation, occupancy, blocked, occu_hist, getAwayTime, unableFlag] = resolveConflict(reservation, occu_hist, vehTourLen, blocked, A, C, curNode, nextNode, tick, implicitRoute, vehIdx, getAwayTime)
+function [waitFee, reservation, occupancy, blocked, occu_hist, getAwayTime, unableFlag, damnFlag] = resolveConflict(reservation, occu_hist, vehTourLen, blocked, A, C, curNode, nextNode, tick, implicitRoute, vehIdx, getAwayTime)
 unableFlag = false;
+damnFlag = false;
+global debugTemp
 
 % get route info
 if A(curNode, nextNode) == 0
@@ -24,13 +26,27 @@ for i = 1:L-1 % for all route nodes
     
     % detect conflict and delay schedule
     reserveNum = reservation{initNode,termNode}.num;
+    runawayTime = min(getAwayTime{termNode}(getAwayTime{termNode}>origTick));
+    if isempty(runawayTime)
+        runawayTime = inf;
+    end
     if reserveNum ~=0
         for j = 1:reserveNum % compare with for all reservations
             % conflict detection
+            debugTemp.reserveNum_i = reserveNum;
+            debugTemp.j_i = j;
+            debugTemp.i_i = i;
+            debugTemp.initNode_i = initNode;
+            debugTemp.termNode_i = termNode;
+            debugTemp.info_i = reservation{initNode,termNode}.info;
             reservationInfo = reservation{initNode,termNode}.info{j};
             isConflict = detectConflict(reqInfo, reservationInfo);
             if isConflict % update reqinfo when conflict occurs
                 if tick <= reservationInfo(2)
+                    if tick > runawayTime && ~isempty(occu_hist) && i == 1
+                        damnFlag = true;
+                        break;
+                    end
                     tick = reservationInfo(2);
                     reqInit = tick;
                     reqTerm = tick + C(initNode,termNode);
@@ -40,8 +56,11 @@ for i = 1:L-1 % for all route nodes
         end
     end
 
+    if damnFlag
+        break;
+    end
+
     if i<L-1 % check whether i can escape from the next node
-        runawayTime = min(getAwayTime{termNode}(getAwayTime{termNode}>origTick));
         if ~isempty(runawayTime)
             preview_tick = reqTerm;
             preview_initNode = routeInfo(i+1);
@@ -59,12 +78,17 @@ for i = 1:L-1 % for all route nodes
                             preview_tick = preview_reservationInfo(2);
                             if preview_tick > runawayTime
                                 unableFlag = true;
+                                break;
                             end
                         end
                     end
                 end
             end
         end
+    end
+
+    if unableFlag
+        break;
     end
 
     if unableFlag == false
@@ -141,7 +165,6 @@ for i = 1:L-1 % for all route nodes
         end
         % update reservation schedule
         relevantNodes = find(A(termNode,:));
-    %     relevantNodes(relevantNodes==initNode) = [];
         for j = relevantNodes
             reservation{j,termNode}.num = reservation{j,termNode}.num + 1;
             reservation{j,termNode}.info{end+1} = [reqInit, reqTerm, vehIdx, localDelay];

@@ -1,4 +1,5 @@
-function [ fitness, fitnessL, fitnessPerV, fitnessM, violation] = fitnessFunctionVRPCF (tour, tourLen, graph, vehNum, tickHistory, servTime, param)
+function [ fitness, fitnessL, fitnessPerV, fitnessM, violation] = fitnessFunctionVRPCF (tour, tourLen, graph, vehNum, tickHistory, servTime, param, incompleteFlag)
+
 
 fitnessPerVeh = zeros(vehNum,1);
 violation = zeros(vehNum,1);
@@ -15,5 +16,6 @@ fitnessM = max(fitnessPerVeh);
 fitnessL = sum(fitnessPerVeh);
 fitnessPerV = fitnessPerVeh;
 fitness = fitnessM;
+
 
 end

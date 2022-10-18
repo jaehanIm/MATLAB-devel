@@ -39,12 +39,12 @@ colony.reservation = [];
 
 for t = 1 : maxIter
     % Create Ants 
-    colony = createColonyVRPCF( mapGraph, antNo, tau, eta, param, vnum, capacity, servTime, implicitRoute);
+    [colony, incompleteFlag] = createColonyVRPCF( mapGraph, antNo, tau, eta, param, vnum, capacity, servTime, implicitRoute);
         
     % Calculate the fitness values of all ants 
     for i = 1 : antNo 
         [colony.ant(i).fitness, colony.ant(i).fitnessL, colony.ant(i).fitnessPer, colony.ant(i).fitnessM, colony.ant(i).violation] = ...
-            fitnessFunctionVRPCF(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum, colony.ant(i).tickHistory, servTime, param);
+            fitnessFunctionVRPCF(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum, colony.ant(i).tickHistory, servTime, param, incompleteFlag);
     end
     
     % Find the best ant (queen)

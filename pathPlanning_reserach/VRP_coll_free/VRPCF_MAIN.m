@@ -11,10 +11,11 @@ fovFactor = 2.7;
 mapheight = 3;
 inpection_dist = 7;
 
-distThres = 25;
-vnum = 8;
+
+distThres = 20;
+vnum = 5;
 antNo = 20;
-stopThres = 10;
+stopThres = 20;
 capacity = 395;
 servTime = 1;
 
@@ -46,7 +47,8 @@ wowCount = 0;
 % node(:,3) = node(:,3) * 10;
 % node = vertcat(homePos,node);
 % simStep = 1;
-% vnum = 7;
+% distThres = 20;
+% vnum = 4;
 
 % random bridge generator
 N = 25;
@@ -237,7 +239,7 @@ end
 hh(i) = line([0,0],[0,0],[0,0]);
 view(0,90)
 % view(-80,-10)
-tt = text(0,120,num2str(0.0));
+tt = text(homePos(1)+2,homePos(2),num2str(0.0));
 
 % occupancy 정리
 for v = 1:vnum
