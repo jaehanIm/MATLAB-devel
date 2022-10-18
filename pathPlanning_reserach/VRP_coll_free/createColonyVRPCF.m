@@ -121,7 +121,7 @@ for i = 1 : antNo
                 [timeSlack, reservation_o, occupancy_o, blocked_o, occu_hist_o, getAwayTime_o, unableFlag, damnFlag] = resolveConflict(reservation, occu_hist, vehTourLen(j), blocked, A, C, currentNode, nextNode, colony.ant(i).tick(j), implicitRoute, j, getAwayTime);
 
                 if damnFlag && vehTourLen(j) > 1
-                    disp("[notice] Withdraw!")
+%                     disp("[notice] Withdraw!")
                     reservation = withdrawReservation(colony.ant(i).occupancy{j,vehTourLen(j)},reservation,j);
                     colony.ant(i).tour(j,vehTourLen(j)) = 0;
                     unvisitedNum = unvisitedNum+1;
@@ -162,7 +162,7 @@ for i = 1 : antNo
                 stuckVeh(j) = true;
                 debugTemp.stuck = stuckVeh;
                 if stuckVeh == true
-                    disp("Shit...")
+%                     disp("Shit...")
                     incompleteFlag = true;
                     break;
                 end

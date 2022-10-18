@@ -44,7 +44,7 @@ for t = 1 : maxIter
     % Calculate the fitness values of all ants 
     for i = 1 : antNo 
         [colony.ant(i).fitness, colony.ant(i).fitnessL, colony.ant(i).fitnessPer, colony.ant(i).fitnessM, colony.ant(i).violation] = ...
-            fitnessFunctionVRPCF(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum, colony.ant(i).tickHistory, servTime, param, incompleteFlag);
+            fitnessFunctionVRPCF(colony.ant(i).tour, colony.ant(i).vehTourLen, mapGraph, vnum, colony.ant(i).tickHistory, servTime, param, incompleteFlag, N);
     end
     
     % Find the best ant (queen)
@@ -103,9 +103,11 @@ for t = 1 : maxIter
 
     if count >= stopThres
         disp('Solution stabilized. Terminating ACS!');
-        if incompleteFlag
+        if ~isempty(missingNode)
             disp('Solution incomplete');
             missingNode
+        else
+            disp('Solution complete')
         end
         break;
     end

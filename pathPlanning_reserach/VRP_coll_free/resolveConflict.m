@@ -27,8 +27,12 @@ for i = 1:L-1 % for all route nodes
     % detect conflict and delay schedule
     reserveNum = reservation{initNode,termNode}.num;
     runawayTime = min(getAwayTime{termNode}(getAwayTime{termNode}>origTick));
+    runawayTimeInit = min(getAwayTime{initNode}(getAwayTime{initNode}>origTick));
     if isempty(runawayTime)
         runawayTime = inf;
+    end
+    if isempty(runawayTimeInit)
+        runawayTimeInit = inf;
     end
     if reserveNum ~=0
         for j = 1:reserveNum % compare with for all reservations
@@ -47,11 +51,11 @@ for i = 1:L-1 % for all route nodes
                     reqInit = tick;
                     reqTerm = tick + C(initNode,termNode);
                     reqInfo = [reqInit,reqTerm];
-                    if tick > runawayTime && ~isempty(occu_hist) && i == 1
-                        damnFlag = true;
-                        break;
-                    end
                 end
+            end
+            if tick > runawayTimeInit && ~isempty(occu_hist) && i == 1
+                damnFlag = true;
+                break;
             end
         end
     end
@@ -177,30 +181,30 @@ for i = 1:L-1 % for all route nodes
         end
     
         % sort reservation
-        for j = relevantNodes
-            tempCell = [];
-            tempCell{1,reservation{j,termNode}.num} = [];
-            forSortInits = zeros(reservation{j,termNode}.num,1);
-            for k = 1:reservation{j,termNode}.num
-                forSortInits(k) = reservation{j,termNode}.info{k}(1);
-            end
-            [~,I] = sort(forSortInits);
-            for k = 1:reservation{j,termNode}.num
-                tempCell{k} = reservation{j,termNode}.info{I==k};
-            end
-            reservation{j,termNode}.info = tempCell;
-        end
-        tempCell = [];
-        tempCell{1,reservation{termNode,initNode}.num} = [];
-        forSortInits = zeros(reservation{termNode,initNode}.num,1);
-        for k = 1:reservation{termNode,initNode}.num
-            forSortInits(k) = reservation{termNode,initNode}.info{k}(1);
-        end
-        [~,I] = sort(forSortInits);
-        for k = 1:reservation{termNode,initNode}.num
-            tempCell{k} = reservation{termNode,initNode}.info{I==k};
-        end
-        reservation{termNode,initNode}.info = tempCell;
+%         for j = relevantNodes
+%             tempCell = [];
+%             tempCell{1,reservation{j,termNode}.num} = [];
+%             forSortInits = zeros(reservation{j,termNode}.num,1);
+%             for k = 1:reservation{j,termNode}.num
+%                 forSortInits(k) = reservation{j,termNode}.info{k}(1);
+%             end
+%             [~,I] = sort(forSortInits);
+%             for k = 1:reservation{j,termNode}.num
+%                 tempCell{k} = reservation{j,termNode}.info{I==k};
+%             end
+%             reservation{j,termNode}.info = tempCell;
+%         end
+%         tempCell = [];
+%         tempCell{1,reservation{termNode,initNode}.num} = [];
+%         forSortInits = zeros(reservation{termNode,initNode}.num,1);
+%         for k = 1:reservation{termNode,initNode}.num
+%             forSortInits(k) = reservation{termNode,initNode}.info{k}(1);
+%         end
+%         [~,I] = sort(forSortInits);
+%         for k = 1:reservation{termNode,initNode}.num
+%             tempCell{k} = reservation{termNode,initNode}.info{I==k};
+%         end
+%         reservation{termNode,initNode}.info = tempCell;
     else
         break;
     end

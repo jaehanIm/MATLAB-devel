@@ -13,42 +13,42 @@ inpection_dist = 7;
 
 
 distThres = 20;
-vnum = 8;
+vnum = 10;
 antNo = 20;
 stopThres = 20;
 capacity = 395;
 servTime = 1;
 
-homePos = [30,40,6];
-% homePos = [10, 80, 6];
+% homePos = [30,40,6];
+homePos = [10, 80, 6];
 % homePos = [0,0,0];
 
 global wowCount;
 wowCount = 0;
 
 % generate map
-% mapGenerator_VRPCF
-% node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
-% node = vertcat(homePos,node);
-% simStep = 1;
+mapGenerator_VRPCF
+node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
+node = vertcat(homePos,node);
+simStep = 1;
 
 % temp node generator
 % node = [0,0;1,1;1,-1;2,0;3,0;4,1;4,-1;5,0;1,2;1,3.1;2,2.5;2,1.5];
 % node = horzcat(node,zeros(size(node,1),1));
 % node = vertcat([1,3.9,0],node);
-% vnum = 5; 
+% vnum = 2; 
 % distThres = sqrt(2)+0.02;
 % simStep = 0.03;
 
 % random node generator
-N = 26;
-node = rand(N,3);
-node(:,1:2) = node(:,1:2) * 100;
-node(:,3) = node(:,3) * 10;
-node = vertcat(homePos,node);
-simStep = 1;
-distThres = 20;
-vnum = 6;
+% N = 26;
+% node = rand(N,3);
+% node(:,1:2) = node(:,1:2) * 100;
+% node(:,3) = node(:,3) * 10;
+% node = vertcat(homePos,node);
+% simStep = 1;
+% distThres = 25;
+% vnum = 3;
 
 % random bridge generator
 % N = 25;
@@ -60,6 +60,7 @@ vnum = 6;
 % node(:,3) = node(:,3) * 10;
 % node = vertcat(homePos,node);
 % simStep = 1;
+% distThres = 30;
 % vnum = 7;
 
 % stl
@@ -252,11 +253,14 @@ count = 0;
 for t = simT
     count = count + 1;
     for v = 1:vnum
+        if tourLen(v) == 1
+            finished(v) = true;
+        end
         % calc status
         routeIdx = getRouteStep(tick(v,:),t);
         if routeIdx ~= -1
             initNode = tour(v,routeIdx); termNode = tour(v,routeIdx+1);
-            if A(initNode, termNode) ~= 0 && termNode ~= 1
+            if A(initNode, termNode) ~= 0 && termNode ~= 1 && tourLen(v) ~= 1
                 actualStart = occupancy{v,routeIdx+1}(1,3);
                 regionDur = tick(v,routeIdx+1) - actualStart;
                 weight = (t-actualStart)/regionDur;
@@ -267,7 +271,7 @@ for t = simT
                 end
                 newPos = (1-weight) .* node(initNode,:) + weight .* node(termNode,:);
                 set(vv(v), 'XData', newPos(1), 'YData', newPos(2), 'ZData', newPos(3));
-            elseif termNode == 1
+            elseif termNode == 1 || tourLen(v) == 1
                 finished(v) = true;
                 set(vv(v), 'XData', node(tour(v,tourLen(v)),1), 'YData', node(tour(v,tourLen(v)),2), 'ZData', node(tour(v,tourLen(v)),3),'Color',[0.4 0.4 0.4]);
             else
