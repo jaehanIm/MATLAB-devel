@@ -131,7 +131,7 @@ for i = 1:L-1 % for all route nodes
                     end
                     if ~isempty(updateIdx)
                         reservation{initNode,prevSessionInit}.info{updateIdx}(2) = reservation{initNode,prevSessionInit}.info{updateIdx}(2) + localDelay;
-                        occu_hist{vehTourLen}(end,2) = reservation{initNode,prevSessionInit}.info{updateIdx}(2);
+                        occu_hist{vehTourLen}(end,4) = reservation{initNode,prevSessionInit}.info{updateIdx}(2);
                     else
     %                     reservation{initNode,prevSessionInit}.info{end}(2) = reservation{initNode,prevSessionInit}.info{end}(2) + localDelay;
     %                     occu_hist{vehTourLen}(end,2) = reservation{initNode,prevSessionInit}.info{end}(2);

@@ -11,25 +11,25 @@ fovFactor = 2.7;
 mapheight = 3;
 inpection_dist = 7;
 
-distThres = 20;
+distThres = 25;
 vnum = 8;
 antNo = 20;
-stopThres = 30;
+stopThres = 10;
 capacity = 395;
 servTime = 1;
 
-% homePos = [30,40,6];
-homePos = [10, 80, 6];
+homePos = [30,40,6];
+% homePos = [10, 80, 6];
 % homePos = [0,0,0];
 
 global wowCount;
 wowCount = 0;
 
 % generate map
-mapGenerator_VRPCF
-node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
-node = vertcat(homePos,node);
-simStep = 1;
+% mapGenerator_VRPCF
+% node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
+% node = vertcat(homePos,node);
+% simStep = 1;
 
 % temp node generator
 % node = [0,0;1,1;1,-1;2,0;3,0;4,1;4,-1;5,0;1,2;1,3.1;2,2.5;2,1.5];
@@ -40,25 +40,25 @@ simStep = 1;
 % simStep = 0.03;
 
 % random node generator
-% N = 100;
+% N = 26;
 % node = rand(N,3);
 % node(:,1:2) = node(:,1:2) * 100;
 % node(:,3) = node(:,3) * 10;
 % node = vertcat(homePos,node);
 % simStep = 1;
-% vnum = 8;
+% vnum = 7;
 
 % random bridge generator
-% N = 100;
-% node = rand(N,3);
-% node(:,1:2) = node(:,1:2) * 100 - 50;
-% node2 = rand(N,3);
-% node2(:,1:2) = node2(:,1:2) * 100 + 50;
-% node = vertcat(node,node2);
-% node(:,3) = node(:,3) * 10;
-% node = vertcat(homePos,node);
-% simStep = 1;
-% vnum = 8;
+N = 25;
+node = rand(N,3);
+node(:,1:2) = node(:,1:2) * 100 - 50;
+node2 = rand(N,3);
+node2(:,1:2) = node2(:,1:2) * 100 + 50;
+node = vertcat(node,node2);
+node(:,3) = node(:,3) * 10;
+node = vertcat(homePos,node);
+simStep = 1;
+vnum = 7;
 
 % stl
 % stlAddr = 'generic.stl';
@@ -238,6 +238,13 @@ hh(i) = line([0,0],[0,0],[0,0]);
 view(0,90)
 % view(-80,-10)
 tt = text(0,120,num2str(0.0));
+
+% occupancy 정리
+for v = 1:vnum
+    for i = 1:tourLen(v)-1
+        tick(v,i+1) = occupancy{v,i+1}(end,4);
+    end
+end
 
 count = 0;
 for t = simT
