@@ -43,14 +43,14 @@ for i = 1:L-1 % for all route nodes
             isConflict = detectConflict(reqInfo, reservationInfo);
             if isConflict % update reqinfo when conflict occurs
                 if tick <= reservationInfo(2)
-                    if tick > runawayTime && ~isempty(occu_hist) && i == 1
-                        damnFlag = true;
-                        break;
-                    end
                     tick = reservationInfo(2);
                     reqInit = tick;
                     reqTerm = tick + C(initNode,termNode);
                     reqInfo = [reqInit,reqTerm];
+                    if tick > runawayTime && ~isempty(occu_hist) && i == 1
+                        damnFlag = true;
+                        break;
+                    end
                 end
             end
         end

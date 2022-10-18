@@ -13,7 +13,7 @@ inpection_dist = 7;
 
 
 distThres = 20;
-vnum = 5;
+vnum = 8;
 antNo = 20;
 stopThres = 20;
 capacity = 395;
@@ -41,26 +41,26 @@ wowCount = 0;
 % simStep = 0.03;
 
 % random node generator
-% N = 26;
-% node = rand(N,3);
-% node(:,1:2) = node(:,1:2) * 100;
-% node(:,3) = node(:,3) * 10;
-% node = vertcat(homePos,node);
-% simStep = 1;
-% distThres = 20;
-% vnum = 4;
-
-% random bridge generator
-N = 25;
+N = 26;
 node = rand(N,3);
-node(:,1:2) = node(:,1:2) * 100 - 50;
-node2 = rand(N,3);
-node2(:,1:2) = node2(:,1:2) * 100 + 50;
-node = vertcat(node,node2);
+node(:,1:2) = node(:,1:2) * 100;
 node(:,3) = node(:,3) * 10;
 node = vertcat(homePos,node);
 simStep = 1;
-vnum = 7;
+distThres = 20;
+vnum = 6;
+
+% random bridge generator
+% N = 25;
+% node = rand(N,3);
+% node(:,1:2) = node(:,1:2) * 100 - 50;
+% node2 = rand(N,3);
+% node2(:,1:2) = node2(:,1:2) * 100 + 50;
+% node = vertcat(node,node2);
+% node(:,3) = node(:,3) * 10;
+% node = vertcat(homePos,node);
+% simStep = 1;
+% vnum = 7;
 
 % stl
 % stlAddr = 'generic.stl';
@@ -169,7 +169,7 @@ end
 toc
 A = A_orig;
 
-% mapData generation
+% mapData generationq
 mapGraph.n = N;
 mapGraph.edges = C;
 mapGraph.node = node;

@@ -78,7 +78,7 @@ for t = 1 : maxIter
     tau = updatePhromoneVRPCF(tau , colony, param.rho, minIndex, vnum);
     
     % Display the results
-    if mod(t,5) == 0
+    if mod(t,1) == 0
         outmsg = [ 'Iteration #' , num2str(t) , ' Shortest length = ' , num2str(colony.queen.fitness)  ];
         disp(outmsg)
     end
@@ -92,8 +92,21 @@ for t = 1 : maxIter
         end
     end
 
+    coveredNode = unique(bestTour);
+    coveredNode(1) = [];
+    missingNode = ones(N,1);
+    missingNode(coveredNode) = 0;
+    missingNode = find(missingNode);
+    if ~isempty(missingNode)
+        missingNode
+    end
+
     if count >= stopThres
         disp('Solution stabilized. Terminating ACS!');
+        if incompleteFlag
+            disp('Solution incomplete');
+            missingNode
+        end
         break;
     end
 
