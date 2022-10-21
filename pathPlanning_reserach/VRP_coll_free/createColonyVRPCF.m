@@ -129,7 +129,7 @@ for i = 1 : antNo
                     colony.ant(i).tick(j) = colony.ant(i).tickHistory(j,vehTourLen(j)-1);
                     colony.ant(i).tickHistory(j,vehTourLen(j)) = 0;
                     vehTourLen(j) = vehTourLen(j)-1;
-%                     stuckVeh(j) = true;
+                    stuckVeh(j) = true;
                 else
                     if ~unableFlag && ~damnFlag
                         tempBlocked{j} = [];

@@ -13,7 +13,7 @@ inpection_dist = 7;
 
 
 distThres = 20;
-vnum = 10;
+vnum = 8;
 antNo = 20;
 stopThres = 20;
 capacity = 395;
@@ -27,10 +27,10 @@ global wowCount;
 wowCount = 0;
 
 % generate map
-mapGenerator_VRPCF
-node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
-node = vertcat(homePos,node);
-simStep = 1;
+% mapGenerator_VRPCF
+% node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
+% node = vertcat(homePos,node);
+% simStep = 1;
 
 % temp node generator
 % node = [0,0;1,1;1,-1;2,0;3,0;4,1;4,-1;5,0;1,2;1,3.1;2,2.5;2,1.5];
@@ -41,17 +41,17 @@ simStep = 1;
 % simStep = 0.03;
 
 % random node generator
-% N = 26;
-% node = rand(N,3);
-% node(:,1:2) = node(:,1:2) * 100;
-% node(:,3) = node(:,3) * 10;
-% node = vertcat(homePos,node);
-% simStep = 1;
-% distThres = 25;
-% vnum = 3;
+N = 80;
+node = rand(N,3);
+node(:,1:2) = node(:,1:2) * 100;
+node(:,3) = node(:,3) * 10;
+node = vertcat(homePos,node);
+simStep = 1;
+distThres = 20;
+vnum =8;
 
 % random bridge generator
-% N = 25;
+% N = 40;
 % node = rand(N,3);
 % node(:,1:2) = node(:,1:2) * 100 - 50;
 % node2 = rand(N,3);
@@ -60,13 +60,13 @@ simStep = 1;
 % node(:,3) = node(:,3) * 10;
 % node = vertcat(homePos,node);
 % simStep = 1;
-% distThres = 30;
+% distThres = 25;
 % vnum = 7;
 
 % stl
 % stlAddr = 'generic.stl';
 % inpection_dist = 1;
-% node = loadStl(stlAddr,inpection_dist);
+% node = loadStl(stlAddvnum = 4;r,inpection_dist);
 % rndF = rand(size(node,1),1);
 % node(rndF>0.3,:,:) = [];
 % 
@@ -223,6 +223,8 @@ occupancy = colony.queen.occupancy;
 tourLen = colony.queen.vehTourLen;
 finished = zeros(vnum,1);
 
+disp(["Active veh : "+num2str(sum(tourLen~=1))+"/"+num2str(vnum)])
+
 % vid = VideoWriter('animation.avi','MPEG-4');
 % vid.FrameRate = fps;
 % vid.Quality = 100;
@@ -262,11 +264,14 @@ for t = simT
             initNode = tour(v,routeIdx); termNode = tour(v,routeIdx+1);
             if A(initNode, termNode) ~= 0 && termNode ~= 1 && tourLen(v) ~= 1
                 actualStart = occupancy{v,routeIdx+1}(1,3);
-                regionDur = tick(v,routeIdx+1) - actualStart;
+%                 regionDur = tick(v,routeIdx+1) - actualStart;
+                occuDur = occupancy{v,routeIdx+1}(1,4) - occupancy{v,routeIdx+1}(1,3);
+                regionDur = C(initNode, termNode);
+                waitDur = occuDur - regionDur;
                 weight = (t-actualStart)/regionDur;
-                if t-actualStart > regionDur
+                if weight > 1
                     weight = 1;
-                elseif t-actualStart < 0
+                elseif weight < 0
                     weight = 0;
                 end
                 newPos = (1-weight) .* node(initNode,:) + weight .* node(termNode,:);
@@ -278,10 +283,13 @@ for t = simT
                 bypassRoute = implicitRoute{initNode, termNode};
                 occupancyInfo = occupancy{v,routeIdx+1}(:,3:4);
                 occupancyInit = occupancyInfo(:,1);
+                occupancyInitNode = occupancy{v,routeIdx+1}(:,1);
+                occupancyTermNode = occupancy{v,routeIdx+1}(:,2);
                 subRouteIdx = max(find((occupancyInit - t) < 0));
                 if ~isempty(subRouteIdx) && min(occupancyInit) <= t
                     subRouteInfo = occupancyInfo(subRouteIdx,:);
-                    regionDur = subRouteInfo(2) - subRouteInfo(1);
+%                     regionDur = subRouteInfo(2) - subRouteInfo(1);
+                    regionDur = C(occupancyInitNode(subRouteIdx),occupancyTermNode(subRouteIdx));
                     weight = (t - subRouteInfo(1))/regionDur;
                     if (t - subRouteInfo(1)) > regionDur
                         weight = 1;
@@ -310,6 +318,7 @@ for t = simT
 %         end
 %     end
     if finished == 1
+        disp(["Finished T : ",num2str(t)])
         break;
     end
     drawnow;

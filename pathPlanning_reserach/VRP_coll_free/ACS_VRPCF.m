@@ -20,7 +20,7 @@ eta = 1./ mapGraph.edges;  % desirability of each edge
 
 param.rho = 0.1; % Evaporation rate
 param.alpha = 1;  % Phromone exponential parameters 
-param.beta = 3;   % Desirability exponetial paramter
+param.beta = 1;   % Desirability exponetial paramter
 param.psi = 0.1;    % local pheromone evaporation rate
 param.q = 0.9;    % Exploration Exploitation parameter
 
@@ -55,6 +55,7 @@ for t = 1 : maxIter
         bestTour = colony.ant(minIndex).tour;
         bestTourLen = colony.ant(minIndex).vehTourLen;
         bestFitnessL = colony.ant(minIndex).fitnessL;        
+        bestFitnessM = colony.ant(minIndex).fitnessM;
         bestFitnessPer = colony.ant(minIndex).fitnessPer;
         bestTick = colony.ant(minIndex).tick;
         bestTickHistory = colony.ant(minIndex).tickHistory;
@@ -67,6 +68,7 @@ for t = 1 : maxIter
     colony.queen.fitness = bestFitness;
     colony.queen.vehTourLen = bestTourLen;
     colony.queen.fitnessL = bestFitnessL;
+    colony.queen.fitnessM = bestFitnessM;
     colony.queen.fitnessPer = bestFitnessPer;
     colony.queen.tick = bestTick;
     colony.queen.tickHistory = bestTickHistory;
