@@ -93,6 +93,22 @@ addpath('./..')
 % imuData = readtable('/home/jaehan/log/220208_oksang/220208_122239/aSensorImu_220208_122239.csv');
 % imuData(1:143,:) = [];
 
+% 2211_1
+% gdLog = readtable('/home/jaehan/log/221108_154600/gdLog_221108_154600.csv');
+% imuData = readtable('/home/jaehan/log/221108_154600/aSensorImu_221108_154600.csv');
+
+% 2211_2
+gdLog = readtable('/home/jaehan/log/221108_153535/gdLog_221108_153535.csv');
+imuData = readtable('/home/jaehan/log/221108_153535/aSensorImu_221108_153535.csv');
+
+for i = 1:size(data,1)
+    if imuData.rosTime(i) > 100000
+        thres = i;
+        break;
+    end
+end
+imuData(1:thres-1,:) = [];
+
 % Job index parser
 jobStartIdx = [];
 jobEndIdx = [];
@@ -115,13 +131,20 @@ gdTimeS = gdLog.rosTime - gdLog.rosTime(1);
 imuTimeS = seconds(imuTime - imuTime(1)) + imuTimeDelay;
 % imuTimeS = seconds(imuTime - imuTime(1)) + 51.9 + 1.67;
 
-% Assign data
-acc_0 = imuData.acc_mpss_0;
+% Assign data - !!! sensor attitude aware !!!
+% acc_0 = imuData.acc_mpss_0;
+% acc_1 = imuData.acc_mpss_1;
+% acc_2 = imuData.acc_mpss_2;
+% gyro_0 = imuData.gyro_dps_0;
+% gyro_1 = imuData.gyro_dps_1;
+% gyro_2 = imuData.gyro_dps_2;
+
+acc_0 = imuData.acc_mpss_2;
 acc_1 = imuData.acc_mpss_1;
-acc_2 = imuData.acc_mpss_2;
-gyro_0 = imuData.gyro_dps_0;
+acc_2 = imuData.acc_mpss_0;
+gyro_0 = imuData.gyro_dps_2;
 gyro_1 = imuData.gyro_dps_1;
-gyro_2 = imuData.gyro_dps_2;
+gyro_2 = imuData.gyro_dps_0;
 
 Fs = round(1/mean(diff(imuTimeS)));
 
@@ -227,7 +250,7 @@ plot(imuTimeS,v)
 grid on
 xlabel('time[s]')
 ylabel('v [m/s]');
-plot(gdTimeS,gdLog.velUVW_mps_1)
+plot(gdTimeS,gdLog.velUvw_mps_1)
 title('velocity trend comparison')
 legend('integrated v (HP filtered)','gdLog v')
 
@@ -243,12 +266,12 @@ for i = 1:length(gdTimeS)-1
     
     timeF = gdTimeS(i);
     timeB = gdTimeS(i+1);
-    gduF = gdLog.velUVW_mps_0(i);
-    gduB = gdLog.velUVW_mps_0(i+1);
-    gdvF = gdLog.velUVW_mps_1(i);
-    gdvB = gdLog.velUVW_mps_1(i+1);
-    gdwF = gdLog.velUVW_mps_2(i);
-    gdwB = gdLog.velUVW_mps_2(i+1);
+    gduF = gdLog.velUvw_mps_0(i);
+    gduB = gdLog.velUvw_mps_0(i+1);
+    gdvF = gdLog.velUvw_mps_1(i);
+    gdvB = gdLog.velUvw_mps_1(i+1);
+    gdwF = gdLog.velUvw_mps_2(i);
+    gdwB = gdLog.velUvw_mps_2(i+1);
     
     gdVelF = dcmI2G * [gduF;gdvF;gdwF];
     gdVelB = dcmI2G * [gduB;gdvB;gdwB];
@@ -273,11 +296,25 @@ plot(imuTimeS,v)
 grid on
 xlabel('time[s]')
 ylabel('v [m/s]');
-plot(gdTimeS,gdLog.velUVW_mps_1)
+plot(gdTimeS,gdLog.velUvw_mps_1)
 title('velocity trend comparison')
 legend('integrated v (HP filtered)','gdLog v')
 
 disp('Partial FDI complete!')
+
+figure(55)
+subplot(3,1,1)
+hold on
+plot(imuTimeS,u)
+plot(gdTimeS,gdLog.velUvw_mps_0)
+subplot(3,1,2)
+hold on
+plot(imuTimeS,v)
+plot(gdTimeS,gdLog.velUvw_mps_1)
+subplot(3,1,3)
+hold on
+plot(imuTimeS,w)
+plot(gdTimeS,gdLog.velUvw_mps_2)
 %% data selection
 y = gyro_1;
 
@@ -640,10 +677,8 @@ residue = threshold - totalVelocity;
 velBar = vertcat(vel,residue);
 
 move = 0;
-start = 1384500 + move; %1434500 1132500 735000 470000 1384500
-finish = 1384500 + move + 400;
-% start = 1;
-% finish = L;
+start = 1;
+finish = L;
 
 figure(11)
 clf
@@ -672,8 +707,8 @@ ylim([0 5])
 %% Total contribution
 
 move = 0;
-start = 1384500 + move; %1434500 1132500 735000 470000 1384500
-finish = 1384500 + move + 400;
+start = 141000 + move; %1434500 1132500 735000 470000 1384500
+finish = 141000 + move + 4000;
 % start = 1;
 % finish = L;
 
