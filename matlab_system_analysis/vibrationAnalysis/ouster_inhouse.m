@@ -1,107 +1,22 @@
 addpath('./..')
 
 %% Load data
+% 221110_1
+% gdLog = readtable('/home/jaehan/log/221110_113922/gdLog_221110_113922.csv');
+% imuData = readtable('/home/jaehan/log/221110_113922/aSensorImu_221110_113922.csv');
 
-% 220112 inhouse - 10hz
-% imuData = readtable('/home/jaehan/log/220112_[0]_inhouse/aSensorLog_220112_111012.csv');
-% gdLog = readtable('/home/jaehan/log/220112_[0]_inhouse/gdLog_220112_111012.csv');
+% 221110_2
+% gdLog = readtable('/home/jaehan/log/221110_121923/gdLog_221110_121923.csv');
+% imuData = readtable('/home/jaehan/log/221110_121923/aSensorImu_221110_121923.csv');
 
-% 220112 inhouse - 20hz
-% imuData = readtable('/home/jaehan/log/220112_[0]_inhouse/aSensorLog_220112_110312.csv');
-% gdLog = readtable('/home/jaehan/log/220112_[0]_inhouse/gdLog_220112_110312.csv');
+% 221110_3
+gdLog = readtable('/home/jaehan/log/221110_123033/gdLog_221110_123033.csv');
+imuData = readtable('/home/jaehan/log/221110_123033/aSensorImu_221110_123033.csv');
 
-% 220113 oksang - 20hz
-% imuData = readtable('/home/jaehan/log/220113_[0]_oksang/220113_090300/aSensorLog_220113_090300.csv');
-% gdLog = readtable('/home/jaehan/log/220113_[0]_oksang/220113_090300/gdLog_220113_090300.csv');
+freqL = [0 5  30  75 150 800 1200];
+freqH = [5 30 75 150 800 1200 2000];
 
-% 220113 oksang - 10hz (noon)
-% imuData = readtable('/home/jaehan/log/220113_[0]_oksang/220113_140901/aSensorLog_220113_140901.csv');
-% gdLog = readtable('/home/jaehan/log/220113_[0]_oksang/220113_140901/gdLog_220113_140901.csv');
-
-% 220113 oksang - 20hz (noon)
-% imuData = readtable('/home/jaehan/log/220113_[0]_oksang/220113_141431/aSensorLog_220113_141431.csv');
-% gdLog = readtable('/home/jaehan/log/220113_[0]_oksang/220113_141431/gdLog_220113_141431.csv');
-
-% 220114 oksang - 10hz
-% imuData = readtable('/home/jaehan/log/220114_[0]_oksang/220114_132544/aSensorLog_220114_132544.csv');
-% gdLog = readtable('/home/jaehan/log/220114_[0]_oksang/220114_132544/gdLog_220114_132544.csv');
-
-% 220114 oksang - 20hz
-% imuData = readtable('/home/jaehan/log/220114_[0]_oksang/220114_133507/aSensorLog_220114_133507.csv');
-% gdLog = readtable('/home/jaehan/log/220114_[0]_oksang/220114_133507/gdLog_220114_133507.csv');
-
-% 220117 oksang - 10hz
-% imuData = readtable('/home/jaehan/log/220117_165029_10hz_wind/aSensorLog_220117_165029.csv');
-% gdLog = readtable('/home/jaehan/log/220117_165029_10hz_wind/gdLog_220117_165029.csv');
-
-% 220107 oksang - 20hz
-% imuData = readtable('/home/jaehan/log/220107_152745_20hz/aSensorLog_220107_152745.csv');
-% gdLog = readtable('/home/jaehan/log/220107_152745_20hz/gdLog_220107_152745.csv');
-
-% 220204 _ set1 - contaminated
-% gdLog = readtable('/home/jaehan/log/220204_oksang/220204_105529/gdLog_220204_105529.csv');
-% imuData = readtable('/home/jaehan/log/220204_oksang/220204_105529/aSensorImu_220204_105529.csv');
-% imuData(1:488,:) = [];
-
-% 220204 _ set2 - contaminated
-% gdLog = readtable('/home/jaehan/log/220204_oksang/220204_112718/gdLog_220204_112718.csv');
-% imuData = readtable('/home/jaehan/log/220204_oksang/220204_112718/aSensorImu_220204_112718.csv');
-% imuData(1:488,:) = [];
-
-% 220207 _ sortie1
-% gdLog = readtable('/home/jaehan/log/220207_oksang/220207_111033/gdLog_220207_111033.csv');
-% imuData = readtable('/home/jaehan/log/220207_oksang/220207_111033/aSensorImu_220207_111033.csv');
-% imuData(1:488,:) = [];
-
-% 220207 _ sortie2
-% gdLog = readtable('/home/jaehan/log/220207_oksang/220207_111846/gdLog_220207_111846.csv');
-% imuData = readtable('/home/jaehan/log/220207_oksang/220207_111846/aSensorImu_220207_111846.csv');
-% imuData(1:488,:) = [];
-
-% 220207 _ sortie3
-% gdLog = readtable('/home/jaehan/log/220207_oksang/220207_114201/gdLog_220207_114201.csv');
-% imuData = readtable('/home/jaehan/log/220207_oksang/220207_114201/aSensorImu_220207_114201.csv');
-% imuData(1:488,:) = [];
-
-% 220207 _ sortie4
-% gdLog = readtable('/home/jaehan/log/220207_oksang/220207_160601/gdLog_220207_160601.csv');
-% imuData = readtable('/home/jaehan/log/220207_oksang/220207_160601/aSensorImu_220207_160601.csv');
-
-% 220208 _ oksang
-% sortie1
-% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_112559/gdLog_220208_112559.csv');
-% imuData = readtable('/home/jaehan/log/220208_oksang/220208_112559/aSensorImu_220208_112559.csv');
-% imuData(1:143,:) = [];
-
-% sortie2
-% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_113911/gdLog_220208_113911.csv');
-% imuData = readtable('/home/jaehan/log/220208_oksang/220208_113911/aSensorImu_220208_113911.csv');
-% imuData(1:143,:) = [];
-
-% sortie3 - stiff soft
-% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_113911/gdLog_220208_113911.csv');
-% imuData = readtable('/home/jaehan/log/220208_oksang/220208_113911/aSensorImu_220208_113911.csv');
-% imuData(1:143,:) = [];
-
-% sortie4 - stiff stiff
-% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_120441/gdLog_220208_120441.csv');
-% imuData = readtable('/home/jaehan/log/220208_oksang/220208_120441/aSensorImu_220208_120441.csv');
-% imuData(1:143,:) = [];
-
-% sortie5 - soft soft
-% gdLog = readtable('/home/jaehan/log/220208_oksang/220208_122239/gdLog_220208_122239.csv');
-% imuData = readtable('/home/jaehan/log/220208_oksang/220208_122239/aSensorImu_220208_122239.csv');
-% imuData(1:143,:) = [];
-
-% 2211_1
-% gdLog = readtable('/home/jaehan/log/221108_154600/gdLog_221108_154600.csv');
-% imuData = readtable('/home/jaehan/log/221108_154600/aSensorImu_221108_154600.csv');
-
-% 2211_2
-gdLog = readtable('/home/jaehan/log/221108_153535/gdLog_221108_153535.csv');
-imuData = readtable('/home/jaehan/log/221108_153535/aSensorImu_221108_153535.csv');
-
-for i = 1:size(data,1)
+for i = 1:size(imuData,1)
     if imuData.rosTime(i) > 100000
         thres = i;
         break;
@@ -123,6 +38,8 @@ for i = 2:size(gdLog,1)
     end
 end
 
+global start finish missStartTime missEndTime imuTimeS
+
 % time synchronization
 imuTime = datetime(imuData.rosTime,'ConvertFrom','posixtime','TimeZone','Asia/Tokyo');
 gdTime = datetime(gdLog.rosTime(1:end),'ConvertFrom','posixtime','TimeZone','Asia/Tokyo');
@@ -139,14 +56,28 @@ imuTimeS = seconds(imuTime - imuTime(1)) + imuTimeDelay;
 % gyro_1 = imuData.gyro_dps_1;
 % gyro_2 = imuData.gyro_dps_2;
 
-acc_0 = imuData.acc_mpss_2;
-acc_1 = imuData.acc_mpss_1;
+% acc_0 = imuData.acc_mpss_2;
+% acc_1 = imuData.acc_mpss_1;
+% acc_2 = imuData.acc_mpss_0;
+% gyro_0 = imuData.gyro_dps_2;
+% gyro_1 = imuData.gyro_dps_1;
+% gyro_2 = imuData.gyro_dps_0;
+
+acc_0 = -imuData.acc_mpss_2;
+acc_1 = -imuData.acc_mpss_1;
 acc_2 = imuData.acc_mpss_0;
-gyro_0 = imuData.gyro_dps_2;
-gyro_1 = imuData.gyro_dps_1;
+gyro_0 = -imuData.gyro_dps_2;
+gyro_1 = -imuData.gyro_dps_1;
 gyro_2 = imuData.gyro_dps_0;
 
 Fs = round(1/mean(diff(imuTimeS)));
+
+missIdxTemp = find(diff(gdLog.fcMcMode)~=0);
+missStartTime = gdTimeS([missIdxTemp(2), missIdxTemp(4), missIdxTemp(6), missIdxTemp(8), missIdxTemp(10)]);
+missEndTime = gdTimeS([missIdxTemp(3), missIdxTemp(5), missIdxTemp(7), missIdxTemp(9), missIdxTemp(11)]);
+
+jobInterest = 5;
+setImuIdx(jobInterest)
 
 disp("Data Loading Complete!")
 
@@ -159,7 +90,7 @@ gyro_1 = detrend(gyro_1,1);
 gyro_2 = detrend(gyro_2,1);
 
 %% Raw plot
-figure(1)
+figure(2)
 clf
 
 subplot(6,1,1)
@@ -380,36 +311,36 @@ clf
 sgtitle('spectrogram')
 
 subplot(1,4,1)
-imagesc([0 200],[imuTimeS(1) imuTimeS(end)],spectrogram(:,0*timeStep+1:200*timeStep));
+imagesc([0 30],[imuTimeS(1) imuTimeS(end)],spectrogram(:,0*timeStep+1:30*timeStep));
 colorbar
 xlabel('hz')
 ylabel('time [s]')
-title('0~200hz')
+title('0~30hz')
 hold on
 
 
 subplot(1,4,2)
-imagesc([40 500],[imuTimeS(1) imuTimeS(end)],spectrogram(:,40*timeStep:500*timeStep));
+imagesc([30 75],[imuTimeS(1) imuTimeS(end)],spectrogram(:,30*timeStep:75*timeStep));
 hold on
 xlabel('hz')
 ylabel('time [s]')
-title('40~500hz')
+title('30~75hz')
 colorbar
 
 subplot(1,4,3)
-imagesc([500 900],[imuTimeS(1) imuTimeS(end)],spectrogram(:,500*timeStep:900*timeStep));
+imagesc([75 150],[imuTimeS(1) imuTimeS(end)],spectrogram(:,75*timeStep:150*timeStep));
 hold on
 xlabel('hz')
 ylabel('time [s]')
-title('500~900')
+title('75~150')
 colorbar
 
 subplot(1,4,4)
-imagesc([900 1300],[imuTimeS(1) imuTimeS(end)],spectrogram(:,900*timeStep:1300*timeStep));
+imagesc([150 1000],[imuTimeS(1) imuTimeS(end)],spectrogram(:,150*timeStep:1000*timeStep));
 hold on
 xlabel('hz')
 ylabel('time [s]')
-title('900~1300hz')
+title('150~1000hz')
 colorbar
 
 figure(888)
@@ -451,12 +382,6 @@ P = fft(p);
 Q = fft(q);
 R = fft(r);
 
-freqL = [0 5  30  100 500 800 1200];
-freqH = [5 30 100 500 800 1200 2000];
-% freqL = [0 5  30  100 500 1200];
-% freqH = [5 30 100 500 800 2000];
-% freqL = [0 5  15  100 500 1200];
-% freqH = [5 15 25 500 800 2000];
 df = L/Fs;
 
 filteredFreq_p = [];
@@ -507,12 +432,6 @@ U = fft(u);
 V = fft(v);
 W = fft(w);
 
-freqL = [0 5  30  100 500 1200];
-freqH = [5 30 100 500 800 2000];
-% freqL = [0 5  30  100 300 500 1200];
-% freqH = [5 30 100 300 500 800 2000];
-% freqL = [0 5  15  100 500 1200];
-% freqH = [5 15 25 500 800 2000];
 df = L/Fs;
 
 filteredFreq_u = [];
@@ -554,15 +473,6 @@ velBarTrans = vertcat(transvel,residueTrans);
 
 %% vibration component plot
 
-start = 1;
-finish = L;
-% start = imuJobStartIdx(2);
-% finish = imuJobEndIdx(2);
-% start = 814400+1700;
-% finish = 818400-300;
-% start = 1008000+1700;
-% finish = 1008000+4000-300;
-
 figure(9)
 clf
 hold on
@@ -578,9 +488,6 @@ legend('pointing velocity','threshold');
 xlabel('time[s]');
 ylabel('deg/s');
 % xlim([110 110.1])
-
-% start = 1008000+1700;
-% finish = 1008000+4000-300;
 
 figure(99)
 clf
@@ -609,12 +516,6 @@ end
 count/(L-20) * 100
 
 %% vibration component plot translational
-
-% start = imuJobStartIdx(2);
-% finish = imuJobEndIdx(2);
-
-start = 1;
-finish = L;
 
 figure(10)
 clf
@@ -657,9 +558,6 @@ count/(L-40) * 100
 
 %% Total component plot
 
-start = 1;
-finish = L;
-
 vel = [];
 x_comp = [];
 y_comp = [];
@@ -676,9 +574,6 @@ threshold = 3.9; % m/s
 residue = threshold - totalVelocity;
 velBar = vertcat(vel,residue);
 
-move = 0;
-start = 1;
-finish = L;
 
 figure(11)
 clf
@@ -706,11 +601,7 @@ ylim([0 5])
 
 %% Total contribution
 
-move = 0;
-start = 141000 + move; %1434500 1132500 735000 470000 1384500
-finish = 141000 + move + 4000;
-% start = 1;
-% finish = L;
+setImuIdx(5)
 
 figure(111111)
 clf
@@ -722,7 +613,7 @@ title('Contribution ratio area plot - total')
 hold on
 % a(8).FaceColor = [0.7 0.7 0.7];
 plot([imuTimeS(start) imuTimeS(finish)],[threshold threshold], 'r:','LineWidth',2.4)
-legend('1-5hz','5-30hz','30-100hz','100-500hz','500-800hz','800-1200hz','1200~hz','residue','threshold')
+legend('1-5hz','5-30hz','30-75hz','75-150hz','150-800hz','800-1200hz','1200~hz','residue','threshold')
 grid on
 % xlim([110 110.5])
 % plot(imuTimeS(start:finish),totalVelocity(start:finish),'g','LineWidth',3)
@@ -732,12 +623,23 @@ ylim([0 5])
 
 componentRatio = [];
 meanVelBar = mean(velBar(1:end-1,start:finish),2);
+stdVelBar = std(velBar(1:end-1,start:finish)');
 totalVelBar = sum(meanVelBar);
 componentRatio = meanVelBar/totalVelBar*100;
+
 figure(11111111)
 bar(componentRatio)
-gca.XTick = [1,2,3,4,5,6];
-gca.XTickLabel = {'1-5hz','5-30hz','30-100hz','100-500hz','500-800hz','800-1200hz'};
+xticks([1,2,3,4,5,6,7]);
+xticklabels({'1-5hz','5-30hz','30-75hz','75-150hz','150-800hz','800-1200hz','1200~hz'});
+ylabel('Contribution [%]')
+grid on
+
+figure(11111112)
+bar(meanVelBar)
+xticks([1,2,3,4,5,6,7]);
+xticklabels({'1-5hz','5-30hz','30-75hz','75-150hz','150-800hz','800-1200hz','1200~hz'});
+ylabel('mean pointing velocity [m/s]')
+grid on
 
 
 syncLen = 20;
@@ -751,7 +653,8 @@ end
 totalSatis = count / (missionLength-syncLen) * 100;
 
 totalSatis
-mean(totalVelocity(start:finish))
+meanTotVel = mean(totalVelocity(start:finish))
+stdTotVel = std(totalVelocity(start:finish))
 
 %% Contribution analysis
 % temp = sum(velBar(:,480000:484000),2)/4000
@@ -772,5 +675,8 @@ mean(totalVelocity(start:finish))
 % temp = sum(velBar(:,680000:684000),2)/4000;
 % save('20hz_220114.mat','temp');
 
+save('oksang_1.mat','meanVelBar','stdVelBar','meanTotVel','stdTotVel')
+
 figure(101010)
 plot(gdTimeS,gdLog.fcMcMode)
+
