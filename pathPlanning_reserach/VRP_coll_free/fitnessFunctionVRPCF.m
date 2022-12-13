@@ -16,9 +16,15 @@ for i = 1:vehNum
     end
 end
 
+fitnessE = zeros(vehNum,1);
+for i = 1:vehNum
+    fitnessE(i) = tickHistory(i,tourLen(i));
+end
+fitnessE = max(fitnessE);
 fitnessM = max(fitnessPerVeh);
 fitnessL = sum(fitnessPerVeh);
 fitnessPerV = fitnessPerVeh;
+
 fitness = fitnessM;
 
 coveredNum = length(unique(tour(:)));

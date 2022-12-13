@@ -13,9 +13,9 @@ inpection_dist = 7;
 
 
 distThres = 20;
-vnum = 8;
+vnum = 10;
 antNo = 20;
-stopThres = 20;
+stopThres = 30;
 capacity = 395;
 servTime = 1;
 
@@ -27,28 +27,28 @@ global wowCount;
 wowCount = 0;
 
 % generate map
-% mapGenerator_VRPCF
-% node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
-% node = vertcat(homePos,node);
-% simStep = 1;
+mapGenerator_VRPCF
+node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
+node = vertcat(homePos,node);
+simStep = 1;
 
 % temp node generator
 % node = [0,0;1,1;1,-1;2,0;3,0;4,1;4,-1;5,0;1,2;1,3.1;2,2.5;2,1.5];
 % node = horzcat(node,zeros(size(node,1),1));
 % node = vertcat([1,3.9,0],node);
-% vnum = 2; 
+% vnum = 7; 
 % distThres = sqrt(2)+0.02;
 % simStep = 0.03;
 
 % random node generator
-N = 80;
-node = rand(N,3);
-node(:,1:2) = node(:,1:2) * 100;
-node(:,3) = node(:,3) * 10;
-node = vertcat(homePos,node);
-simStep = 1;
-distThres = 20;
-vnum =8;
+% N = 80;
+% node = rand(N,3);
+% node(:,1:2) = node(:,1:2) * 100;
+% node(:,3) = node(:,3) * 10;
+% node = vertcat(homePos,node);
+% simStep = 1;
+% distThres = 20;
+% vnum =8;
 
 % random bridge generator
 % N = 40;
@@ -182,7 +182,7 @@ graphDensity = sum(A,'all')/2/nchoosek(N,2)*100
 ACS_VRPCF;
 
 % plot
-drawSchedule(2, N, colony, vnum);
+% drawSchedule(2, N, colony, vnum);
 xlabel('time[s]')
 ylabel('edge index')
 legend('veh 1','veh2')
@@ -197,6 +197,7 @@ hold on
 for i = 1:size(node,1)
     plot3(node(:,1),node(:,2),node(:,3),'.');
 end
+view(45,45)
 lineList = find(A(:));
 for i = 1:N-1
     for j= i+1:N
@@ -305,18 +306,6 @@ for t = simT
         end
     end
     set(tt,'String',num2str(t))
-%     for i = 1:N
-%         for j = 1:N
-%             reservationLen = reservation{i,j}.num;
-%             if reservationLen ~= 0
-%                 for k = 1:reservationLen
-%                     timeRange = reservation{i,j}.info{k}(1:2);
-%                     if (timeRange(1)-t) * (timeRange(2)-t) < 0
-%                     end
-%                 end
-%             end
-%         end
-%     end
     if finished == 1
         disp(["Finished T : ",num2str(t)])
         break;

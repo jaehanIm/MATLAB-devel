@@ -15,12 +15,6 @@ addpath('./ComDetTBv090/Auxiliary/')
 node = [airPosX(~isnan(airPosZ(:))),airPosY(~isnan(airPosZ(:))),airPosZ(~isnan(airPosZ(:)))];
 node = vertcat(depotPos,node); % add depot
 
-
-% node = readtable('/home/jaehan/Desktop/TSP_test.csv');
-% node = node.Variables;
-% node(:,1:2) = node(:,2:3);
-% node(:,3) = 0;
-
 N = size(node,1);
 A = zeros(N,N); % connectivity matrix
 C = zeros(N,N); % cost matrix

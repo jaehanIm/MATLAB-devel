@@ -5,9 +5,7 @@ incompleteFlag = false;
 
 alpha = param.alpha;
 beta = param.beta;
-% gamma = param.gamma;
 q = param.q;
-% lambda = param.lambda;
 psi = param.psi;
 
 A = graph.A;
@@ -28,6 +26,7 @@ for i = 1 : antNo
     unvisitedNum = unvisitedNum - 1;
     vehTourLen = ones(vehNum,1);
     reservation{N,N} = [];
+    reservationNum = sparse(N,N);
     blocked = zeros(N,1);
     stuckVeh = zeros(vehNum,1);
     getAwayTime = {};
@@ -35,7 +34,6 @@ for i = 1 : antNo
 
     for m = 1:N
         for n = 1:N
-            reservation{m,n}.num = 0;
             reservation{m,n}.info = [];
         end
     end
@@ -77,8 +75,8 @@ for i = 1 : antNo
                 end
             end
 
-            debugTemp.possibleNodes = possibleNodes;
-            debugTemp.blocked = blocked;
+%             debugTemp.possibleNodes = possibleNodes;
+%             debugTemp.blocked = blocked;
 
             P_allNodes(~possibleNodes) = 0;
 
@@ -90,19 +88,18 @@ for i = 1 : antNo
                 P = P_allNodes./sum(P_allNodes);
                 
                 % for debugging
-                debugTemp.P_allNodes = P_allNodes;
-                debugTemp.P = P;
-                debugTemp.currentNode = currentNode;
-                debugTemp.i = i;
-                debugTemp.j = j;
-                debugTemp.colony = colony;
-                debugTemp.vehTourLen = vehTourLen;
-                debugTemp.unvisitedNum = unvisitedNum;
-                debugTemp.tempBlocked =tempBlocked;
-                debugTemp.reservation = reservation;
-                if unvisitedNum == N-1
-                    debugTemp.initColony = colony;
-                end
+%                 debugTemp.P_allNodes = P_allNodes;
+%                 debugTemp.P = P;
+%                 debugTemp.currentNode = currentNode;
+%                 debugTemp.i = i;
+%                 debugTemp.j = j;
+%                 debugTemp.colony = colony;
+%                 debugTemp.vehTourLen = vehTourLen;
+%                 debugTemp.unvisitedNum = unvisitedNum;
+%                 debugTemp.tempBlocked =tempBlocked;
+%                 if unvisitedNum == N-1
+%                     debugTemp.initColony = colony;
+%                 end
                 
                 if rand(1) > q
                     nextNode = rouletteWheel(P);
@@ -118,11 +115,12 @@ for i = 1 : antNo
                     orig_occu_hist = occu_hist;
                 end
 
-                [timeSlack, reservation_o, occupancy_o, blocked_o, occu_hist_o, getAwayTime_o, unableFlag, damnFlag] = resolveConflict(reservation, occu_hist, vehTourLen(j), blocked, A, C, currentNode, nextNode, colony.ant(i).tick(j), implicitRoute, j, getAwayTime);
+%                 [timeSlack, reservation_o, reservationNum_o, occupancy_o, blocked_o, occu_hist_o, getAwayTime_o, unableFlag, damnFlag] = resolveConflict(reservation, reservationNum, occu_hist, vehTourLen(j), blocked, A, C, currentNode, nextNode, colony.ant(i).tick(j), implicitRoute, j, getAwayTime);
+                [timeSlack, reservation, reservationNum, occupancy_o, blocked_o, occu_hist_o, getAwayTime_o, unableFlag, damnFlag] = resolveConflict(reservation, reservationNum, occu_hist, vehTourLen(j), blocked, A, C, currentNode, nextNode, colony.ant(i).tick(j), implicitRoute, j, getAwayTime);
 
                 if damnFlag && vehTourLen(j) > 1
 %                     disp("[notice] Withdraw!")
-                    reservation = withdrawReservation(colony.ant(i).occupancy{j,vehTourLen(j)},reservation,j);
+                    [reservation, reservationNum] = withdrawReservation(colony.ant(i).occupancy{j,vehTourLen(j)},reservation,reservationNum,j);
                     colony.ant(i).tour(j,vehTourLen(j)) = 0;
                     unvisitedNum = unvisitedNum+1;
                     colony.ant(i).occupancy{j,vehTourLen(j)} = [];
@@ -134,7 +132,8 @@ for i = 1 : antNo
                     if ~unableFlag && ~damnFlag
                         tempBlocked{j} = [];
                         %update info
-                        reservation = reservation_o;
+%                         reservation = reservation_o;
+%                         reservationNum = reservationNum_o;
                         blocked = blocked_o;
                         occupancy = occupancy_o;
                         occu_hist = occu_hist_o;
