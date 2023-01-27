@@ -1,17 +1,19 @@
 %% Param setting
 vnum = 3;
 % depotPos = [60 60 60];
-depotPos = [10 -5 0];
+% depotPos = [10 -5 0];
+depotPos = [-30,20,-10]; % factory
+
 
 fovFactor = 1.8;
 inpection_dist = 1; % Inspection distance
 mapheight = 5.0;
 conThres = 1.7;
-stlAddr = '/home/jaehan/Desktop/generic.stl';
+% stlAddr = '/home/jaehan/Desktop/generic.stl';
 % stlAddr = '/home/jaehan/Downloads/generic_edited.stl';
 % stlAddr = 'C:\Users\dlawo\Desktop\Model\generic.stl';
 
-
+% 최신 데이터는 totladata3
 %% wp generator
 
 node = load('stlnode.mat');
@@ -32,51 +34,118 @@ end
 
 
 %% Build Network Graph
-for i = 2:N % do not connect depot!
-    for j = 2:N
+% for i = 2:N % do not connect depot!
+%     for j = 2:N
+%         if i~=j
+%             if L(i,j) < conThres
+%                 A(i,j) = 1;
+%                 C(i,j) = L(i,j);
+%             end
+%         else
+%             A(i,j) = 0;
+%         end
+%     end
+% end
+% 
+% C(1,:) = L(1,:);
+% C(:,1) = L(:,1);
+% 
+% A_orig = A;
+% C_orig = C;
+
+%for factory
+for i = 2:size(extNodes,1)
+    for j = 2:size(extNodes,1)
         if i~=j
-            if L(i,j) < conThres
+            if L(i,j) <= 5%4.3
                 A(i,j) = 1;
                 C(i,j) = L(i,j);
             end
         else
             A(i,j) = 0;
+            C(i,j) = 0;
+        end
+    end
+end
+for i = size(extNodes,1)+1:size(extNodes,1)+size(intNodes,1)
+    for j = size(extNodes,1)+1:size(extNodes,1)+size(intNodes,1)
+        if i~=j
+            if L(i,j) <= 3 %3
+                A(i,j) = 1;
+                C(i,j) = L(i,j);
+            end
+        else
+            A(i,j) = 0;
+            C(i,j) = 0;
+        end
+    end
+end
+for i = size(extNodes,1)-8:size(extNodes,1)+8
+    for j = size(extNodes,1)-8:size(extNodes,1)+8
+        if i~=j
+            if L(i,j) <= 5
+                A(i,j) = 1;
+                C(i,j) = L(i,j);
+            end
+        else
+            A(i,j) = 0;
+            C(i,j) = 0;
         end
     end
 end
 
-C(1,:) = L(1,:);
-C(:,1) = L(:,1);
+% [A,C]=graphSparseConnection(node,A,C,L);
+% A(1,:) = 0; A(:,1) = 0;
+% C(1,:) = 0; C(:,1) = 0;
+
+[A_ext,C_ext]=graphSparseConnection(node(1:size(extNodes,1),:,:),A(1:size(extNodes,1),1:size(extNodes,1)),C(1:size(extNodes,1),1:size(extNodes,1)),L(1:size(extNodes,1),1:size(extNodes,1)));
+[A_int,C_int]=graphSparseConnection(node(size(extNodes,1)+1:N,:,:),A(size(extNodes,1)+1:N,size(extNodes,1)+1:N),C(size(extNodes,1)+1:N,size(extNodes,1)+1:N),L(size(extNodes,1)+1:N,size(extNodes,1)+1:N));
+A(1:size(extNodes,1),1:size(extNodes,1)) = A_ext;
+C(1:size(extNodes,1),1:size(extNodes,1)) = C_ext;
+A(size(extNodes,1)+1:N,size(extNodes,1)+1:N) = A_int;
+C(size(extNodes,1)+1:N,size(extNodes,1)+1:N) = C_int;
+
+A(1,:) = 0; A(:,1) = 0;
+
+A(1:size(extNodes,1)-9,size(extNodes,1)+9:N) = 0; % only for factory
+A(size(extNodes,1)+9:N,1:size(extNodes,1)-9) = 0; % only for factory
+C(1:size(extNodes,1)-9,size(extNodes,1)+9:N) = 0; % only for factory
+C(size(extNodes,1)+9:N,1:size(extNodes,1)-9) = 0; % only for factory
 
 A_orig = A;
 C_orig = C;
 
-
 G = graph(C);
-degree = centrality(G,'degree');
-closeness = centrality(G,'closeness');
-betweenness = centrality(G,'betweenness');
-pagerank = centrality(G,'pagerank');
-eigenvector = centrality(G,'eigenvector');
-avgdegree = mean(degree);
 
-figure(2)
-p = plot(G,'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
-p.NodeCData = betweenness;
-colormap jet
-colorbar
+totalDegree = sum(A(2:end,2:end),'all')/2
+completeDegree = nchoosek(N-1,2)
+degreeConnectivity = totalDegree / completeDegree
 
-figure(3)
-clf
-grid on
-hold on
-plot(normalize(degree, 'range'))
-plot(normalize(closeness, 'range'))
-plot(normalize(betweenness, 'range'))
-plot(normalize(pagerank, 'range'))
-plot(normalize(eigenvector, 'range'))
-legend('degree','close','betweenness','pagerank','eigen')
-ylim([0 1.5])
+% G = graph(C);
+% degree = centrality(G,'degree');
+% closeness = centrality(G,'closeness');
+% betweenness = centrality(G,'betweenness');
+% pagerank = centrality(G,'pagerank');
+% eigenvector = centrality(G,'eigenvector');
+% avgdegree = mean(degree);
+% 
+% figure(2)
+% p = plot(G,'Layout','force','EdgeAlpha',0.3,'MarkerSize',7);
+% p.NodeCData = betweenness;
+% colormap jet
+% colorbar
+% 
+% figure(3)
+% clf
+% grid on
+% hold on
+% plot(normalize(degree, 'range'))
+% plot(normalize(closeness, 'range'))
+% plot(normalize(betweenness, 'range'))
+% plot(normalize(pagerank, 'range'))
+% plot(normalize(eigenvector, 'range'))
+% legend('degree','close','betweenness','pagerank','eigen')
+% ylim([0 1.5])
 
 
 %% Completefication
@@ -84,7 +153,7 @@ tic
 disp("complefication start")
 graph2 = graph(C);
 implicitPath = [];
-for i = 1:N-1
+for i = 2:N-1
     for j = i+1:N
         if A(i,j) == 0 % if disconnected
             [path,d] = shortestpath(graph2,i,j);
@@ -95,6 +164,11 @@ for i = 1:N-1
         end
     end
 end
+for i = 1:N
+    C(1,i) = L(1,i);
+    C(i,1) = L(1,i);
+end
+A(1,:) = 1; A(:,1) = 1;
 disp("complefication complete")
 completeTime_soleACO = toc;
 

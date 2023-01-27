@@ -1,23 +1,28 @@
-data1 = load('oksang_1.mat');
-data1_vel = data1.meanVelBar;
-data1_std = data1.stdVelBar;
-data1_tot = data1.meanTotVel;
-data1_totStd = data1.stdTotVel;
-data2 = load('oksang_2.mat');
-data2_vel = data2.meanVelBar;
-data2_std = data2.stdVelBar;
-data2_tot = data2.meanTotVel;
-data2_totStd = data2.stdTotVel;
-data4 = load('oksang_3.mat');
-data4_vel = data4.meanVelBar;
-data4_std = data4.stdVelBar;
-data4_tot = data4.meanTotVel;
-data4_totStd = data4.stdTotVel;
+% dataList = ["oksang_1.mat","oksang_2.mat","oksang_4.mat","oksang_3.mat"];
+dataList = ["oksang_wind_1","oksang_wind_2","oksang_wind_3"];
+dataNum = length(dataList);
+legendArray = {'Neutral','Mid wind','High wind'};
 
-totVelData = [data1_vel,data2_vel,data4_vel];
-totStdData = [data1_std;data2_std;data4_std]';
-totTotVelData = [data1_tot;data2_tot;data4_tot];
-totStdTotVelData = [data1_totStd;data2_totStd;data4_totStd];
+data = {};
+for i = 1:dataNum
+    data{i}.data = load(dataList(i));
+    data{i}.vel = data{i}.data.meanVelBar;
+    data{i}.std = data{i}.data.stdVelBar;
+    data{i}.tot = data{i}.data.meanTotVel;
+    data{i}.totStd = data{i}.data.stdTotVel;
+end
+
+totVelData = [];
+totStdData = [];
+totTotVelData = [];
+totStdTotVelData = [];
+
+for i = 1:dataNum
+    totVelData = horzcat(totVelData, data{i}.vel);
+    totStdData = vertcat(totStdData, data{i}.std);
+    totTotVelData = horzcat(totTotVelData, data{i}.tot);
+    totStdTotVelData = horzcat(totStdTotVelData, data{i}.totStd);
+end
 
 figure(1)
 clf
@@ -30,22 +35,22 @@ x = nan(nbars,ngroups);
 for i = 1:nbars
     x(i,:) = b(i).XEndPoints;
 end
-errorbar(x',totVelData,totStdData,'k.','LineWidth',1)
+errorbar(x,totVelData',totStdData,'k.','LineWidth',1)
 grid on
 ylabel('Pointing Velocity [m/s]')
-legend(b,{'Original','Updated','Vehicle'})
+% legend(b,{'C','C++','D','Vehicle','Vehicle2'})
+legend(b,legendArray)
 ylim([0 inf])
 title('Average pointing vel.')
 
 figure(2)
 clf
-bar(1,totTotVelData(1))
-% xticks([1])
-hold on
-bar(2,totTotVelData(2))
-bar(3,totTotVelData(3))
-xticks([1,2,3]);
-xticklabels({'Original','Updated','Vehicle'});
+for i = 1:dataNum
+    bar(i,totTotVelData(i));
+    hold on
+end
+xticks([1,2,3,4]);
+xticklabels(legendArray);
 errorbar(totTotVelData,totStdTotVelData,'k.','LineWidth',1)
 ylabel('Pointing Velocity [m/s]')
 title('Average pointing vel. (Hovering)')

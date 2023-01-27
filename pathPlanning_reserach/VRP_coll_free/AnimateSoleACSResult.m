@@ -62,7 +62,7 @@ for i = 1:N-1
     for j = i+1:N
         localSchedule = soleOccup{i,j}.info;
         accum = checkConflict(localSchedule);
-        accumHist = vertcat(accumHist,accum);
+        accumHist = vertcat(accumHist,accum);x
         warn = warn + accum;
     end
 end

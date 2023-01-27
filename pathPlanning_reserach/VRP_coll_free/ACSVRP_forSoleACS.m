@@ -9,7 +9,7 @@
 
 global homeIdx temp tau0
 %% Initial parameters of ACO 
-maxIter = 100000;
+maxIter = 10000;
 
 tau0 = 1 / (mapGraph.n * mean( mapGraph.edges(:)) * N);  % Initial phromone concentration
 
@@ -93,8 +93,4 @@ soleACO_time = toc;
 soleACO_result = colony.queen.fitness;
 soleACO_resultL = colony.queen.fitnessL;
 soleACO_resultPerV = colony.queen.fitnessPer;
-
-history(t+1,:) = [];
-historyACO = history;
-historyACO(historyACO==0) = [];
 

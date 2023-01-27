@@ -12,6 +12,6 @@ patch(FV,'FaceColor',       [0.8 0.8 1.0], ...
 camlight('headlight');
 material('shiny')
 axis('image');
-alpha(0.7)
+alpha(0.8)
 
 end

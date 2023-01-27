@@ -119,7 +119,3 @@ VRPCF_result = colony.queen.fitness;
 VRPCF_resultL = colony.queen.fitnessL;
 VRPCF_resultPerV = colony.queen.fitnessPer;
 
-% history(t+1,:) = [];
-historyACO = history;
-historyACO(historyACO==0) = [];
-

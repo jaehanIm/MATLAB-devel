@@ -1,6 +1,6 @@
 
-imuData = readtable('/home/jaehan/Downloads/aSensorImu_220125_121103.csv');
-parseStart = 1;
+imuData = readtable('/home/jaehan/log/221115_095700/aSensorImu_221115_095700.csv');
+parseStart = 170;
 parseEnd = size(imuData,1);
 imuTime = datetime(imuData.rosTime(1:end),'ConvertFrom','posixtime','TimeZone','Asia/Tokyo');
 imuTimeS = imuData.rosTime(parseStart:parseEnd) - imuData.rosTime(1);

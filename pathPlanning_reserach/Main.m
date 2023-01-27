@@ -13,7 +13,7 @@ depotPos = [60 60 10];
 fovFactor = 3;
 inpection_dist = 7; % Inspection distance
 mapheight = 4.0;
-conThres = 4;
+conThres = 20;
 antNo = 20;
 stopThres = 200;
 
@@ -335,7 +335,7 @@ for i = 1:cluNum
     temp = node(nodeInCluIdx{i},:);
     plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
 end
-mesh(voxelPosX,voxelPosY,voxelFilterData);
+% mesh(voxelPosX,voxelPosY,voxelFilterData);
 plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
 for i = 1:cluNum
     text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));
@@ -569,7 +569,7 @@ for i = 1:cluNum
     temp = node(nodeInCluIdx{i},:);
     plot3(temp(:,1),temp(:,2),temp(:,3),'x','LineWidth',5,'MarkerSize',5);
 end
-mesh(voxelPosX,voxelPosY,voxelFilterData);
+% mesh(voxelPosX,voxelPosY,voxelFilterData);
 plot3(superNet.pos(:,1),superNet.pos(:,2),superNet.pos(:,3),'yx','MarkerSize',10,'LineWidth',5)
 for i = 1:cluNum
     text(superNet.pos(i,1),superNet.pos(i,2),superNet.pos(i,3),num2str(i));

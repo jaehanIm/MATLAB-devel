@@ -54,8 +54,13 @@ for i = 1 : antNo
                 debugTemp.currentNode = currentNode;
                 debugTemp.i = i;
                 debugTemp.j = j;
+                debugTemp.c = c;
                 debugTemp.colony = colony;
                 debugTemp.vehTourLen = vehStepLen;
+                debugTemp.currentNode = currentNode;
+                debugTemp.currSubNodes = currSubNodes;
+                debugTemp.endIdx = endIdx;
+
 
                 % choose next node
                 if rand(1) > q

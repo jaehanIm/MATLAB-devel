@@ -102,5 +102,4 @@ score = colony.queen.fitness;
 bridgeCost = colony.queen.bridgeCost;
 clusterCost = colony.queen.clusterCost;
 residueCost = [initCost,returnCost];
-
 end

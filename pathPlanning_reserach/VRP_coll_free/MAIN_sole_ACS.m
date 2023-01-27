@@ -1,10 +1,9 @@
 %% solve
-stopThres = 30;
 ACSVRP_forSoleACS
 
 AnimateSoleACSResult
 
-warn/10
+warn
 
 disp('Time')
 soleACO_result

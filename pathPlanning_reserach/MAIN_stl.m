@@ -9,8 +9,8 @@ addpath('./Model/')
 
 %% Param setting
 vnum = 3;
-% depotPos = [60 60 60];
-depotPos = [10 -5 0];
+% depotPos = [10 -5 0]; % aircraft
+depotPos = [-30,20,-10]; % factory
 
 fovFactor = 1.8;
 inpection_dist = 1; % Inspection distance
@@ -19,6 +19,7 @@ mapheight = 5.0;
 conThres = 1.7;
 % stlAddr = 'C:\Users\dlawo\Desktop\Model\generic.stl';
 stlAddr = 'generic.stl';
+% stlAddr = '/home/jaehan/Desktop/MATLAB-devel/pathPlanning_reserach/Model/Factory2.stl';
 
 %% wp generator
 node = loadStl(stlAddr,inpection_dist);
@@ -64,6 +65,8 @@ node = [body;tail;lEngine;rEngine;nose;emphennage];
 
 save('stlnode.mat','node');
 
+% loadFactory;
+
 % formulation
 node = vertcat(depotPos,node); % add depot
 N = size(node,1)
@@ -100,30 +103,107 @@ for i = 2:N % do not connect depot!
     end
 end
 
+%for factory
+% for i = 2:size(extNodes,1)
+%     for j = 2:size(extNodes,1)
+%         if i~=j
+%             if L(i,j) <= 5 %4.3 8
+%                 A(i,j) = 1;
+%                 C(i,j) = L(i,j);
+%             end
+%         else
+%             A(i,j) = 0;
+%             C(i,j) = 0;
+%         end
+%     end
+% end
+% for i = size(extNodes,1)+1:size(extNodes,1)+size(intNodes,1)
+%     for j = size(extNodes,1)+1:size(extNodes,1)+size(intNodes,1)
+%         if i~=j
+%             if L(i,j) <= 3 %3 7
+%                 A(i,j) = 1;
+%                 C(i,j) = L(i,j);
+%             end
+%         else
+%             A(i,j) = 0;
+%             C(i,j) = 0;
+%         end
+%     end
+% end
+% for i = size(extNodes,1)-6:size(extNodes,1)+9
+%     for j = size(extNodes,1)-6:size(extNodes,1)+9
+%         if i~=j
+%             if L(i,j) <= 5
+%                 A(i,j) = 1;
+%                 C(i,j) = L(i,j);
+%             end
+%         else
+%             A(i,j) = 0;
+%             C(i,j) = 0;
+%         end
+%     end
+% end
+
 [A,C]=graphSparseConnection(node,A,C,L);
 A(1,:) = 0; A(:,1) = 0;
+C(1,:) = 0; C(:,1) = 0;
+
+% [A_ext,C_ext]=graphSparseConnection(node(1:size(extNodes,1),:,:),A(1:size(extNodes,1),1:size(extNodes,1)),C(1:size(extNodes,1),1:size(extNodes,1)),L(1:size(extNodes,1),1:size(extNodes,1)));
+% [A_int,C_int]=graphSparseConnection(node(size(extNodes,1)+1:N,:,:),A(size(extNodes,1)+1:N,size(extNodes,1)+1:N),C(size(extNodes,1)+1:N,size(extNodes,1)+1:N),L(size(extNodes,1)+1:N,size(extNodes,1)+1:N));
+% A(1:size(extNodes,1),1:size(extNodes,1)) = A_ext;
+% C(1:size(extNodes,1),1:size(extNodes,1)) = C_ext;
+% A(size(extNodes,1)+1:N,size(extNodes,1)+1:N) = A_int;
+% C(size(extNodes,1)+1:N,size(extNodes,1)+1:N) = C_int;
+% 
+% A(1,:) = 0; A(:,1) = 0;
+% 
+% A(1:size(extNodes,1)-7,size(extNodes,1)+10:N) = 0; % only for factory
+% A(size(extNodes,1)+10:N,1:size(extNodes,1)-7) = 0; % only for factory
+% C(1:size(extNodes,1)-7,size(extNodes,1)+10:N) = 0; % only for factory
+% C(size(extNodes,1)+10:N,1:size(extNodes,1)-7) = 0; % only for factory
 
 A_orig = A;
 C_orig = C;
 
 G = graph(C);
+% G_ext = graph(C(1:size(extNodes,1)+1,1:size(extNodes,1)+1));
+% G_int = graph(C(size(extNodes,1)+2:size(C,1),size(extNodes,1)+2:size(C,1)));
+% G_inter = graph(C(size(extNodes,1)-6:size(extNodes,1)+9,size(extNodes,1)-6:size(extNodes,1)+9));
 
 totalDegree = sum(A(2:end,2:end),'all')/2
 completeDegree = nchoosek(N-1,2)
 degreeConnectivity = totalDegree / completeDegree
 
-figure(99)
-clf
-drawStl(stlAddr,98)
+figure(98)
 hold on
-plot3(node(:,1),node(:,2),node(:,3),'.')
 for i = 1:size(G.Edges,1)
     startIdx = G.Edges.EndNodes(i,1);
     EndIdx = G.Edges.EndNodes(i,2);
     startPos = node(startIdx,:);
     EndPos = node(EndIdx,:);
-    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)]);
+    line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)],'Color','blue','LineWidth',1.3);
 end
+% for i = 1:size(G_ext.Edges,1)
+%     startIdx = G_ext.Edges.EndNodes(i,1);
+%     EndIdx = G_ext.Edges.EndNodes(i,2);
+%     startPos = node(startIdx,:);
+%     EndPos = node(EndIdx,:);
+%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)],'Color','blue','LineWidth',1.3);
+% end
+% for i = 1:size(G_int.Edges,1)
+%     startIdx = G_int.Edges.EndNodes(i,1)+size(extNodes,1)+1;
+%     EndIdx = G_int.Edges.EndNodes(i,2)+size(extNodes,1)+1;
+%     startPos = node(startIdx,:);
+%     EndPos = node(EndIdx,:);
+%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)],'Color','red','LineWidth',1.3);
+% end
+% for i = 1:size(G_inter.Edges,1)
+%     startIdx = G_inter.Edges.EndNodes(i,1)+size(extNodes,1)-7;
+%     EndIdx = G_inter.Edges.EndNodes(i,2)+size(extNodes,1)-7;
+%     startPos = node(startIdx,:);
+%     EndPos = node(EndIdx,:);
+%     line([startPos(1) EndPos(1)],[startPos(2) EndPos(2)],[startPos(3) EndPos(3)],'Color','yellow','LineWidth',1.3);
+% end
 
 %% Save Network
 graph1.n = N;
@@ -168,6 +248,14 @@ for i = 1:cluNum-1
     end
 end
 
+clusteringTime = toc;
+disp("Clustering complete.")
+
+bypassL = zeros(N,1);
+for i = 2:N
+    [~,bypassLen] = shortestpath(G,1,i);
+    bypassL(i) = bypassLen;
+end
 % connect depot to cluster
 for j = 2:cluNum
     [~,I]=min(L(1,nodeInCluIdx{j}));
@@ -181,8 +269,17 @@ for j = 2:cluNum
     A(nodeInCluIdx{j}(I),1) = 1;
 end
 
-clusteringTime = toc;
-disp("Clustering complete.")
+% for j = 2:cluNum
+%     [~,I] = min(bypassL(nodeInCluIdx{j}));
+%     intraCluIdxSet{1,j} = [1,I];
+%     intraCluIdxSet{j,1} = [I,1];
+%     intraCluNodeSet{1,j} = [1,nodeInCluIdx{j}(I)];
+%     intraCluNodeSet{j,1} = [nodeInCluIdx{j}(I),1];
+%     C(1,nodeInCluIdx{j}(I)) = bypassL(nodeInCluIdx{j}(I));
+%     C(nodeInCluIdx{j}(I),1) = bypassL(nodeInCluIdx{j}(I));
+%     A(1,nodeInCluIdx{j}(I)) = 1;
+%     A(nodeInCluIdx{j}(I),1) = 1;
+% end
 
 
 %% SuperNet Construction
@@ -542,7 +639,7 @@ while true
     end
 
     terminationType = "SOLDET";
-%     break;
+    break;
 
 
     firstTry = false;
@@ -612,5 +709,9 @@ plot(totalScoreHistory,'o-');
 xlabel('trialNum');
 ylabel('Score');
 title('total score history')
+
+solveTime
+totalScore
+intraCompleteTime+clusteringTime+interCompleteTime
 %% post processing
 % 2-opt

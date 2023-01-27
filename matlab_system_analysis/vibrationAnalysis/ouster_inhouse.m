@@ -1,18 +1,40 @@
 addpath('./..')
 
 %% Load data
-% 221110_1
+% 221110_1 - C #1
 % gdLog = readtable('/home/jaehan/log/221110_113922/gdLog_221110_113922.csv');
 % imuData = readtable('/home/jaehan/log/221110_113922/aSensorImu_221110_113922.csv');
 
-% 221110_2
+% 221110_2 - C #2
 % gdLog = readtable('/home/jaehan/log/221110_121923/gdLog_221110_121923.csv');
 % imuData = readtable('/home/jaehan/log/221110_121923/aSensorImu_221110_121923.csv');
 
-% 221110_3
-gdLog = readtable('/home/jaehan/log/221110_123033/gdLog_221110_123033.csv');
-imuData = readtable('/home/jaehan/log/221110_123033/aSensorImu_221110_123033.csv');
+% 221110_3 - body 1_!
+% gdLog = readtable('/home/jaehan/log/221110_123033/gdLog_221110_123033.csv');
+% imuData = readtable('/home/jaehan/log/221110_123033/aSensorImu_221110_123033.csv');
 
+% 221115_4 - D
+% gdLog = readtable('/home/jaehan/log/221115_111538/gdLog_221115_111538.csv');
+% imuData = readtable('/home/jaehan/log/221115_111538/aSensorImu_221115_111538.csv');
+
+% 221115_5 - body 1_2
+% gdLog = readtable('/home/jaehan/log/221115_112930/gdLog_221115_112930.csv');
+% imuData = readtable('/home/jaehan/log/221115_112930/aSensorImu_221115_112930.csv');
+
+% 221201_1 - nowind
+gdLog = readtable('/home/jaehan/log/221201_111806/gdLog_221201_111806.csv');
+imuData = readtable('/home/jaehan/log/221201_111806/aSensorImuLog_221201_111806.csv');
+
+% 221201_1 - midwind
+% gdLog = readtable('/home/jaehan/log/221201_115426/gdLog_221201_115426.csv');
+% gdLog(1:13516,:) = [];
+% imuData = readtable('/home/jaehan/log/221201_115426/aSensorImuLog_221201_115426.csv');
+
+% 221201_1 - highwind
+% gdLog = readtable('/home/jaehan/log/221201_120533/gdLog_221201_120533.csv');
+% imuData = readtable('/home/jaehan/log/221201_120533/aSensorImuLog_221201_120533.csv');
+
+jobInterest = 5;
 freqL = [0 5  30  75 150 800 1200];
 freqH = [5 30 75 150 800 1200 2000];
 
@@ -56,27 +78,27 @@ imuTimeS = seconds(imuTime - imuTime(1)) + imuTimeDelay;
 % gyro_1 = imuData.gyro_dps_1;
 % gyro_2 = imuData.gyro_dps_2;
 
-% acc_0 = imuData.acc_mpss_2;
-% acc_1 = imuData.acc_mpss_1;
+acc_0 = imuData.acc_mpss_2;
+acc_1 = imuData.acc_mpss_1;
+acc_2 = imuData.acc_mpss_0;
+gyro_0 = imuData.gyro_dps_2;
+gyro_1 = imuData.gyro_dps_1;
+gyro_2 = imuData.gyro_dps_0;
+% 
+% acc_0 = -imuData.acc_mpss_2;
+% acc_1 = -imuData.acc_mpss_1;
 % acc_2 = imuData.acc_mpss_0;
-% gyro_0 = imuData.gyro_dps_2;
-% gyro_1 = imuData.gyro_dps_1;
+% gyro_0 = -imuData.gyro_dps_2;
+% gyro_1 = -imuData.gyro_dps_1;
 % gyro_2 = imuData.gyro_dps_0;
 
-acc_0 = -imuData.acc_mpss_2;
-acc_1 = -imuData.acc_mpss_1;
-acc_2 = imuData.acc_mpss_0;
-gyro_0 = -imuData.gyro_dps_2;
-gyro_1 = -imuData.gyro_dps_1;
-gyro_2 = imuData.gyro_dps_0;
-
 Fs = round(1/mean(diff(imuTimeS)));
+L = size(imuData,1);
 
 missIdxTemp = find(diff(gdLog.fcMcMode)~=0);
 missStartTime = gdTimeS([missIdxTemp(2), missIdxTemp(4), missIdxTemp(6), missIdxTemp(8), missIdxTemp(10)]);
 missEndTime = gdTimeS([missIdxTemp(3), missIdxTemp(5), missIdxTemp(7), missIdxTemp(9), missIdxTemp(11)]);
 
-jobInterest = 5;
 setImuIdx(jobInterest)
 
 disp("Data Loading Complete!")
@@ -94,52 +116,58 @@ figure(2)
 clf
 
 subplot(6,1,1)
-plot(imuTimeS,gyro_0)
+plot(imuTimeS(start:finish),gyro_0(start:finish))
 title('gyro R')
 xlabel('time[s]');
 ylabel('[rad/s]');
 hold on
 ylim([-10*std(gyro_0) 10*std(gyro_0)])
+xlim([imuTimeS(start) imuTimeS(finish)])
 
 subplot(6,1,2)
-plot(imuTimeS,gyro_1)
+plot(imuTimeS(start:finish),gyro_1(start:finish))
 title('gyro P')
 xlabel('time[s]')
 ylabel('[rad/s]');
 hold on
 ylim([-10*std(gyro_1) 10*std(gyro_1)])
+xlim([imuTimeS(start) imuTimeS(finish)])
 
 subplot(6,1,3)
-plot(imuTimeS,gyro_2)
+plot(imuTimeS(start:finish),gyro_2(start:finish))
 title('gyro Y')
 xlabel('time[s]')
 ylabel('[rad/s]');
 hold on
 ylim([-10*std(gyro_2) 10*std(gyro_2)])
+xlim([imuTimeS(start) imuTimeS(finish)])
 
 subplot(6,1,4)
-plot(imuTimeS,acc_0)
+plot(imuTimeS(start:finish),acc_0(start:finish))
 title('acc X')
 xlabel('time[s]');
 ylabel('[m/s^2]');
 hold on
 ylim([-10*std(acc_0) 10*std(acc_0)])
+xlim([imuTimeS(start) imuTimeS(finish)])
 
 subplot(6,1,5)
-plot(imuTimeS,acc_1)
+plot(imuTimeS(start:finish),acc_1(start:finish))
 title('acc Y')
 xlabel('time[s]')
 ylabel('[m/s^2]');
 hold on
 ylim([-10*std(acc_1) 10*std(acc_1)])
+xlim([imuTimeS(start) imuTimeS(finish)])
 
 subplot(6,1,6)
-plot(imuTimeS,acc_2)
+plot(imuTimeS(start:finish),acc_2(start:finish))
 title('acc Z')
 xlabel('time[s]')
 ylabel('[m/s^2]');
 hold on
 ylim([-10*std(acc_2) 10*std(acc_2)])
+xlim([imuTimeS(start) imuTimeS(finish)])
 
 %% FDI
 
@@ -247,41 +275,42 @@ hold on
 plot(imuTimeS,w)
 plot(gdTimeS,gdLog.velUvw_mps_2)
 %% data selection
-y = gyro_1;
+% y = gyro_1;
 
 %% FFT plot
-figure(2)
-title('FFT')
-clf
-[freq, fftResult, psdResult] = data2fftpsd(u,Fs);
+% figure(2)
+% title('FFT')
+% clf
+% [freq, fftResult, psdResult] = data2fftpsd(u,Fs);
+% % plot(freq,fftResult);
 % plot(freq,fftResult);
-plot(freq,fftResult);
-hold on
-[freq, fftResult, psdResult] = data2fftpsd(v,Fs);
+% hold on
+% [freq, fftResult, psdResult] = data2fftpsd(v,Fs);
+% % plot(freq,fftResult);
 % plot(freq,fftResult);
-plot(freq,fftResult);
-grid on
-xlabel('hz');
-ylabel('magnitude')
-legend('u','v')
-xlim([0.1 2000])
-
-figure(3)
-title('PSD')
-clf
-[freq, fftResult, psdResult] = data2fftpsd(gyro_0,Fs);
-plot(freq,fftResult);
-hold on
-[freq, fftResult, psdResult] = data2fftpsd(gyro_1,Fs);
-plot(freq,fftResult);
-grid on
-xlabel('hz');
-ylabel('psd')
-legend('gyro_R','gyro_P')
-xlim([0.1 2000])
+% grid on
+% xlabel('hz');
+% ylabel('magnitude')
+% legend('u','v')
+% xlim([0.1 2000])
+% 
+% figure(3)
+% title('PSD')
+% clf
+% [freq, fftResult, psdResult] = data2fftpsd(gyro_0,Fs);
+% plot(freq,fftResult);
+% hold on
+% [freq, fftResult, psdResult] = data2fftpsd(gyro_1,Fs);
+% plot(freq,fftResult);
+% grid on
+% xlabel('hz');
+% ylabel('psd')
+% legend('gyro_R','gyro_P')
+% xlim([0.1 2000])
 
 %% Spectrogram
-y = gyro_1;
+% y = acc_1;
+y = acc_1;
 timeStep = 1; %[s]
 
 dspec = timeStep * Fs;
@@ -297,19 +326,24 @@ end
 
 spectrogram(:,length(freq)+1:end) = [];
 
+spectrogram(1:32,:) = [];
+% spectrogram = log(spectrogram);
+
 figure(8)
+clf
 imagesc([freq(1) freq(end)],[imuTimeS(1) imuTimeS(end)],spectrogram(1:end,1:end));
+% imagesc([freq(1) freq(end)],[missStartTime(1) missEndTime(end)],spectrogram(1:end,1:end));
 xlabel('freq [hz]')
 ylabel('time [s]')
-% xlim([0 200])
-% ylim([0 250])
+xlim([0 400])
 title('Spectrogram Analysis [dt = 1.0s]')
 colorbar
+colormap("turbo")
 
 figure(88)
 clf
 sgtitle('spectrogram')
-
+colormap("turbo")
 subplot(1,4,1)
 imagesc([0 30],[imuTimeS(1) imuTimeS(end)],spectrogram(:,0*timeStep+1:30*timeStep));
 colorbar
@@ -336,11 +370,11 @@ title('75~150')
 colorbar
 
 subplot(1,4,4)
-imagesc([150 1000],[imuTimeS(1) imuTimeS(end)],spectrogram(:,150*timeStep:1000*timeStep));
+imagesc([150 400],[imuTimeS(1) imuTimeS(end)],spectrogram(:,150*timeStep:400*timeStep));
 hold on
 xlabel('hz')
 ylabel('time [s]')
-title('150~1000hz')
+title('150~400hz')
 colorbar
 
 figure(888)
@@ -471,41 +505,36 @@ thresholdTrans = 3.8; % m/s
 residueTrans = thresholdTrans - totalVelocityTrans;
 velBarTrans = vertcat(transvel,residueTrans);
 
-%% vibration component plot
+%% vibration component plot angular
 
 figure(9)
 clf
+subplot(2,1,1)
 hold on
 grid on
 plot(imuTimeS(start:finish),totalVelocity(start:finish),'k','LineWidth',1)
-% for i = 1:size(vel,1)
-% plot(imuTimeS(start:finish),vel(i,start:finish))
-% end
 plot([imuTimeS(start) imuTimeS(finish)],[24.8 24.8], 'r--','LineWidth',2)
 xlim([imuTimeS(start) imuTimeS(finish)])
 title('Pointing error velocity - angular component');
 legend('pointing velocity','threshold');
 xlabel('time[s]');
 ylabel('deg/s');
-% xlim([110 110.1])
 
-figure(99)
-clf
+subplot(2,1,2)
 a = area(imuTimeS(start:finish),velBar(1:end-1,start:finish)');
 xlim([imuTimeS(start) imuTimeS(finish)])
 xlabel('time[s]')
 ylabel('deg/s')
 title('Contribution ratio area plot - angular component')
 hold on
-% a(8).FaceColor = [0.7 0.7 0.7];
 plot([imuTimeS(start) imuTimeS(finish)],[24.8 24.8], 'r:','LineWidth',2.4)
-legend('DC-5hz','5-30hz','30-100hz','100-500hz','500-800hz','800-1200hz','1200~hz','residue','threshold')
+legend('DC-5hz','5-30hz','30-75hz','75-150hz','150-800hz','800-1200hz','1200> hz','threshold')
 grid on
-% xlim([110 110.1])
-% plot(imuTimeS(start:finish),totalVelocity(start:finish),'g','LineWidth',3)
 
 dpsViolationRate = size(find(totalVelocity >= threshold),2)/L * 100
 dpsViolationRate = size(find(totalVelocity(start:finish) >= threshold),2)/(finish-start) * 100
+
+
 
 count = 0;
 for i= 1:L-20
@@ -519,6 +548,7 @@ count/(L-20) * 100
 
 figure(10)
 clf
+subplot(2,1,1)
 hold on
 grid on
 plot(imuTimeS(start:finish),totalVelocityTrans(start:finish),'k','LineWidth',1)
@@ -528,9 +558,10 @@ title('Pointing error velocity - translational component');
 legend('pointing velocity','threshold');
 xlabel('time[s]');
 ylabel('m/s');
-% xlim([110 110.1])
-figure(110)
-clf
+xlim([imuTimeS(start) imuTimeS(finish)])
+
+subplot(2,1,2)
+
 a = area(imuTimeS(start:finish),velBarTrans(1:end-1,start:finish)');
 xlim([imuTimeS(start) imuTimeS(finish)])
 xlabel('time[s]')
@@ -540,9 +571,9 @@ hold on
 % a(8).FaceColor = [0.7 0.7 0.7];
 plot([imuTimeS(start) imuTimeS(finish)],[thresholdTrans thresholdTrans], 'r:','LineWidth',2.4)
 
-legend('1-5hz','5-30hz','30-100hz','100-500hz','500-800hz','800-1200hz','1200~hz','residue','threshold')
+legend('DC-5hz','5-30hz','30-75hz','75-150hz','150-800hz','800-1200hz','1200> hz','threshold')
 grid on
-% xlim([110 110.1])
+xlim([imuTimeS(start) imuTimeS(finish)])
 % plot(imuTimeS(start:finish),totalVelocityTrans(start:finish),'g','LineWidth',3)
 
 dpsViolationRate = size(find(totalVelocityTrans >= thresholdTrans),2)/L * 100
@@ -577,6 +608,7 @@ velBar = vertcat(vel,residue);
 
 figure(11)
 clf
+subplot(2,1,1)
 hold on
 grid on
 plot(imuTimeS(start:finish),totalVelocity(start:finish),'k','LineWidth',1)
@@ -587,39 +619,24 @@ xlabel('time[s]');
 ylabel('m/s');
 ylim([0 5])
 legend('pointing velocity','threshold');
+xlim([imuTimeS(start) imuTimeS(finish)])
+% xlim([308 309])
 
-figure(1111)
-clf
-hold on
-grid on
-plot(totalVelocity(start:finish),'k','LineWidth',1)
-title('Pointing error velocity - total'); 
-xlabel('time[s]');
-ylabel('m/s');
-legend('pointing velocity','threshold');
-ylim([0 5])
-
-%% Total contribution
-
-setImuIdx(5)
-
-figure(111111)
-clf
+subplot(2,1,2)
 a = area(imuTimeS(start:finish),velBar(1:end-1,start:finish)');
 xlim([imuTimeS(start) imuTimeS(finish)])
 xlabel('time[s]')
 ylabel('m/s')
 title('Contribution ratio area plot - total')
 hold on
-% a(8).FaceColor = [0.7 0.7 0.7];
 plot([imuTimeS(start) imuTimeS(finish)],[threshold threshold], 'r:','LineWidth',2.4)
-legend('1-5hz','5-30hz','30-75hz','75-150hz','150-800hz','800-1200hz','1200~hz','residue','threshold')
+legend('DC-5hz','5-30hz','30-75hz','75-150hz','150-800hz','800-1200hz','1200> hz','threshold')
 grid on
-% xlim([110 110.5])
-% plot(imuTimeS(start:finish),totalVelocity(start:finish),'g','LineWidth',3)
 plot([],[],'m:','LineWidth',1.5)
 plot([],[],'g:','LineWidth',1.5)
 ylim([0 5])
+xlim([imuTimeS(start) imuTimeS(finish)])
+% xlim([308 309])
 
 componentRatio = [];
 meanVelBar = mean(velBar(1:end-1,start:finish),2);
@@ -627,19 +644,19 @@ stdVelBar = std(velBar(1:end-1,start:finish)');
 totalVelBar = sum(meanVelBar);
 componentRatio = meanVelBar/totalVelBar*100;
 
-figure(11111111)
-bar(componentRatio)
-xticks([1,2,3,4,5,6,7]);
-xticklabels({'1-5hz','5-30hz','30-75hz','75-150hz','150-800hz','800-1200hz','1200~hz'});
-ylabel('Contribution [%]')
-grid on
-
-figure(11111112)
-bar(meanVelBar)
-xticks([1,2,3,4,5,6,7]);
-xticklabels({'1-5hz','5-30hz','30-75hz','75-150hz','150-800hz','800-1200hz','1200~hz'});
-ylabel('mean pointing velocity [m/s]')
-grid on
+% figure(11111111)
+% bar(componentRatio)
+% xticks([1,2,3,4,5,6,7]);
+% xticklabels({'1-5hz','5-30hz','30-75hz','75-150hz','150-800hz','800-1200hz','1200~hz'});
+% ylabel('Contribution [%]')
+% grid on
+% 
+% figure(11111112)
+% bar(meanVelBar)
+% xticks([1,2,3,4,5,6,7]);
+% xticklabels({'1-5hz','5-30hz','30-75hz','75-150hz','150-800hz','800-1200hz','1200~hz'});
+% ylabel('mean pointing velocity [m/s]')
+% grid on
 
 
 syncLen = 20;
@@ -657,26 +674,6 @@ meanTotVel = mean(totalVelocity(start:finish))
 stdTotVel = std(totalVelocity(start:finish))
 
 %% Contribution analysis
-% temp = sum(velBar(:,480000:484000),2)/4000
-% save('10hz_inhouse2.mat','temp')
+% save('oksang_wind_3','meanVelBar','stdVelBar','meanTotVel','stdTotVel')
 
-% temp = sum(velBar(:,460000:464000),2)/4000
-% save('0hz_inhouse.mat','temp')
-
-% temp = sum(velBar(:,6000:10000),2)/4000
-% save('20hz_inhouse.mat','temp')
-
-% temp = sum(velBar(:,start:start+4000),2)/4000;
-% save('10hz_210113_1.mat','temp');
-
-% temp = sum(velBar(:,560000:564000),2)/4000;
-% save('10hz_220114.mat','temp');
-% 
-% temp = sum(velBar(:,680000:684000),2)/4000;
-% save('20hz_220114.mat','temp');
-
-save('oksang_1.mat','meanVelBar','stdVelBar','meanTotVel','stdTotVel')
-
-figure(101010)
-plot(gdTimeS,gdLog.fcMcMode)
 

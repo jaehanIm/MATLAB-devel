@@ -25,11 +25,12 @@ fitnessM = max(fitnessPerVeh);
 fitnessL = sum(fitnessPerVeh);
 fitnessPerV = fitnessPerVeh;
 
-fitness = fitnessM;
+% fitness = fitnessM;
+fitness = max(tickHistory,[],'all');
 
 coveredNum = length(unique(tour(:)));
 if coveredNum ~= N+1
-    disp("Infeasible! cursed!")
+%     disp("Infeasible! cursed!")
     fitness = fitness * exp(N+1-coveredNum);
 end
 
