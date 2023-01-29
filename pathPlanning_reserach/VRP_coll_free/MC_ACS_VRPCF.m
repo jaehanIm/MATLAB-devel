@@ -22,6 +22,7 @@ for distThres = distThresCase
     distCount = distCount + 1;
 end
 %% post analysis
+
 vCaseNum = length(vnumCase);
 distCaseNum = length(distThresCase);
 filtered = zeros(vCaseNum, distCaseNum, 5); %vnum %[loss warnRatio]
@@ -43,31 +44,36 @@ for i = 1:distCaseNum
     end
 end
 
-% filtered(distCaseNum,vCaseNum,test/comparison)
+filtered(2,:,:) = (filtered(2,:,:)+filtered(3,:,:))./2;
+filtered(3,:,:) = [];
 figure(1)
 clf
-subplot(2,1,1)
-for i = 1:distCaseNum
+for i = 1:distCaseNum-1
     errorbar(vnumCase,filtered(i,:,1)*100,filtered(i,:,3)*10,'.-')
     hold on
 end
 plot([4 12],[0 0],'k--')
-title('Performance degradation')
-xlabel('Number of agents (N)')
-ylabel('Degradation [%]')
-legend('<5%','5~10%','10~20%','20~30%','30~ %','Location','best')
+title('Performance Gap','fontsize',15)
+xlabel('Number of agents (N)','fontsize',15)
+ylabel('Gap [%]','fontsize',15)
+legend('<5%','<10%','<15%','<20%','>20%','Location','best','fontsize',13)
 grid on
+drawnow
+exportgraphics(gca,'[0]Performance gap.png')
 
-subplot(2,1,2)
-for i = 1:distCaseNum
+figure(2)
+clf
+for i = 1:distCaseNum-1
     errorbar(vnumCase,filtered(i,:,2)*100,filtered(i,:,4)*10,'.--')
     hold on
 end
-title('Conflict Ratio')
-xlabel('Number of agents (N)')
-ylabel('[%]')
-legend('<5%','5~10%','10~20%','20~30%','30~ %','Location','best')
+title('Conflict Ratio','fontsize',15)
+xlabel('Number of agents (N)','fontsize',15)
+ylabel('[%]','fontsize',15)
+legend('<5%','<10%','<15%','<20%','>20%','Location','northwest','fontsize',13)
 grid on
+drawnow
+exportgraphics(gca,'[0]Conflict ratio.png')
 
 % subplot(3,1,3)
 % for i = 1:distCaseNum
@@ -75,9 +81,9 @@ grid on
 %     hold on
 % end
 
-figure(2)
+figure(4)
 clf
-for i = 1:distCaseNum
+for i = 1:distCaseNum-1
     temp = graphDensityFiltered(i,:,:);
     temp = temp(:);
     scatter(ones(size(temp))*i,temp)
@@ -88,6 +94,8 @@ figure(3)
 clf
 plot(filtered(:,:,2)*100,filtered(:,:,1)*100,'k*')
 grid on
-xlabel('conflict ratio [%]')
-ylabel('Degradation [%]')
-title('Performance degradation to conflict ratio')
+xlabel('Conflict ratio [%]','fontsize',15)
+ylabel('Gap [%]','fontsize',15)
+title('Performance Gap to Conflict Ratio','fontsize',15)
+drawnow
+exportgraphics(gca,'[0]gap to ratio.png')
