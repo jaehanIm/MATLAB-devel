@@ -28,6 +28,6 @@ fitnessM = max(fitnessPerVeh);
 fitnessL = sum(fitnessPerVeh);
 fitnessPerV = fitnessPerVeh;
 fitnessME = max(fitnessPerVeh_e);
-fitness = fitnessL;
+fitness = fitnessM;
 
 end
