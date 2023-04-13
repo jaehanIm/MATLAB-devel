@@ -22,8 +22,8 @@ addpath('./..')
 % imuData = readtable('/home/jaehan/log/221115_112930/aSensorImu_221115_112930.csv');
 
 % 221201_1 - nowind
-gdLog = readtable('/home/jaehan/log/221201_111806/gdLog_221201_111806.csv');
-imuData = readtable('/home/jaehan/log/221201_111806/aSensorImuLog_221201_111806.csv');
+% gdLog = readtable('/home/jaehan/log/221201_111806/gdLog_221201_111806.csv');
+% imuData = readtable('/home/jaehan/log/221201_111806/aSensorImuLog_221201_111806.csv');
 
 % 221201_1 - midwind
 % gdLog = readtable('/home/jaehan/log/221201_115426/gdLog_221201_115426.csv');
@@ -33,6 +33,10 @@ imuData = readtable('/home/jaehan/log/221201_111806/aSensorImuLog_221201_111806.
 % 221201_1 - highwind
 % gdLog = readtable('/home/jaehan/log/221201_120533/gdLog_221201_120533.csv');
 % imuData = readtable('/home/jaehan/log/221201_120533/aSensorImuLog_221201_120533.csv');
+
+% 230212 - wind
+gdLog = readtable('/data/230228_121753/gdLog_230228_121753.csv');
+imuData = readtable('/data/230228_121753/aSensorImuLog_230228_121753.csv');
 
 jobInterest = 5;
 freqL = [0 5  30  75 150 800 1200];

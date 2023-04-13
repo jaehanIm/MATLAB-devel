@@ -46,8 +46,8 @@ node(:,1:2) = node(:,1:2) * 100;
 node(:,3) = node(:,3) * 10;
 node = vertcat(homePos,node);
 simStep = 1;
-% distThres = 20;
-% vnum =8;
+distThres = 20;
+vnum =8;
 
 % random bridge generator
 % N = 40;
@@ -121,120 +121,121 @@ simStep = 1;
 % distThres = 0.5;
 % stopThres = 30;
 
-loadFactory;
-vnum = 8;
-depotPos = [-30,20,-10]; % factory
-node = vertcat(depotPos,node); % add depot
-N = size(node,1)
-A = zeros(N,N); % connectivity matrix
-C = zeros(N,N); % cost matrix
-L = zeros(N,N); % linear distance matrix
+% loadFactory;
+% vnum = 8;
+% depotPos = [-30,20,-10]; % factory
+% node = vertcat(depotPos,node); % add depot
+% N = size(node,1)
+% A = zeros(N,N); % connectivity matrix
+% C = zeros(N,N); % cost matrix
+% L = zeros(N,N); % linear distance matrix
+% 
+% for i = 1:N
+%     for j = 1:N
+%         L(i,j) = distance(node(i,:), node(j,:));
+%     end
+% end
+% 
+% figure(98)
+% clf
+% drawStl(stlAddr,98)
+% hold on
+% plot3(node(:,1),node(:,2),node(:,3),'.')
+% 
+% disp("STL preprocessing complete");
+% 
+% % for factory
+% for i = 2:size(extNodes,1)
+%     for j = 2:size(extNodes,1)
+%         if i~=j
+%             if L(i,j) <= 5 %4.3 8
+%                 A(i,j) = 1;
+%                 C(i,j) = L(i,j);
+%             end
+%         else
+%             A(i,j) = 0;
+%             C(i,j) = 0;
+%         end
+%     end
+% end
+% for i = size(extNodes,1)+1:size(extNodes,1)+size(intNodes,1)
+%     for j = size(extNodes,1)+1:size(extNodes,1)+size(intNodes,1)
+%         if i~=j
+%             if L(i,j) <= 3 %3 7
+%                 A(i,j) = 1;
+%                 C(i,j) = L(i,j);
+%             end
+%         else
+%             A(i,j) = 0;
+%             C(i,j) = 0;
+%         end
+%     end
+% end
+% for i = size(extNodes,1)-6:size(extNodes,1)+9
+%     for j = size(extNodes,1)-6:size(extNodes,1)+9
+%         if i~=j
+%             if L(i,j) <= 5
+%                 A(i,j) = 1;
+%                 C(i,j) = L(i,j);
+%             end
+%         else
+%             A(i,j) = 0;
+%             C(i,j) = 0;
+%         end
+%     end
+% end
+% 
+% [A_ext,C_ext]=graphSparseConnection(node(1:size(extNodes,1),:,:),A(1:size(extNodes,1),1:size(extNodes,1)),C(1:size(extNodes,1),1:size(extNodes,1)),L(1:size(extNodes,1),1:size(extNodes,1)));
+% [A_int,C_int]=graphSparseConnection(node(size(extNodes,1)+1:N,:,:),A(size(extNodes,1)+1:N,size(extNodes,1)+1:N),C(size(extNodes,1)+1:N,size(extNodes,1)+1:N),L(size(extNodes,1)+1:N,size(extNodes,1)+1:N));
+% A(1:size(extNodes,1),1:size(extNodes,1)) = A_ext;
+% C(1:size(extNodes,1),1:size(extNodes,1)) = C_ext;
+% A(size(extNodes,1)+1:N,size(extNodes,1)+1:N) = A_int;
+% C(size(extNodes,1)+1:N,size(extNodes,1)+1:N) = C_int;
+% 
+% A(1,:) = 0; A(:,1) = 0;
+% 
+% A(1:size(extNodes,1)-7,size(extNodes,1)+10:N) = 0; % only for factory
+% A(size(extNodes,1)+10:N,1:size(extNodes,1)-7) = 0; % only for factory
+% C(1:size(extNodes,1)-7,size(extNodes,1)+10:N) = 0; % only for factory
+% C(size(extNodes,1)+10:N,1:size(extNodes,1)-7) = 0; % only for factory
 
-for i = 1:N
-    for j = 1:N
-        L(i,j) = distance(node(i,:), node(j,:));
+% A_orig = A;
+% C_orig = C;
+% G = graph(C);
+
+N = size(node,1);
+
+% Graph construction
+L = zeros(N,N);
+for i = 1:N-1
+    for j = i+1:N
+        L(i,j) = norm(node(i,:)-node(j,:));
+        L(j,i) = L(i,j);
     end
 end
 
-figure(98)
-clf
-drawStl(stlAddr,98)
-hold on
-plot3(node(:,1),node(:,2),node(:,3),'.')
-
-disp("STL preprocessing complete");
-
-% for factory
-for i = 2:size(extNodes,1)
-    for j = 2:size(extNodes,1)
-        if i~=j
-            if L(i,j) <= 5 %4.3 8
-                A(i,j) = 1;
-                C(i,j) = L(i,j);
-            end
-        else
+A = zeros(N,N);
+C = zeros(N,N);
+for i = 1:N-1
+    for j = 2:N
+        if L(i,j) < distThres
+            A(i,j) = 1;
+            A(j,i) = 1;
+            C(i,j) = L(i,j);
+            C(j,i) = C(i,j);
+        end
+        if i == j
             A(i,j) = 0;
-            C(i,j) = 0;
+            A(j,i) = 0;
         end
     end
 end
-for i = size(extNodes,1)+1:size(extNodes,1)+size(intNodes,1)
-    for j = size(extNodes,1)+1:size(extNodes,1)+size(intNodes,1)
-        if i~=j
-            if L(i,j) <= 3 %3 7
-                A(i,j) = 1;
-                C(i,j) = L(i,j);
-            end
-        else
-            A(i,j) = 0;
-            C(i,j) = 0;
-        end
-    end
-end
-for i = size(extNodes,1)-6:size(extNodes,1)+9
-    for j = size(extNodes,1)-6:size(extNodes,1)+9
-        if i~=j
-            if L(i,j) <= 5
-                A(i,j) = 1;
-                C(i,j) = L(i,j);
-            end
-        else
-            A(i,j) = 0;
-            C(i,j) = 0;
-        end
-    end
-end
 
-[A_ext,C_ext]=graphSparseConnection(node(1:size(extNodes,1),:,:),A(1:size(extNodes,1),1:size(extNodes,1)),C(1:size(extNodes,1),1:size(extNodes,1)),L(1:size(extNodes,1),1:size(extNodes,1)));
-[A_int,C_int]=graphSparseConnection(node(size(extNodes,1)+1:N,:,:),A(size(extNodes,1)+1:N,size(extNodes,1)+1:N),C(size(extNodes,1)+1:N,size(extNodes,1)+1:N),L(size(extNodes,1)+1:N,size(extNodes,1)+1:N));
-A(1:size(extNodes,1),1:size(extNodes,1)) = A_ext;
-C(1:size(extNodes,1),1:size(extNodes,1)) = C_ext;
-A(size(extNodes,1)+1:N,size(extNodes,1)+1:N) = A_int;
-C(size(extNodes,1)+1:N,size(extNodes,1)+1:N) = C_int;
-
-A(1,:) = 0; A(:,1) = 0;
-
-A(1:size(extNodes,1)-7,size(extNodes,1)+10:N) = 0; % only for factory
-A(size(extNodes,1)+10:N,1:size(extNodes,1)-7) = 0; % only for factory
-C(1:size(extNodes,1)-7,size(extNodes,1)+10:N) = 0; % only for factory
-C(size(extNodes,1)+10:N,1:size(extNodes,1)-7) = 0; % only for factory
-
+[A,C]=graphSparseConnection(node,A,C,L);
 A_orig = A;
 C_orig = C;
 G = graph(C);
-
-% N = size(node,1);
-% 
-% % Graph construction
-% L = zeros(N,N);
-% for i = 1:N-1
-%     for j = i+1:N
-%         L(i,j) = norm(node(i,:)-node(j,:));
-%         L(j,i) = L(i,j);
-%     end
-% end
-% 
-% A = zeros(N,N);
-% C = zeros(N,N);
-% for i = 1:N-1
-%     for j = 2:N
-%         if L(i,j) < distThres
-%             A(i,j) = 1;
-%             A(j,i) = 1;
-%             C(i,j) = L(i,j);
-%             C(j,i) = C(i,j);
-%         end
-%         if i == j
-%             A(i,j) = 0;
-%             A(j,i) = 0;
-%         end
-%     end
-% end
-% 
-% [A,C]=graphSparseConnection(node,A,C,L);
-% A_orig = A;
-% C_orig = C;
-% tic
+tic
 implicitRoute = cell(N,N);
 for i = 1:N-1
     for j = i+1:N
@@ -277,7 +278,7 @@ hold on
 for i = 1:size(node,1)
     plot3(node(:,1),node(:,2),node(:,3),'.');
 end
-view(45,45)
+view(0, 90)
 lineList = find(A(:));
 for i = 1:N-1
     for j= i+1:N
@@ -293,9 +294,9 @@ plot3(node(1,1),node(1,2),node(1,3),'x','MarkerSize',5,'LineWidth',4)
 grid on
 axis equal
 title('Tour animation')
-% view(0, 90)
+view(0, 90)
 drawnow
-view(45,45)
+% view(45,45)
 
 % animate
 tour = colony.queen.tour;
@@ -322,7 +323,7 @@ for i = 1:vnum
     hold on
 end
 hh(i) = line([0,0],[0,0],[0,0]);
-view(135,45)
+view(0, 90)
 tt = text(homePos(1)+2,homePos(2),num2str(0.0));
 
 % occupancy 정리
