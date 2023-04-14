@@ -15,7 +15,7 @@ stopThres = 20;
 capacity = 395;
 servTime = 1;
 
-% homePos = [0,0,0];
+homePos = [0,0,0];
 
 global wowCount;
 wowCount = 0;
@@ -87,6 +87,6 @@ mapGraph.A = A;
 graphDensity = sum(A,'all')/2/nchoosek(N,2)*100
 
 %% Solve
-ACS_VRPCF;
+ACS_VRPDM;
 
 %% Draw result
