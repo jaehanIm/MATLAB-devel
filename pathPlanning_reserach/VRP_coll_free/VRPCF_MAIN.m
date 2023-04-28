@@ -18,9 +18,10 @@ stopThres = 20;
 capacity = 395;
 servTime = 1;
 
-% homePos = [30,40,6];
-homePos = [10, 80, 6];
+% homePos = [-55,-55,6];
+% homePos = [10, 80, 6]; 
 % homePos = [0,0,0];
+homePos = [40,60,0];
 
 global wowCount;
 wowCount = 0;
@@ -40,27 +41,27 @@ wowCount = 0;
 % simStep = 0.03;
 
 % random node generator
-N = 80;
-node = rand(N,3);
-node(:,1:2) = node(:,1:2) * 100;
-node(:,3) = node(:,3) * 10;
-node = vertcat(homePos,node);
-simStep = 1;
-distThres = 20;
-vnum =8;
-
-% random bridge generator
-% N = 40;
+% N = 80;
 % node = rand(N,3);
-% node(:,1:2) = node(:,1:2) * 100 - 50;
-% node2 = rand(N,3);
-% node2(:,1:2) = node2(:,1:2) * 100 + 50;
-% node = vertcat(node,node2);
+% node(:,1:2) = node(:,1:2) * 100;
 % node(:,3) = node(:,3) * 10;
 % node = vertcat(homePos,node);
 % simStep = 1;
-% distThres = 25;
-% vnum = 7;
+% distThres = 20;
+% vnum =8;
+
+% random bridge generator
+N = 50;
+node = rand(N,3);
+node(:,1:2) = node(:,1:2) * 100 - 50;
+node2 = rand(N,3);
+node2(:,1:2) = node2(:,1:2) * 100 + 50;
+node = vertcat(node,node2);
+node(:,3) = node(:,3) * 10;
+node = vertcat(homePos,node);
+simStep = 1.2;
+distThres = 25;
+vnum = 7;
 
 % stl
 % stlAddr = 'generic.stl';
@@ -308,9 +309,6 @@ finished = zeros(vnum,1);
 
 disp(["Active veh : "+num2str(sum(tourLen~=1))+"/"+num2str(vnum)])
 
-% vid = VideoWriter('animation.avi','MPEG-4');
-% vid.FrameRate = fps;
-% vid.Quality = 100;
 vid = VideoWriter('animation.avi');
 open(vid);
 

@@ -520,7 +520,7 @@ while true
     superRouteHistory{trialNum} = superRoute;
     vehScoreHistory{trialNum} = vehScore;
     
-    if ~firstTry %&& trialNum ~= 2
+    if ~firstTry && trialNum ~= 2
         if totalScoreHistory(end-1) < totalScore
             disp("Solution deteriorated.")
             disp("Termination condition met. Finishing the solver!");
@@ -543,15 +543,13 @@ end
 clusteringTime
 interCompleteTime + intraCompleteTime
 solveTime
-totalScoreHistory
-totalScoreHistoryL
 vehScore
 
 %% plot
 
 
 [~,I] = min(totalScoreHistory);
-finalTourRecord = totalTourHistory{I};
+finalTourRecord = totalTourHistory{I}
 
 figure(4)
 clf
